@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:alpha="0.9"
+        android:layout_height="match_parent">
+
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="5dp"
+            android:id="@+id/ivAddFriendProfile"
+            android:src="@mipmap/ic_launcher_round"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/tvAddFriendName"
+            android:gravity="center"
+            android:textColor="@color/colorBrown"
+            android:text="Unknown"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center |end"
+            android:id="@+id/tvAddFriendStatus"
+            android:text="Friend"
+            android:textColor="@color/colorBrown"
+            android:layout_margin="20dp"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
