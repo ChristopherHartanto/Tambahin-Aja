@@ -45,6 +45,10 @@ class AddFriendsActivity : AppCompatActivity() {
     }
 
     fun retrieve(){
+        items.clear()
+        uids.clear()
+        statusItems.clear()
+
         GlobalScope.launch {
             val postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -108,6 +112,7 @@ class AddFriendsActivity : AppCompatActivity() {
 
         database.child("friends").child(auth.currentUser!!.uid).child(friendUid).child("date").setValue(currentDate).addOnSuccessListener {
             toast("add friend")
+            retrieve()
 
         }.addOnFailureListener {
             toast(""+ it.message)

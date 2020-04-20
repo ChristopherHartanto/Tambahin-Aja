@@ -155,6 +155,11 @@ class NormalGameActivity : AppCompatActivity(){
         }
     }
 
+    override fun onDestroy() {
+        countDownTimer.cancel()
+        super.onDestroy()
+    }
+
     override fun onPause() {
         playing = false
         //countDownTimer.cancel()

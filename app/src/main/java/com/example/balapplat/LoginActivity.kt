@@ -180,7 +180,7 @@ class LoginActivity : AppCompatActivity() {
             val postListener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
-                    if(dataSnapshot.exists())
+                    if(dataSnapshot.exists()) // setelah wilsen wisley dan albert login kembali untuk retriver uid facebook, baru diganti menjadi !exist
                         Init()
                 }
 
