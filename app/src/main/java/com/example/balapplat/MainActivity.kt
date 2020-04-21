@@ -35,7 +35,7 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 
 
 class MainActivity : AppCompatActivity() {
-//test
+//Christopher Hartanto
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     lateinit var helper : Helper
