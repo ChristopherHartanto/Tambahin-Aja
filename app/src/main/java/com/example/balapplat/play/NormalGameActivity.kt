@@ -44,7 +44,7 @@ class NormalGameActivity : AppCompatActivity(){
         getHighScore()
         keyboard()
         generate()
-        control()
+        control(false)
         
     }
 
@@ -94,7 +94,7 @@ class NormalGameActivity : AppCompatActivity(){
 
     }
 
-    private fun control(){
+    private fun control(status : Boolean){
         val countDownTimer = object: CountDownTimer(30000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timer--
@@ -119,7 +119,10 @@ class NormalGameActivity : AppCompatActivity(){
                 startActivity<MainActivity>()
             }
         }
-        countDownTimer.start()
+        if(status)
+            countDownTimer.start()
+        else
+            countDownTimer.cancel()
     }
     
     private fun keyboard(){
@@ -156,19 +159,17 @@ class NormalGameActivity : AppCompatActivity(){
     }
 
     override fun onDestroy() {
-        countDownTimer.cancel()
+        control(false)
         super.onDestroy()
     }
 
     override fun onPause() {
-        playing = false
-        //countDownTimer.cancel()
+        control(false)
         super.onPause()
     }
 
     override fun onResume() {
-        playing = true
-
+        control(true)
         super.onResume()
     }
 
@@ -192,4 +193,6 @@ class NormalGameActivity : AppCompatActivity(){
     fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
+
+
 }

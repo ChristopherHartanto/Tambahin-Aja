@@ -17,6 +17,8 @@ class WaitingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_waiting)
 
+        supportActionBar?.hide()
+
         var count = 3
 
         val timer = object: CountDownTimer(40000, 1000) {

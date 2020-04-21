@@ -18,6 +18,11 @@ class CountdownActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
+        countDown(true)
+
+    }
+
+    fun countDown(status : Boolean){
         var count = 3
 
         val timer = object: CountDownTimer(4000, 1000) {
@@ -33,7 +38,15 @@ class CountdownActivity : AppCompatActivity() {
                 startActivity(intentFor<NormalGameActivity>().clearTask())
             }
         }
-        timer.start()
+        if (status)
+            timer.start()
+        else
+            timer.cancel()
+    }
+
+    override fun onDestroy() {
+        countDown(false)
+        super.onDestroy()
     }
 
 }

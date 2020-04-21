@@ -6,4 +6,5 @@
     <color name="colorGrey">#4f5c4e</color>
     <color name="colorBrown">#a18374</color>
     <color name="colorTransparent">#0000</color>
+    <color name="colorSecondaryText">#000000</color>
 </resources>
