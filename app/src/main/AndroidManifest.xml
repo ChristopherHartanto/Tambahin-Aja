@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        <activity android:name=".HomeActivity"></activity>
+        <activity android:name=".rank.RankActivity"></activity>
         <activity android:name=".play.OddEvenGameActivity" />
         <activity android:name=".play.WaitingActivity" />
         <activity android:name=".leaderboard.LeaderBoardActivity" />

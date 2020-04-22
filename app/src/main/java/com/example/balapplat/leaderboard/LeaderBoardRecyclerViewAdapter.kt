@@ -1,6 +1,5 @@
 package com.example.balapplat.leaderboard
 
-import android.content.ClipData
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
-import com.example.balapplat.model.LeaderBoard
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 

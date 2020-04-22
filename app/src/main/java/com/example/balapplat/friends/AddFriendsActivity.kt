@@ -4,16 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.R
-import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
-import com.example.balapplat.model.AddFriend
-import com.example.balapplat.model.LeaderBoard
 import com.example.balapplat.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_add_friends.*
-import kotlinx.android.synthetic.main.activity_leader_board.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat

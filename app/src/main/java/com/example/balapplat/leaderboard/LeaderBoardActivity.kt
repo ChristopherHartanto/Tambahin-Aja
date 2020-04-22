@@ -1,19 +1,15 @@
 package com.example.balapplat.leaderboard
 
-import android.graphics.Path
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.balapplat.model.LeaderBoard
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_leader_board.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.ctx
 import org.jetbrains.anko.toast
 
 class LeaderBoardActivity : AppCompatActivity() {

@@ -8,22 +8,18 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.example.balapplat.R
-import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
 import com.example.balapplat.model.Friend
-import com.example.balapplat.model.LeaderBoard
 import com.example.balapplat.model.User
 import com.example.balapplat.play.WaitingActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import kotlinx.android.synthetic.main.activity_leader_board.*
 import kotlinx.android.synthetic.main.fragment_list_friends.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 
 /**
  * A simple [Fragment] subclass.
@@ -48,7 +44,7 @@ class ListFriendsFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         adapter = FriendsRecyclerViewAdapter(ctx,ProfileItems){
-            ctx.startActivity<WaitingActivity>()
+            ctx.startActivity(intentFor<WaitingActivity>("facebookId" to ProfileItems[it].facebookId))
         }
 
         retrieve()

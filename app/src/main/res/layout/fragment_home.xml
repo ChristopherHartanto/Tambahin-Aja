@@ -6,89 +6,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorGrey"
+    android:background="@color/colorWhite"
     android:id="@+id/root_layout"
     tools:context=".HomeFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_weight="2"
-        android:background="@color/colorPrimaryDark"
-        android:paddingTop="10dp"
-        android:alpha="0.9"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="High Score : "
-            android:gravity="right"
-            android:layout_weight="1"
-            android:textSize="21sp"
-            android:textColor="@color/colorBrown"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:gravity="left"
-            android:layout_weight="1"
-            android:id="@+id/tvHighScore"
-            android:textSize="21sp"
-            android:paddingStart="40dp"
-            android:paddingLeft="40dp"
-            android:textColor="@color/colorBrown"/>
-    </LinearLayout>
-
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="1"
-        android:alpha="0.9"
-        android:layout_margin="10dp"
-        android:id="@+id/cvProfile">
-
-        <LinearLayout
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@color/colorPrimaryDark">
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_gravity="center"
-                android:layout_margin="5dp"
-                android:layout_weight="3"
-                android:src="@mipmap/ic_launcher_round"
-                android:id="@+id/ivProfile"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvProfileName"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="16sp"
-                android:text="Unknown"
-                android:textColor="@color/colorBrown"
-                android:layout_margin="5dp"/>
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:text="MC01"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvTitle"
+        android:text="Tambahin Aja"
+        android:textColor="@color/colorPrimary"
         android:gravity="center"
-        android:textSize="32dp"
-        android:background="@color/colorPrimary"
-        android:layout_weight="5"
-        android:layout_margin="10dp"/>
+        android:textSize="36dp"
+        android:layout_weight="7"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnCustomPlay"
+        android:layout_gravity="center"
+        android:text="Play"
+        android:textColor="#ff0000"
+        android:textSize="32sp"
+        android:background="@drawable/button_bg_round"
+        android:layout_margin="50dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -98,9 +39,9 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Play"
-            android:id="@+id/btnPlay"
-            android:background="@color/colorPrimaryDark"
+            android:text="Rank"
+            android:id="@+id/btnRank"
+            android:background="@drawable/button_border"
             android:textColor="@color/colorBrown"
             android:layout_weight="1"
             android:alpha="0.9"
@@ -113,7 +54,7 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:alpha="0.9"
-            android:background="@color/colorPrimaryDark"
+            android:background="@drawable/button_border"
             android:text="Play\nOnline"
             android:textColor="@color/colorBrown" />
 
@@ -123,6 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginBottom="50dp"
         android:layout_weight="1">
 
         <Button
@@ -132,7 +74,7 @@
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"
-            android:background="@color/colorPrimaryDark"
+            android:background="@drawable/button_border"
             android:textColor="@color/colorBrown"
             android:id="@+id/btnPlayFriend"/>
 
@@ -144,19 +86,19 @@
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"
-            android:background="@color/colorPrimaryDark"
+            android:background="@drawable/button_border"
             android:textColor="@color/colorBrown"
             android:id="@+id/btnLeaderboard"/>
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="5"
-        android:gravity="center_horizontal |bottom"
-        android:paddingBottom="7dp"
-        android:textColor="@color/colorBrown"
-        android:text="Version 1.0.0"/>
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_weight="5"-->
+<!--        android:gravity="center_horizontal |bottom"-->
+<!--        android:paddingBottom="7dp"-->
+<!--        android:textColor="@color/colorBrown"-->
+<!--        android:text="Version 1.0.0"/>-->
 
 </LinearLayout>

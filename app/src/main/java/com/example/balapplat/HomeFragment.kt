@@ -18,6 +18,8 @@ import androidx.transition.TransitionManager
 import com.example.balapplat.friends.FriendsActivity
 import com.example.balapplat.leaderboard.LeaderBoardActivity
 import com.example.balapplat.model.HighScore
+import com.example.balapplat.play.WaitingActivity
+import com.example.balapplat.rank.RankActivity
 import com.facebook.AccessToken
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
@@ -31,6 +33,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
+import org.jetbrains.anko.support.v4.startActivity
 
 class HomeFragment : Fragment() {
 
@@ -55,9 +58,15 @@ class HomeFragment : Fragment() {
 
         database = FirebaseDatabase.getInstance().reference
 
+        val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+        btnCustomPlay.startAnimation(animationBounce)
 
-        btnPlay.onClick {
-            popUp(2)
+        btnCustomPlay.onClick {
+            startActivity<WaitingActivity>()
+        }
+
+        btnRank.onClick {
+            startActivity<RankActivity>()
 
         }
 
@@ -73,61 +82,26 @@ class HomeFragment : Fragment() {
                 startActivity(intentFor<LoginActivity>().clearTask())
             else
                 popUp(1)
+
         }
 
         btnLeaderboard.onClick {
             startActivity(intentFor<LeaderBoardActivity>().clearTask())
         }
 
-        cvProfile.onClick {
-            startActivity(intentFor<LoginActivity>())
-        }
+//        cvProfile.onClick {
+//            startActivity(intentFor<LoginActivity>())
+//        }
 
         if(AccessToken.getCurrentAccessToken() == null)
             auth.signOut()
 
-        updateUI()
+        //updateUI()
 
         super.onStart()
     }
+//
 
-    fun updateUI(){
-        if (auth.currentUser != null){
-            tvProfileName.text = auth.currentUser!!.displayName.toString()
-            getHighScore()
-            helper.userActive(true)
-//            GlobalScope.launch {
-//                tvHighScore.text = "" + getHighScore()
-//            }
-            Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
-        }else{
-            tvProfileName.text = "Unknown"
-        }
-    }
-
-    fun getHighScore(){
-        var highScore = 0
-        GlobalScope.async {
-            val postListener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    // Get Post object and use the values to update the UI
-                    if(dataSnapshot.exists())
-                        highScore = dataSnapshot.getValue(HighScore::class.java)?.score!!
-                    tvHighScore.text = "" + highScore
-                    val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-                    tvHighScore.startAnimation(animationBounce)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-
-                }
-            }
-
-            database.child("highscore").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
-
-        }
-
-    }
 
     fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"

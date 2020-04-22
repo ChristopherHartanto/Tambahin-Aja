@@ -168,6 +168,11 @@ class NormalGameActivity : AppCompatActivity(){
         super.onPause()
     }
 
+    override fun onBackPressed() {
+        control(false)
+        super.onBackPressed()
+    }
+
     override fun onResume() {
         control(true)
         super.onResume()

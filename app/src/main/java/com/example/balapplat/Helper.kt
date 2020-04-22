@@ -16,6 +16,6 @@ class Helper {
 
             database.child("users").child(auth.currentUser!!.uid).child("active").setValue(active)
         }
-
     }
+
 }

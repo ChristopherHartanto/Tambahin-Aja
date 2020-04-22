@@ -8,12 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
-import com.example.balapplat.model.AddFriend
-import com.example.balapplat.model.Friend
-import com.example.balapplat.model.LeaderBoard
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
-import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.textColor
 
 class AddFriendRecyclerViewAdapter(private val context: Context, private val items: List<User>,

@@ -8,8 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
-import com.example.balapplat.model.Friend
-import com.example.balapplat.model.LeaderBoard
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.backgroundColor
@@ -21,7 +19,7 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_friend, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],listener)
+        holder.bindItem(items[position],listener,position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -32,7 +30,7 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
         private val name = view.findViewById<TextView>(R.id.tvFriendName)
         private val image = view.findViewById<ImageView>(R.id.ivFriendProfile)
 
-        fun bindItem(items: User,listener: (position: Int) -> Unit) {
+        fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int) {
             if (items.active == 0)
                 active.backgroundColor = R.color.colorGrey
             else
