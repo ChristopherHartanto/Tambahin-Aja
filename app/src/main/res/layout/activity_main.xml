@@ -32,7 +32,8 @@
             android:layout_height="wrap_content"
             app:itemBackground="@color/colorPrimary"
             app:itemIconTint="@color/colorWhite"
-            app:menu="@menu/bottom_navigation_menu" />
+            app:menu="@menu/bottom_navigation_menu"
+            app:labelVisibilityMode="labeled"/>
 
     </LinearLayout>
 
