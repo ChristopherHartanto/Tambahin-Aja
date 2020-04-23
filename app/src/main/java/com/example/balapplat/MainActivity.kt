@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.facebook.AccessToken
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -25,7 +26,9 @@ class MainActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
-        receiveInvitation()
+
+        if(AccessToken.getCurrentAccessToken() != null)
+            receiveInvitation()
 
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -74,16 +77,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         Log.d("destroy","masuk")
-        val values: HashMap<String, Any> = hashMapOf(
-            "active" to 0
-        )
-
-        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-            toast("active 0")
-
-        }.addOnFailureListener {
-            toast(""+ it.message)
-        }
+//        val values: HashMap<String, Any> = hashMapOf(
+//            "active" to 0
+//        )
+//
+//        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+//            toast("active 0")
+//
+//        }.addOnFailureListener {
+//            toast(""+ it.message)
+//        }
         super.onDestroy()
     }
 
@@ -101,9 +104,10 @@ class MainActivity : AppCompatActivity() {
                             val values: HashMap<String, Any> = hashMapOf(
                                 "status" to true
                             )
-                            database.child("onPlay").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
+                            database.child("invitation").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
                                 toast("accepted game")
-                                startActivity<CountdownActivity>()
+
+                                startActivity(intentFor<CountdownActivity>("status" to "player2"))
 
                             }.addOnFailureListener {
                                 toast(""+ it.message)
@@ -112,11 +116,11 @@ class MainActivity : AppCompatActivity() {
                         noButton {
 
                         }
-                    }
+                    }.show()
                 }
             }
 
         }
-        database.child("invitation").child(auth.currentUser!!.uid).addValueEventListener(postListener)
+        database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
     }
 }

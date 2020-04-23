@@ -28,7 +28,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
-import java.util.HashMap
+import java.text.SimpleDateFormat
+import java.util.*
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -195,10 +196,14 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun Init(){
+        val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+        val currentDate = sdf.format(Date())
+
         val values: HashMap<String, Any> = hashMapOf(
             "name" to auth.currentUser!!.displayName.toString(),
             "facebookId" to Profile.getCurrentProfile().id,
-            "active" to 1
+            "active" to 1,
+            "registerDate" to currentDate
         )
 
         database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {

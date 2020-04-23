@@ -34,6 +34,8 @@ class LeaderBoardActivity : AppCompatActivity() {
     }
 
     fun retrieve(){
+        items.clear()
+        profileItems.clear()
         GlobalScope.launch {
             val postListener = object :  ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {

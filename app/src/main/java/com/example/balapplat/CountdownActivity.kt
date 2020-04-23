@@ -35,7 +35,16 @@ class CountdownActivity : AppCompatActivity() {
 
             override fun onFinish() {
                 finish()
-                startActivity(intentFor<NormalGameActivity>().clearTask())
+
+                if (intent.extras != null){
+                    if(intent.extras!!.getString("facebookId").equals(null)){
+                        if (intent.extras!!.getString("status").equals("player2")){
+                            startActivity(intentFor<NormalGameActivity>("status" to "player2"))
+                        }
+                }
+               else
+                    startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId")))
+                }
             }
         }
         if (status)

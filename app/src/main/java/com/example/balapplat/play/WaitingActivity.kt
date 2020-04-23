@@ -6,16 +6,21 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.animation.AnimationUtils
 import com.example.balapplat.CountdownActivity
+import com.example.balapplat.MainActivity
 import com.example.balapplat.R
+import com.facebook.Profile
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_countdown.*
 import kotlinx.android.synthetic.main.activity_waiting.*
 import org.jetbrains.anko.*
-import java.util.HashMap
+import java.text.SimpleDateFormat
+import java.util.*
 
 class WaitingActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
+    var inviter = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_waiting)
@@ -24,8 +29,8 @@ class WaitingActivity : AppCompatActivity() {
         database = FirebaseDatabase.getInstance().reference
 
 
-
        if (intent.extras != null){
+           inviter = true
            intent.extras!!.getString("facebookId")?.let { makeInvitation(it) }
        }else{
            timer()
@@ -79,6 +84,14 @@ class WaitingActivity : AppCompatActivity() {
                     Log.i("cek1",""+p0)
                     if(p0.getValue(Status::class.java)!!.status!!){
                         intent.extras!!.getString("facebookId")?.let { createGame(it) }
+                    }else{
+//                        database.child("invitation").child(facebookId).removeValue()
+//                           alert{
+//                            title = "Reject"
+//                            yesButton {
+//                                startActivity(intentFor<MainActivity>())
+//                            }
+//                        }.show()
                     }
 
                 }
@@ -89,17 +102,29 @@ class WaitingActivity : AppCompatActivity() {
     }
 
     fun createGame(facebookId: String){
+        val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+        val currentDate = sdf.format(Date())
+
         val values: HashMap<String, Any> = hashMapOf(
-            "score1" to 0,
-            "score2" to 0
+            "player1" to 0,
+            "player2" to 0,
+            "date" to currentDate
         )
         database.child("onPlay").child(facebookId).setValue(values).addOnSuccessListener {
             toast("create game")
-            startActivity<CountdownActivity>()
+            finish()
+            startActivity(intentFor<CountdownActivity>("facebookId" to facebookId))
 
         }.addOnFailureListener {
             toast(""+ it.message)
         }
+    }
+
+    override fun onDestroy() {
+        if (inviter)
+            database.child("invitation").child(intent.extras!!.getString("facebookId")!!).removeValue()
+
+        super.onDestroy()
     }
 }
 data class Status(var status: Boolean? = false)

@@ -21,9 +21,6 @@ import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.toast
 
-/**
- * A simple [Fragment] subclass.
- */
 class ListFriendsFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth

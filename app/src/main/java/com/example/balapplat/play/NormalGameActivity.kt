@@ -3,10 +3,13 @@ package com.example.balapplat.play
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.provider.ContactsContract
+import android.util.Log
 import android.view.animation.AnimationUtils
 import com.example.balapplat.MainActivity
 import com.example.balapplat.R
 import com.example.balapplat.model.NormalMatch
+import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -29,6 +32,10 @@ class NormalGameActivity : AppCompatActivity(){
     var answer = 999
     var highScore = 0
     var gameType = "normal"
+    var status = "custom"
+    var opponentPoint = 0
+    var player = 1 // 1 yang ajak, 2 yang diajak, 0 main sendiri
+    var facebookId = ""
 
     private var numberArr : MutableList<Int> = mutableListOf()
 
@@ -41,7 +48,28 @@ class NormalGameActivity : AppCompatActivity(){
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
 
-        getHighScore()
+
+        if (intent.extras != null){
+            if(intent.extras!!.getString("facebookId").equals(null)){ // jika kamu diinvite main
+                player = 2
+                facebookId = Profile.getCurrentProfile().id
+                fetchOpponentPoints(false)
+            }
+            else{ // kamu yang tukang invite
+                player = 1
+                facebookId = intent.extras!!.getString("facebookId")!!
+                fetchOpponentPoints(true) // true kalau kamu tukang invite
+            }
+        }else{
+            if (auth.currentUser != null)
+            {
+                // jika main sendiri
+                getHighScore()
+                player = 0
+            }
+
+        }
+
         keyboard()
         generate()
         control(false)
@@ -82,6 +110,10 @@ class NormalGameActivity : AppCompatActivity(){
     private fun checkAnswer(value : Int){
         if (answer == value){
             point += 10
+            if (player == 1)
+                updateValue(true)
+            else if(player == 2)
+                updateValue(false)
             generate()
         }else{
             if(point != 0)
@@ -102,19 +134,26 @@ class NormalGameActivity : AppCompatActivity(){
 
             }
             override fun onFinish() {
-                if(highScore < point){
 
-                    val values: HashMap<String, Any> = hashMapOf(
-                        "score" to point
-                    )
+                if (auth.currentUser != null){
+                    if (player == 0){
+                        if(highScore < point){
 
-                    database.child("highscore").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-                        toast("save")
-                        
-                    }.addOnFailureListener {
-                        toast(""+ it.message)
+                            val values: HashMap<String, Any> = hashMapOf(
+                                "score" to point
+                            )
+
+                            database.child("highscore").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+                                toast("save")
+
+                            }.addOnFailureListener {
+                                toast(""+ it.message)
+                            }
+                        }
                     }
+
                 }
+
                 finish()
                 startActivity<MainActivity>()
             }
@@ -199,5 +238,60 @@ class NormalGameActivity : AppCompatActivity(){
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
+    fun updateValue(inviter: Boolean){
+        var values: HashMap<String, Any>
 
+        if (!inviter){
+            values  = hashMapOf(
+                "player1" to opponentPoint,
+                "player2" to point
+            )
+            database.child("onPlay").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
+                toast("save")
+
+            }.addOnFailureListener {
+                toast(""+ it.message)
+            }
+        }
+        else{
+            values  = hashMapOf(
+                "player1" to point,
+                "player2" to opponentPoint
+            )
+
+            database.child("onPlay").child(intent.extras!!.getString("facebookId")!!).setValue(values).addOnSuccessListener {
+                toast("save")
+
+            }.addOnFailureListener {
+                toast(""+ it.message)
+            }
+        }
+
+    }
+
+    fun fetchOpponentPoints(inviter: Boolean){
+        val postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists())
+                {
+                    opponentPoint = if (inviter)
+                        p0.getValue(Play::class.java)?.player2!!
+                    else
+                        p0.getValue(Play::class.java)?.player1!!
+                    toast("opponentPoint : " + opponentPoint)
+                }
+            }
+
+        }
+        database.child("invitation").child(facebookId).addValueEventListener(postListener)
+    }
 }
+
+data class Play(
+    var player1: Int? = 0,
+    var player2: Int? = 0
+)
