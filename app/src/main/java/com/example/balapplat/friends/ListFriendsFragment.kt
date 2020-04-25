@@ -46,8 +46,8 @@ class ListFriendsFragment : Fragment() {
         database = FirebaseDatabase.getInstance().reference
         adapter = FriendsRecyclerViewAdapter(ctx,ProfileItems){
             if (!ProfileItems[it].active!!){
-                alert ("Offline"){
-                    title = ProfileItems[it].name + "   is Offline"
+                alert (ProfileItems[it].name + "   is Offline"){
+                    title = "Offline"
                     okButton {
 
                     }

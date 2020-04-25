@@ -11,6 +11,8 @@ import com.example.balapplat.R
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.backgroundColorResource
+import org.jetbrains.anko.backgroundResource
 
 class FriendsRecyclerViewAdapter(private val context: Context, private val items: List<User>, private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<FriendsRecyclerViewAdapter.ViewHolder>() {
@@ -32,10 +34,9 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
 
         fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int) {
             if (items.active == false)
-                active.backgroundColor = R.color.colorGrey
+                active.backgroundResource = R.color.colorGrey
             else
-                active.text = "online"
-                //active.backgroundColor = R.color.colorPrimary
+                active.backgroundColorResource = R.color.colorPrimary
 
             name.text = items.name
             items.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(items.facebookId!!)).fit().into(image) }

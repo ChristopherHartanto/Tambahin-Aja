@@ -3,24 +3,30 @@ package com.example.balapplat.friends
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.balapplat.MainView
+import com.example.balapplat.Presenter
 import com.example.balapplat.R
+import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.User
+import com.example.balapplat.play.CountdownActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddFriendsActivity : AppCompatActivity() {
+class AddFriendsActivity : AppCompatActivity(), MainView {
 
     private lateinit var auth: FirebaseAuth
     private var items: MutableList<User> = mutableListOf()
     private var uids: MutableList<String> = mutableListOf()
     private var statusItems: MutableList<Boolean> = mutableListOf()
     private lateinit var database: DatabaseReference
+    lateinit var presenter: Presenter
+    lateinit var data: Inviter
 
     private lateinit var adapter: AddFriendRecyclerViewAdapter
 
@@ -29,6 +35,9 @@ class AddFriendsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_add_friends)
 
         database = FirebaseDatabase.getInstance().reference
+        presenter = Presenter(this,database)
+        presenter.receiveInvitation()
+
         adapter = AddFriendRecyclerViewAdapter(this,items,statusItems){
             addFriend(uids[it])
         }
@@ -112,5 +121,29 @@ class AddFriendsActivity : AppCompatActivity() {
         }.addOnFailureListener {
             toast(""+ it.message)
         }
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot) {
+        data = dataSnapshot.getValue(Inviter::class.java)!!
+
+        alert(data!!.name + " invite you to play"){
+            title = "Invitation"
+            yesButton {
+                presenter.replyInvitation(true)
+            }
+            noButton {
+                presenter.replyInvitation(false)
+            }
+        }.show()
+    }
+
+    override fun response(message: String) {
+        if (message === "acceptedGame"){
+            toast("acceptedGame")
+
+            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
+                "inviterName" to data.name))
+        }
+
     }
 }

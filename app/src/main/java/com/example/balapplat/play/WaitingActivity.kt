@@ -4,16 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import android.view.animation.AnimationUtils
-import com.example.balapplat.CountdownActivity
-import com.example.balapplat.MainActivity
 import com.example.balapplat.R
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_countdown.*
-import kotlinx.android.synthetic.main.activity_normal_game.*
 import kotlinx.android.synthetic.main.activity_waiting.*
 import org.jetbrains.anko.*
 import java.text.SimpleDateFormat

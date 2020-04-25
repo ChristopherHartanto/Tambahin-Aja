@@ -2,21 +2,32 @@ package com.example.balapplat.friends
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.balapplat.MainView
+import com.example.balapplat.Presenter
 import com.example.balapplat.R
+import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.NormalMatch
+import com.example.balapplat.play.CountdownActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_friends.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
 
-class FriendsActivity : AppCompatActivity() {
+class FriendsActivity : AppCompatActivity(), MainView {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
+    private lateinit var mAdView : AdView
+    lateinit var data: Inviter
+    lateinit var presenter: Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +35,17 @@ class FriendsActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
+        presenter = Presenter(this,database)
+        presenter.receiveInvitation()
+
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
+        MobileAds.initialize(this)
+        val adView = AdView(this)
+        adView.adSize = AdSize.BANNER
+        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
         checkFriends(savedInstanceState)
 
@@ -69,6 +91,30 @@ class FriendsActivity : AppCompatActivity() {
 
             database.child("friends").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
 
+        }
+
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot) {
+        data = dataSnapshot.getValue(Inviter::class.java)!!
+
+        alert(data!!.name + " invite you to play"){
+            title = "Invitation"
+            yesButton {
+                presenter.replyInvitation(true)
+            }
+            noButton {
+                presenter.replyInvitation(false)
+            }
+        }.show()
+    }
+
+    override fun response(message: String) {
+        if (message === "acceptedGame"){
+            toast("acceptedGame")
+
+            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
+                "inviterName" to data.name))
         }
 
     }

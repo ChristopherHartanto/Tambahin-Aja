@@ -1,35 +1,37 @@
 package com.example.balapplat
 
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.balapplat.model.Inviter
+import com.example.balapplat.play.CountdownActivity
 import com.facebook.AccessToken
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
-import java.util.HashMap
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainView {
 
     private lateinit var database: DatabaseReference
+    lateinit var presenter: Presenter
     private lateinit var auth: FirebaseAuth
     lateinit var helper : Helper
+    var data : Inviter = Inviter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         supportActionBar?.hide()
-//Christopher Hartanto
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         helper = Helper()
+        presenter = Presenter(this,database)
 
         if(AccessToken.getCurrentAccessToken() != null)
-            receiveInvitation()
+            presenter.receiveInvitation()
 
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -90,44 +92,30 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
     }
 
-    fun receiveInvitation(){
-        val postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun loadData(dataSnapshot: DataSnapshot) {
+        data = dataSnapshot.getValue(Inviter::class.java)!!
+
+        alert(data!!.name + " invite you to play"){
+            title = "Invitation"
+            yesButton {
+                presenter.replyInvitation(true)
             }
-
-            override fun onDataChange(p0: DataSnapshot) {
-                if(p0.exists()){
-                    val data = p0.getValue(Inviter::class.java)
-
-                    alert(data!!.name + " invite you to play"){
-                        title = "Invitation"
-                        yesButton {
-                            database.child("invitation").child(Profile.getCurrentProfile().id).child("status").setValue(true).addOnSuccessListener {
-                                toast("accepted game")
-
-                                startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                                        "inviterName" to data.name))
-
-                            }.addOnFailureListener {
-                                toast(""+ it.message)
-                            }
-                        }
-                        noButton {
-                            database.child("invitation").child(Profile.getCurrentProfile().id).removeValue()
-                        }
-                    }.show()
-                }
+            noButton {
+               presenter.replyInvitation(false)
             }
+        }.show()
+    }
 
+    override fun response(message: String) {
+        if (message === "acceptedGame"){
+            toast("acceptedGame")
+
+            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
+                "inviterName" to data.name))
         }
-        database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
+
     }
 
 }
 
-data class Inviter(
-    var facebookId: String? = "",
-    var name: String? = "",
-    var status: Boolean? = false
-)
+

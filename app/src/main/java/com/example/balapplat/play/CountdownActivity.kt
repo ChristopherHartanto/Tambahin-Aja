@@ -1,12 +1,11 @@
-package com.example.balapplat
+package com.example.balapplat.play
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.animation.AnimationUtils
-import com.example.balapplat.play.NormalGameActivity
+import com.example.balapplat.R
 import kotlinx.android.synthetic.main.activity_countdown.*
-import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.startActivity
@@ -29,7 +28,9 @@ class CountdownActivity : AppCompatActivity() {
         val timer = object: CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 tvCountdown.text = count.toString()
-                val animationSlideDown = AnimationUtils.loadAnimation(ctx, R.anim.slide_down)
+                val animationSlideDown = AnimationUtils.loadAnimation(ctx,
+                    R.anim.slide_down
+                )
                 tvCountdown.startAnimation(animationSlideDown)
                 count--
             }
@@ -46,7 +47,8 @@ class CountdownActivity : AppCompatActivity() {
                         }
                     }
                    else
-                        startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId")))
+                        startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
+                            "name" to intent.extras!!.getString("facebookId")))
                 }else
                     startActivity<NormalGameActivity>()
                 }
@@ -58,8 +60,9 @@ class CountdownActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        countDown(false)
-        super.onBackPressed()
+//        countDown(false)
+//        finish()
+//        super.onBackPressed()
     }
 
     override fun onDestroy() {

@@ -1,7 +1,8 @@
 package com.example.balapplat
 
+import com.google.firebase.database.DataSnapshot
+
 interface MainView {
-    fun showLoading()
-    fun hideLoading()
-    fun showHighScore(data: String)
+    fun loadData(dataSnapshot: DataSnapshot)
+    fun response(message: String)
 }

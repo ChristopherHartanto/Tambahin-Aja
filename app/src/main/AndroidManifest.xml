@@ -24,13 +24,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".PlayActivity" />
-        <activity android:name=".CountdownActivity" />
+        <activity android:name=".play.CountdownActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".friends.AddFriendsActivity" />
         <activity android:name=".friends.FriendsActivity" />
         <activity android:name=".play.NormalGameActivity" />
         <activity android:name=".MainActivity" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1388436725980010~2049118383"/>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"

@@ -8,7 +8,10 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import com.example.balapplat.MainActivity
+import com.example.balapplat.MainView
+import com.example.balapplat.Presenter
 import com.example.balapplat.R
+import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.NormalMatch
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
@@ -20,11 +23,13 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
 
-class NormalGameActivity : AppCompatActivity(){
+class NormalGameActivity : AppCompatActivity(), MainView{
 
     private lateinit var database: DatabaseReference
     private lateinit var databaseFetchPoint: DatabaseReference
     private lateinit var auth: FirebaseAuth
+    lateinit var data: Inviter
+    lateinit var presenter: Presenter
     private lateinit var countDownTimer : CountDownTimer
     var count = 4
     var point = 0
@@ -49,7 +54,7 @@ class NormalGameActivity : AppCompatActivity(){
         database = FirebaseDatabase.getInstance().reference
         databaseFetchPoint = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
-
+        presenter = Presenter(this,database)
 
         if (intent.extras != null){
             if(intent.extras!!.getString("facebookId").equals(null)){ // jika kamu diinvite main
@@ -170,15 +175,15 @@ class NormalGameActivity : AppCompatActivity(){
                         toast("your point : "+ point + "opponent point : " + opponentPoint)
                         var text = ""
                         text = when {
-                            point > highScore -> {
+                            point > opponentPoint -> {
                                 getStats(true)
                                 "win"
                             }
-                            point < highScore -> {
+                            point < opponentPoint -> {
                                 getStats(false)
                                 "lose"
                             }
-                            point == highScore -> {
+                            point == opponentPoint -> {
                                 toast("1.  your point : "+ point + "opponent point : " + opponentPoint)
                                 "draw"
                             }
@@ -359,9 +364,9 @@ class NormalGameActivity : AppCompatActivity(){
             override fun onDataChange(p0: DataSnapshot) {
                 if (temp == 0){
                     if(p0.exists())
-                        updateStats(winStatus, p0.value as Long)
+                        presenter.updateStats(winStatus, p0.value as Long,auth)
                     else
-                        updateStats(winStatus, 0)
+                        presenter.updateStats(winStatus, 0,auth)
                     temp = 1
                 }
 
@@ -377,14 +382,11 @@ class NormalGameActivity : AppCompatActivity(){
 
     }
 
-    fun updateStats(winStatus: Boolean, value: Long){
-        if (winStatus){
-            database.child("stats").child(auth.currentUser!!.uid).child("win").setValue(value+1)
-        }else{
-            database.child("stats").child(auth.currentUser!!.uid).child("lose").setValue(value+1)
-        }
+    override fun loadData(dataSnapshot: DataSnapshot) {
+        presenter.replyInvitation(false)
+    }
 
-
+    override fun response(message: String) {
 
     }
 
