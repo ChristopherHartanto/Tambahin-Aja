@@ -1,40 +1,28 @@
 package com.example.balapplat
 
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.facebook.AccessToken
+import com.facebook.Profile
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.*
+import java.util.HashMap
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var database: DatabaseReference
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-/**
- * a
- * s
- * asd
- * a
- * da
- * sda
- * sd
- * asd
- * a
- * d
- * ad
- * a
- * da
- * sd
- *
- * d
- * d
- * d
- * d
- * d
- * d
- * d
- *
- * d**/
+
+
+
         supportActionBar?.hide()
 //Christopher Hartanto
         database = FirebaseDatabase.getInstance().reference
@@ -92,6 +80,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         Log.d("destroy","masuk")
+//        val values: HashMap<String, Any> = hashMapOf(
+//            "active" to 0
+//        )
+//
+//        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+//            toast("active 0")
+//
+//        }.addOnFailureListener {
+//            toast(""+ it.message)
+//        }
         super.onDestroy()
     }
 
