@@ -3,8 +3,8 @@ package com.example.balapplat.friends
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.balapplat.MainView
-import com.example.balapplat.Presenter
+import com.example.balapplat.view.MainView
+import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.User
@@ -18,7 +18,8 @@ import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddFriendsActivity : AppCompatActivity(), MainView {
+class AddFriendsActivity : AppCompatActivity(),
+    MainView {
 
     private lateinit var auth: FirebaseAuth
     private var items: MutableList<User> = mutableListOf()
@@ -35,7 +36,7 @@ class AddFriendsActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_add_friends)
 
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this,database)
+        presenter = Presenter(this, database)
         presenter.receiveInvitation()
 
         adapter = AddFriendRecyclerViewAdapter(this,items,statusItems){

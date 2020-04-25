@@ -5,8 +5,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
-import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity(), MainView {
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         helper = Helper()
-        presenter = Presenter(this,database)
+        presenter = Presenter(this, database)
 
         if(AccessToken.getCurrentAccessToken() != null)
             presenter.receiveInvitation()

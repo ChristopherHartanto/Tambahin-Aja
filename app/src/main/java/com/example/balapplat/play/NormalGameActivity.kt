@@ -3,13 +3,11 @@ package com.example.balapplat.play
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.provider.ContactsContract
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import com.example.balapplat.MainActivity
-import com.example.balapplat.MainView
-import com.example.balapplat.Presenter
+import com.example.balapplat.view.MainView
+import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.NormalMatch
@@ -17,13 +15,13 @@ import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_normal_game.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
 
-class NormalGameActivity : AppCompatActivity(), MainView{
+class NormalGameActivity : AppCompatActivity(),
+    MainView {
 
     private lateinit var database: DatabaseReference
     private lateinit var databaseFetchPoint: DatabaseReference
@@ -54,7 +52,7 @@ class NormalGameActivity : AppCompatActivity(), MainView{
         database = FirebaseDatabase.getInstance().reference
         databaseFetchPoint = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
-        presenter = Presenter(this,database)
+        presenter = Presenter(this, database)
 
         if (intent.extras != null){
             if(intent.extras!!.getString("facebookId").equals(null)){ // jika kamu diinvite main

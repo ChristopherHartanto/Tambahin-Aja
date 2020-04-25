@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import com.example.balapplat.view.MainView
 import com.example.balapplat.R
+import com.example.balapplat.presenter.Presenter
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -15,11 +17,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
 
-class WaitingActivity : AppCompatActivity() {
+class WaitingActivity : AppCompatActivity(),
+    MainView {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     var inviter = false
+    lateinit var presenter: Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +32,7 @@ class WaitingActivity : AppCompatActivity() {
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
+        presenter = Presenter(this,database)
 
        if (intent.extras != null){
            inviter = true
@@ -140,6 +145,14 @@ class WaitingActivity : AppCompatActivity() {
 
     fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun response(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
 data class Status(var status: Boolean? = false)

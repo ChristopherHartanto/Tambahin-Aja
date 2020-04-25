@@ -2,11 +2,10 @@ package com.example.balapplat.friends
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.balapplat.MainView
-import com.example.balapplat.Presenter
+import com.example.balapplat.view.MainView
+import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
-import com.example.balapplat.model.NormalMatch
 import com.example.balapplat.play.CountdownActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -15,13 +14,13 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_friends.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class FriendsActivity : AppCompatActivity(), MainView {
+class FriendsActivity : AppCompatActivity(),
+    MainView {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -35,7 +34,7 @@ class FriendsActivity : AppCompatActivity(), MainView {
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this,database)
+        presenter = Presenter(this, database)
         presenter.receiveInvitation()
 
         mAdView = findViewById(R.id.adView)

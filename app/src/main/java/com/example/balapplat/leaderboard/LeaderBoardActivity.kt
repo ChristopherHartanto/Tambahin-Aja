@@ -3,8 +3,8 @@ package com.example.balapplat.leaderboard
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.balapplat.MainView
-import com.example.balapplat.Presenter
+import com.example.balapplat.view.MainView
+import com.example.balapplat.presenter.Presenter
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_leader_board.*
 import kotlinx.coroutines.GlobalScope
@@ -16,7 +16,8 @@ import com.example.balapplat.play.CountdownActivity
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 
-class LeaderBoardActivity : AppCompatActivity(), MainView {
+class LeaderBoardActivity : AppCompatActivity(),
+    MainView {
 
     private var items: MutableList<HighScore> = mutableListOf()
     private var profileItems: MutableList<User> = mutableListOf()
@@ -33,7 +34,7 @@ class LeaderBoardActivity : AppCompatActivity(), MainView {
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
-        presenter = Presenter(this,database)
+        presenter = Presenter(this, database)
         presenter.receiveInvitation()
 
         rvLeaderBoard.layoutManager = LinearLayoutManager(this)

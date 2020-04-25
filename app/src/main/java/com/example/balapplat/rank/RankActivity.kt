@@ -5,8 +5,8 @@ import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.Helper
-import com.example.balapplat.MainView
-import com.example.balapplat.Presenter
+import com.example.balapplat.view.MainView
+import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.google.android.gms.ads.AdRequest
@@ -35,7 +35,7 @@ class RankActivity : AppCompatActivity(), MainView {
         supportActionBar?.hide()
         helper = Helper()
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this,database)
+        presenter = Presenter(this, database)
         presenter.receiveInvitation()
 
         mAdView = findViewById(R.id.adView)
