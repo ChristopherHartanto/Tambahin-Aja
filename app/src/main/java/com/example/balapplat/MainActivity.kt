@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                         noButton {
-
+                            database.child("invitation").child(Profile.getCurrentProfile().id).removeValue()
                         }
                     }.show()
                 }

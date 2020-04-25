@@ -10,7 +10,9 @@ import com.example.balapplat.MainActivity
 import com.example.balapplat.R
 import com.facebook.Profile
 import com.google.firebase.database.*
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_countdown.*
+import kotlinx.android.synthetic.main.activity_normal_game.*
 import kotlinx.android.synthetic.main.activity_waiting.*
 import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
@@ -32,6 +34,8 @@ class WaitingActivity : AppCompatActivity() {
        if (intent.extras != null){
            inviter = true
            intent.extras!!.getString("facebookId")?.let { makeInvitation(it) }
+           Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("facebookId")!!)).fit().into(ivOpponentImageWaiting)
+           Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
        }else{
            timer()
        }
@@ -41,7 +45,7 @@ class WaitingActivity : AppCompatActivity() {
     fun timer(){
         var count = 3
 
-        val timer = object: CountDownTimer(40000, 1000) {
+        val timer = object: CountDownTimer(100000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 if (count == 3)
                     tvWaiting.text = "Waiting ."
@@ -84,16 +88,17 @@ class WaitingActivity : AppCompatActivity() {
                     Log.i("cek1",""+p0)
                     if(p0.getValue(Status::class.java)!!.status!!){
                         intent.extras!!.getString("facebookId")?.let { createGame(it) }
-                    }else{
-//                        database.child("invitation").child(facebookId).removeValue()
+                    }
+
+                }else{
+
 //                           alert{
 //                            title = "Reject"
 //                            yesButton {
 //                                startActivity(intentFor<MainActivity>())
 //                            }
+//                               noButton {  }
 //                        }.show()
-                    }
-
                 }
             }
 
@@ -108,7 +113,8 @@ class WaitingActivity : AppCompatActivity() {
         val values: HashMap<String, Any> = hashMapOf(
             "player1" to 0,
             "player2" to 0,
-            "date" to currentDate
+            "date" to currentDate,
+            "pause" to false
         )
         database.child("onPlay").child(facebookId).setValue(values).addOnSuccessListener {
             toast("create game")
@@ -125,6 +131,10 @@ class WaitingActivity : AppCompatActivity() {
             database.child("invitation").child(intent.extras!!.getString("facebookId")!!).removeValue()
 
         super.onDestroy()
+    }
+
+    fun getFacebookProfilePicture(userID: String): String {
+        return "https://graph.facebook.com/$userID/picture?type=large"
     }
 }
 data class Status(var status: Boolean? = false)

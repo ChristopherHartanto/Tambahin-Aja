@@ -9,6 +9,81 @@
     tools:context=".play.NormalGameActivity"
     android:background="@color/colorWhite">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/layoutMultipleGame"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="left">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorYellow"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:text="0"
+                android:id="@+id/tvPlayerPoint"/>
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_launcher_background"
+                android:id="@+id/ivPlayerImage"
+                android:background="@drawable/button_bg_round"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/tvPlayerName"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorYellow"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:text="0"
+                android:id="@+id/tvOpponentPoint"/>
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_gravity="center"
+                android:layout_height="60dp"
+                android:background="@drawable/button_bg_round"
+                android:src="@drawable/ic_launcher_background"
+                android:id="@+id/ivOpponentImage"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/tvOpponentName"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
