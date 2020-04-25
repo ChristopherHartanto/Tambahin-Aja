@@ -5,29 +5,25 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
+import com.example.balapplat.model.HighScore
+import com.example.balapplat.model.User
+import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_leader_board.*
+import kotlinx.android.synthetic.main.fragment_tournament.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.toast
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [Tournament.newInstance] factory method to
- * create an instance of this fragment.
- */
 class Tournament : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var items: MutableList<HighScore> = mutableListOf()
+    private var profileItems: MutableList<User> = mutableListOf()
+    private lateinit var database: DatabaseReference
+
+    private lateinit var adapter: LeaderBoardRecyclerViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,23 +33,75 @@ class Tournament : Fragment() {
         return inflater.inflate(R.layout.fragment_tournament, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Tournament.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Tournament().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    fun retrieve(){
+        items.clear()
+        profileItems.clear()
+        GlobalScope.launch {
+            val postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    //toast("" + p0.children)
+                    fetchData(p0)
+                }
+
             }
+            database.child("highscore").orderByChild("score").addValueEventListener(postListener)
+
+        }
+    }
+
+    fun fetchData(dataSnapshot: DataSnapshot){
+
+        for (ds in dataSnapshot.children) {
+            val score = ds.getValue(HighScore::class.java)!!.score
+            val id = ds.key
+
+
+
+            id?.let { retrieveUser(it,score) }
+        }
+    }
+
+    fun retrieveUser(id : String,score: Int?){
+        GlobalScope.launch {
+            val postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    items.add(HighScore(score))
+                    //toast("" + p0.children)
+                    fetchDataUser(p0)
+                }
+
+            }
+            database.child("users").child(id).addValueEventListener(postListener)
+
+        }
+    }
+
+    override fun onStart() {
+        database = FirebaseDatabase.getInstance().reference
+        adapter = LeaderBoardRecyclerViewAdapter(ctx,items,profileItems)
+
+        rvStanding.layoutManager = LinearLayoutManager(ctx)
+        rvStanding.adapter = adapter
+
+        items.clear()
+        profileItems.clear()
+        retrieve()
+        super.onStart()
+    }
+
+    fun fetchDataUser(dataSnapshot: DataSnapshot){
+
+        val item = dataSnapshot.getValue(User::class.java)!!
+
+        profileItems.add(item)
+        adapter.notifyDataSetChanged()
     }
 }

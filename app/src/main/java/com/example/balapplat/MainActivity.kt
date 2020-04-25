@@ -12,6 +12,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         supportActionBar?.hide()
+//Christopher Hartanto
+        database = FirebaseDatabase.getInstance().reference
+        auth = FirebaseAuth.getInstance()
+
+        if(AccessToken.getCurrentAccessToken() != null)
+            receiveInvitation()
 
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -61,5 +67,39 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         Log.d("destroy","masuk")
         super.onDestroy()
+    }
+
+    fun receiveInvitation(){
+        val postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    alert{
+                        title = "Invitation"
+                        yesButton {
+                            val values: HashMap<String, Any> = hashMapOf(
+                                "status" to true
+                            )
+                            database.child("invitation").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
+                                toast("accepted game")
+
+                                startActivity(intentFor<CountdownActivity>("status" to "player2"))
+
+                            }.addOnFailureListener {
+                                toast(""+ it.message)
+                            }
+                        }
+                        noButton {
+                            database.child("invitation").child(Profile.getCurrentProfile().id).removeValue()
+                        }
+                    }.show()
+                }
+            }
+
+        }
+        database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
     }
 }

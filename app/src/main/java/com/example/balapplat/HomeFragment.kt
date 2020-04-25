@@ -113,70 +113,70 @@ class HomeFragment : Fragment() {
     }
 
     fun popUp(layout: Int){
-        val inflater:LayoutInflater = activity!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-        val view = if (layout == 1)
-            inflater.inflate(R.layout.pre_enter_room,null)
-        else
-            inflater.inflate(R.layout.game_category,null)
-
-
-        // Initialize a new instance of popup window
-        val popupWindow = PopupWindow(
-            view, // Custom view to show in popup window
-            LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-            LinearLayout.LayoutParams.MATCH_PARENT// Window height
-        )
-
-        // Set an elevation for the popup window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            popupWindow.elevation = 10.0F
-        }
-
-
-        // If API level 23 or higher then execute the code
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-//            // Create a new slide animation for popup window enter transition
-//            val slideIn = Slide()
-//            slideIn.slideEdge = Gravity.TOP
-//            popupWindow.enterTransition = slideIn
+//        val inflater:LayoutInflater = activity!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 //
-//            // Slide animation for popup window exit transition
-//            val slideOut = Slide()
-//            slideOut.slideEdge = Gravity.RIGHT
-//            popupWindow.exitTransition = slideOut
+//        val view = if (layout == 1)
+//            inflater.inflate(R.layout.pre_enter_room,null)
+//        else
+//            inflater.inflate(R.layout.game_category,null)
 //
+//
+//        // Initialize a new instance of popup window
+//        val popupWindow = PopupWindow(
+//            view, // Custom view to show in popup window
+//            LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+//            LinearLayout.LayoutParams.MATCH_PARENT// Window height
+//        )
+//
+//        // Set an elevation for the popup window
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            popupWindow.elevation = 10.0F
 //        }
-
-        if (layout == 1){
-            val layoutPreEnterRoom = view.findViewById<LinearLayout>(R.id.layout_pre_enter_room)
-
-            layoutPreEnterRoom.onClick {
-                popupWindow.dismiss()
-            }
-        }
-        else{
-            val layoutGameCategory = view.findViewById<LinearLayout>(R.id.layout_game_category)
-            val btnPlay = view.findViewById<Button>(R.id.btnNormalGame)
-
-            btnPlay.onClick {
-                startActivity(intentFor<CountdownActivity>().clearTask())
-            }
-
-            layoutGameCategory.onClick {
-                popupWindow.dismiss()
-            }
-        }
-
-
-        // Finally, show the popup window on app
-        TransitionManager.beginDelayedTransition(root_layout)
-        popupWindow.showAtLocation(
-            root_layout, // Location to display popup window
-            Gravity.CENTER, // Exact position of layout to display popup
-            0, // X offset
-            0 // Y offset
-        )
+//
+//
+//        // If API level 23 or higher then execute the code
+////        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+////            // Create a new slide animation for popup window enter transition
+////            val slideIn = Slide()
+////            slideIn.slideEdge = Gravity.TOP
+////            popupWindow.enterTransition = slideIn
+////
+////            // Slide animation for popup window exit transition
+////            val slideOut = Slide()
+////            slideOut.slideEdge = Gravity.RIGHT
+////            popupWindow.exitTransition = slideOut
+////
+////        }
+//
+//        if (layout == 1){
+//            val layoutPreEnterRoom = view.findViewById<LinearLayout>(R.id.layout_pre_enter_room)
+//
+//            layoutPreEnterRoom.onClick {
+//                popupWindow.dismiss()
+//            }
+//        }
+//        else{
+//            val layoutGameCategory = view.findViewById<LinearLayout>(R.id.layout_game_category)
+//            val btnPlay = view.findViewById<Button>(R.id.btnNormalGame)
+//
+//            btnPlay.onClick {
+//                startActivity(intentFor<CountdownActivity>().clearTask())
+//            }
+//
+//            layoutGameCategory.onClick {
+//                popupWindow.dismiss()
+//            }
+//        }
+//
+//
+//        // Finally, show the popup window on app
+//        TransitionManager.beginDelayedTransition(root_layout)
+//        popupWindow.showAtLocation(
+//            root_layout, // Location to display popup window
+//            Gravity.CENTER, // Exact position of layout to display popup
+//            0, // X offset
+//            0 // Y offset
+//        )
 
     }
 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.ContactsContract
 import android.util.Log
+import android.view.View
 import android.view.animation.AnimationUtils
 import com.example.balapplat.MainActivity
 import com.example.balapplat.R
@@ -12,17 +13,17 @@ import com.example.balapplat.model.NormalMatch
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_normal_game.*
-import org.jetbrains.anko.ctx
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
 import java.util.*
 
 class NormalGameActivity : AppCompatActivity(){
 
     private lateinit var database: DatabaseReference
+    private lateinit var databaseFetchPoint: DatabaseReference
     private lateinit var auth: FirebaseAuth
     private lateinit var countDownTimer : CountDownTimer
     var count = 4
@@ -46,6 +47,7 @@ class NormalGameActivity : AppCompatActivity(){
         supportActionBar?.hide()
 
         database = FirebaseDatabase.getInstance().reference
+        databaseFetchPoint = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
 
 
@@ -53,18 +55,21 @@ class NormalGameActivity : AppCompatActivity(){
             if(intent.extras!!.getString("facebookId").equals(null)){ // jika kamu diinvite main
                 player = 2
                 facebookId = Profile.getCurrentProfile().id
-                fetchOpponentPoints(false)
+                fetchOpponent(false)
             }
             else{ // kamu yang tukang invite
                 player = 1
                 facebookId = intent.extras!!.getString("facebookId")!!
-                fetchOpponentPoints(true) // true kalau kamu tukang invite
+                fetchOpponent(true) // true kalau kamu tukang invite
             }
+            tvPoint.visibility = View.INVISIBLE
+            fetchProfile()
         }else{
             if (auth.currentUser != null)
             {
                 // jika main sendiri
                 getHighScore()
+                layoutMultipleGame.visibility = View.INVISIBLE
                 player = 0
             }
 
@@ -119,9 +124,16 @@ class NormalGameActivity : AppCompatActivity(){
             if(point != 0)
                 point -= 5
         }
-        tvPoint.text = "" + point
+
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-        tvPoint.startAnimation(animationBounce)
+
+        if(player == 0){
+            tvPoint.text = "" + point
+            tvPoint.startAnimation(animationBounce)
+        }else{
+            tvPlayerPoint.text = ""+point
+            tvPlayerPoint.startAnimation(animationBounce)
+        }
 
 
     }
@@ -149,13 +161,31 @@ class NormalGameActivity : AppCompatActivity(){
                             }.addOnFailureListener {
                                 toast(""+ it.message)
                             }
+                            finish()
+                            startActivity<MainActivity>()
                         }
+                    }else{
+                        var text = ""
+                        text = if (point > highScore) {
+                            getStats(true)
+                            "win"
+                        } else {
+                            getStats(false)
+                            "lose"
+                        }
+//
+//                        alert {
+//                            title = text
+//                            okButton {
+//                                finish()
+//                                startActivity<MainActivity>()
+//                            }
+//                        }.show()
                     }
 
                 }
 
-                finish()
-                startActivity<MainActivity>()
+
             }
         }
         if(status)
@@ -195,26 +225,6 @@ class NormalGameActivity : AppCompatActivity(){
         btn0.onClick {
             checkAnswer(0)
         }
-    }
-
-    override fun onDestroy() {
-        control(false)
-        super.onDestroy()
-    }
-
-    override fun onPause() {
-        control(false)
-        super.onPause()
-    }
-
-    override fun onBackPressed() {
-        control(false)
-        super.onBackPressed()
-    }
-
-    override fun onResume() {
-        control(true)
-        super.onResume()
     }
 
     fun getHighScore(){
@@ -269,7 +279,7 @@ class NormalGameActivity : AppCompatActivity(){
 
     }
 
-    fun fetchOpponentPoints(inviter: Boolean){
+    fun fetchOpponent(inviter: Boolean){
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -278,16 +288,112 @@ class NormalGameActivity : AppCompatActivity(){
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists())
                 {
+                    val check = opponentPoint
+
                     opponentPoint = if (inviter)
                         p0.getValue(Play::class.java)?.player2!!
                     else
                         p0.getValue(Play::class.java)?.player1!!
-                    toast("opponentPoint : " + opponentPoint)
+
+                    if (check != opponentPoint){ // jika value tidak sama dengan sebelumnya maka update data
+                        val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+                        tvOpponentPoint.text = "" + opponentPoint
+                        tvOpponentPoint.startAnimation(animationBounce)
+                    }
+
                 }
             }
 
         }
-        database.child("invitation").child(facebookId).addValueEventListener(postListener)
+        databaseFetchPoint.child("onPlay").child(facebookId).addValueEventListener(postListener)
+//
+//        val postListener1 = object : ValueEventListener {
+//            override fun onCancelled(p0: DatabaseError) {
+//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//            }
+//
+//            override fun onDataChange(p0: DataSnapshot) {
+//                if(p0.exists())
+//                {
+//                    if (p0.value!! == true)
+//                        control(false)
+//                    else
+//                        control(true)
+//                }
+//            }
+//
+//        }
+//        database.child("onPlay").child(facebookId).child("pause").addValueEventListener(postListener1)
+    }
+
+    fun fetchProfile(){
+        Picasso.get().load(getFacebookProfilePicture(facebookId)).fit().into(ivOpponentImage)
+
+        Picasso.get().load(getFacebookProfilePicture(facebookId)).fit().into(ivPlayerImage)
+    }
+
+    fun getStats(winStatus : Boolean){
+        val postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists())
+                    updateStats(winStatus, p0.value as Int)
+
+            }
+
+        }
+        if (winStatus)
+            databaseFetchPoint.child("stats").child(auth.currentUser!!.uid).child("win").addValueEventListener(postListener)
+        else
+            databaseFetchPoint.child("stats").child(auth.currentUser!!.uid).child("lose").addValueEventListener(postListener)
+    }
+
+    fun updateStats(winStatus: Boolean, value: Int){
+        if (winStatus){
+            database.child("stats").child(auth.currentUser!!.uid).child("win").setValue(value+1)
+        }else{
+            database.child("onPlay").child(Profile.getCurrentProfile().id).child("lose").setValue(value+1)
+        }
+
+    }
+
+    override fun onDestroy() {
+        control(false)
+        super.onDestroy()
+    }
+
+    override fun onPause() {
+        control(false)
+
+
+        super.onPause()
+    }
+
+    override fun onBackPressed() {
+//        database.child("onPlay").child(facebookId).child("pause").setValue(true)
+//        control(false)
+
+        alert {
+            title = "Exit"
+            yesButton {
+                // di isi
+                finish()
+            }
+            noButton {
+                control(true)
+            }
+        }.show()
+
+    }
+
+    override fun onResume() {
+       // database.child("onPlay").child(facebookId).child("pause").setValue(false)
+        control(true)
+
+        super.onResume()
     }
 }
 

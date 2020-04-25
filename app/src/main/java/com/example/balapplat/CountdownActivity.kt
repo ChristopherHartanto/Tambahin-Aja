@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.activity_countdown.*
 import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.startActivity
 
 class CountdownActivity : AppCompatActivity() {
 
@@ -41,11 +42,12 @@ class CountdownActivity : AppCompatActivity() {
                         if (intent.extras!!.getString("status").equals("player2")){
                             startActivity(intentFor<NormalGameActivity>("status" to "player2"))
                         }
+                    }
+                   else
+                        startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId")))
+                }else
+                    startActivity<NormalGameActivity>()
                 }
-               else
-                    startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId")))
-                }
-            }
         }
         if (status)
             timer.start()
