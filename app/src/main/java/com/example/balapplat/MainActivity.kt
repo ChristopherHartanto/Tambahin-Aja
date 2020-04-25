@@ -21,7 +21,31 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+/**
+ * a
+ * s
+ * asd
+ * a
+ * da
+ * sda
+ * sd
+ * asd
+ * a
+ * d
+ * ad
+ * a
+ * da
+ * sd
+ *
+ * d
+ * d
+ * d
+ * d
+ * d
+ * d
+ * d
+ *
+ * d**/
         supportActionBar?.hide()
 
         database = FirebaseDatabase.getInstance().reference
@@ -47,6 +71,8 @@ class MainActivity : AppCompatActivity() {
         }
         bottom_navigation.selectedItemId = R.id.home
     }
+
+
 
     private fun loadHomeFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
