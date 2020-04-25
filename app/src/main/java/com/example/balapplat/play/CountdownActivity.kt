@@ -45,10 +45,16 @@ class CountdownActivity : AppCompatActivity() {
                             val inviterName = intent.extras!!.getString("inviterName")
                             startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName))
                         }
+                        else{
+                            startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
+                                "name" to intent.extras!!.getString("name")
+                                ,"playOnline" to intent.extras!!.getString("playOnline")
+                                ,"creator" to intent.extras!!.getString("creator")))
+                        }
                     }
                    else
                         startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
-                            "name" to intent.extras!!.getString("facebookId")))
+                            "name" to intent.extras!!.getString("name")))
                 }else
                     startActivity<NormalGameActivity>()
                 }

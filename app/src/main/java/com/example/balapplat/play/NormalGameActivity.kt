@@ -31,18 +31,17 @@ class NormalGameActivity : AppCompatActivity(),
     lateinit var matchPresenter: MatchPresenter
     lateinit var data: Inviter
     lateinit var presenter: Presenter
-    private lateinit var countDownTimer : CountDownTimer
     var count = 4
     var point = 0
-    var playing = true
     var timer = 30
     var answer = 999
     var highScore = 0
-    var gameType = "normal"
     var status = "custom"
     var opponentPoint = 0
-    var player = 1 // 1 yang ajak, 2 yang diajak, 0 main sendiri
+    var player = 0 // 1 yang ajak, 2 yang diajak, 0 main sendiri
     var facebookId = ""
+    var playOnline = false
+    var creator = false
 
     private var numberArr : MutableList<Int> = mutableListOf()
 
@@ -64,6 +63,11 @@ class NormalGameActivity : AppCompatActivity(),
                 facebookId = Profile.getCurrentProfile().id
                 matchPresenter.fetchOpponent(false,facebookId)
                 fetchProfile(false)
+            }
+            else if (intent.extras!!.getBoolean("playOnline")){
+                creator = intent.extras!!.getBoolean("creator")
+                playOnline = true
+                facebookId = intent.extras!!.getString("facebookId")!!
             }
             else{ // kamu yang tukang invite
                 player = 1
@@ -129,10 +133,12 @@ class NormalGameActivity : AppCompatActivity(),
             if(point != 0)
                 point -= 5
         }
-        if (player == 1)
+        if (player == 1 || creator)
             matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
-        else if(player == 2)
-            matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
+        else if(player == 2 || !creator)
+            matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("inviterFacebookId")!!)
+        else if (!creator)
+            matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
 
@@ -192,6 +198,20 @@ class NormalGameActivity : AppCompatActivity(),
                             else -> "error"
                         }
 
+                        when {
+                            player == 1 -> matchPresenter.addToHistory(auth,point,opponentPoint, facebookId,
+                                intent.extras!!.getString("name")!!)
+                            player == 2 -> matchPresenter.addToHistory(auth,point,opponentPoint, intent.extras!!.getString("inviterFacebookId")!!,
+                                intent.extras!!.getString("inviterName")!!
+                            )
+                            playOnline -> matchPresenter.addToHistory(auth,point,opponentPoint, facebookId,
+                                intent.extras!!.getString("name")!!
+                            )
+                        }
+
+                        if (player == 2 || creator)
+                            matchPresenter.removeOnPlay()
+
                         alert ("You $text"){
                             title = "End"
                             okButton {
@@ -245,7 +265,7 @@ class NormalGameActivity : AppCompatActivity(),
         }
     }
 
-    fun getHighScore(){
+    private fun getHighScore(){
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
@@ -262,19 +282,21 @@ class NormalGameActivity : AppCompatActivity(),
     }
 
 
-    fun getFacebookProfilePicture(userID: String): String {
+    private fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
 
-    fun fetchProfile(inviter: Boolean){
+    private fun fetchProfile(inviter: Boolean){
+
         if (!inviter){
             Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("inviterFacebookId")!!)).fit().into(ivOpponentImage)
             tvOpponentName.text = "" + intent.extras!!.getString("inviterName")
-        }else{
+        }else if (inviter || playOnline){
             Picasso.get().load(getFacebookProfilePicture(facebookId)).fit().into(ivOpponentImage)
             tvOpponentName.text = "" + intent.extras!!.getString("name")
         }
+
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerImage)
         tvPlayerName.text = "" + Profile.getCurrentProfile().name
     }
@@ -329,7 +351,7 @@ class NormalGameActivity : AppCompatActivity(),
     override fun fetchOpponentData(dataSnapshot: DataSnapshot, inviter: Boolean) {
         val check = opponentPoint
 
-        opponentPoint = if (inviter)
+        opponentPoint = if (inviter || creator)
             dataSnapshot.getValue(Play::class.java)?.player2!!
         else
             dataSnapshot.getValue(Play::class.java)?.player1!!

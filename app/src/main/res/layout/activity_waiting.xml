@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:background="@color/colorPrimary"
     tools:context=".play.WaitingActivity">
 
     <LinearLayout
@@ -33,14 +34,22 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="32sp"
+        android:textSize="21sp"
         android:id="@+id/tvWaiting"
         android:gravity="center"
-        android:text="Waiting . . ."/>
+        android:text="Waiting . . ."
+        android:textStyle="bold"
+        android:textColor="@color/colorWhite"
+        android:layout_marginBottom="10dp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tvTips" />
+        android:id="@+id/tvTips"
+        android:textColor="@color/colorWhite"
+        android:textSize="18dp"
+        android:text="Tips"
+        android:gravity="center"
+        android:layout_below="@id/tvWaiting"/>
 
 </RelativeLayout>

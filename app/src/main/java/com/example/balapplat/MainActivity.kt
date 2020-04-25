@@ -1,5 +1,6 @@
 package com.example.balapplat
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference

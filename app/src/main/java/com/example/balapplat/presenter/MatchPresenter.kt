@@ -1,5 +1,6 @@
 package com.example.balapplat.presenter
 
+import android.annotation.SuppressLint
 import android.view.animation.AnimationUtils
 import com.example.balapplat.R
 import com.example.balapplat.play.Play
@@ -14,12 +15,13 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_normal_game.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.toast
-import java.util.HashMap
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MatchPresenter (private val view: MatchView, private val database: DatabaseReference){
 
     fun updateValue(inviter: Boolean,playerPoint: Int, opponentPoint: Int,facebookId: String){
-        var values: HashMap<String, Any>
+        val values: HashMap<String, Any>
 
         if (!inviter){
             values  = hashMapOf(
@@ -79,6 +81,35 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         } else {
             database.child("stats").child(auth.currentUser!!.uid).child("lose").setValue(value + 1)
         }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun addToHistory(auth: FirebaseAuth, playerPoint: Int, opponentPoint: Int, opponentFacebookId: String, opponentName: String){
+        val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+        val currentDate = sdf.format(Date())
+
+        val status = when {
+            playerPoint > opponentPoint -> {
+                "win"
+            }
+            playerPoint == opponentPoint -> {
+                "lose"
+            }
+            else -> "draw"
+        }
+
+        val values  = hashMapOf(
+            "status" to status,
+            "point" to playerPoint,
+            "opponentFacebookId" to opponentFacebookId,
+            "opponentName" to opponentName,
+            "opponentPoint" to opponentPoint
+        )
+        database.child("history").child(auth.currentUser!!.uid).child("" +currentDate).setValue(values)
+    }
+
+    fun removeOnPlay(){
+        database.child("history").child(Profile.getCurrentProfile().id).removeValue()
     }
 
     fun fetchOpponent(inviter: Boolean, facebookId: String){

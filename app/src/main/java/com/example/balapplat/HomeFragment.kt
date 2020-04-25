@@ -81,7 +81,7 @@ class HomeFragment : Fragment() {
             if(auth.currentUser == null)
                 startActivity(intentFor<LoginActivity>().clearTask())
             else
-                popUp(1)
+                startActivity(intentFor<WaitingActivity>("playOnline" to true))
 
         }
 
