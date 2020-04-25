@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         supportActionBar?.hide()
-
+//Christopher Hartanto
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
 
