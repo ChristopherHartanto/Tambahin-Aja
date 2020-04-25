@@ -12,9 +12,7 @@ class Helper {
 
     fun userActive(status : Boolean) {
         if (auth.currentUser != null){
-            val active = if (status) 1 else 0
-
-            database.child("users").child(auth.currentUser!!.uid).child("active").setValue(active)
+            database.child("users").child(auth.currentUser!!.uid).child("active").setValue(status)
         }
     }
 

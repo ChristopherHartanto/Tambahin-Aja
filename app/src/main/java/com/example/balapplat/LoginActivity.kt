@@ -181,7 +181,7 @@ class LoginActivity : AppCompatActivity() {
             val postListener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
-                    if(dataSnapshot.exists()) // setelah wilsen wisley dan albert login kembali untuk retriver uid facebook, baru diganti menjadi !exist
+                    if(!dataSnapshot.exists())
                         Init()
                 }
 
@@ -202,7 +202,7 @@ class LoginActivity : AppCompatActivity() {
         val values: HashMap<String, Any> = hashMapOf(
             "name" to auth.currentUser!!.displayName.toString(),
             "facebookId" to Profile.getCurrentProfile().id,
-            "active" to 1,
+            "active" to true,
             "registerDate" to currentDate
         )
 

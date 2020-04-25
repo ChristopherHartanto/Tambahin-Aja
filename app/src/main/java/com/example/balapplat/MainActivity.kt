@@ -16,17 +16,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
+    lateinit var helper : Helper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-
         supportActionBar?.hide()
 //Christopher Hartanto
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
+        helper = Helper()
 
         if(AccessToken.getCurrentAccessToken() != null)
             receiveInvitation()
@@ -80,17 +80,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         Log.d("destroy","masuk")
-//        val values: HashMap<String, Any> = hashMapOf(
-//            "active" to 0
-//        )
-//
-//        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-//            toast("active 0")
-//
-//        }.addOnFailureListener {
-//            toast(""+ it.message)
-//        }
+
+        helper.userActive(false)
         super.onDestroy()
+    }
+
+    override fun onStart() {
+        helper.userActive(true)
+        super.onStart()
     }
 
     fun receiveInvitation(){
@@ -101,16 +98,16 @@ class MainActivity : AppCompatActivity() {
 
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
-                    alert{
+                    val data = p0.getValue(Inviter::class.java)
+
+                    alert(data!!.name + " invite you to play"){
                         title = "Invitation"
                         yesButton {
-                            val values: HashMap<String, Any> = hashMapOf(
-                                "status" to true
-                            )
-                            database.child("invitation").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
+                            database.child("invitation").child(Profile.getCurrentProfile().id).child("status").setValue(true).addOnSuccessListener {
                                 toast("accepted game")
 
-                                startActivity(intentFor<CountdownActivity>("status" to "player2"))
+                                startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
+                                        "inviterName" to data.name))
 
                             }.addOnFailureListener {
                                 toast(""+ it.message)
@@ -126,4 +123,11 @@ class MainActivity : AppCompatActivity() {
         }
         database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
     }
+
 }
+
+data class Inviter(
+    var facebookId: String? = "",
+    var name: String? = "",
+    var status: Boolean? = false
+)

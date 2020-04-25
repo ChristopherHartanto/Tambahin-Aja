@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
-    lateinit var helper : Helper
+
 
 
     override fun onCreateView(
@@ -54,7 +54,7 @@ class HomeFragment : Fragment() {
 
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
-        helper = Helper()
+
 
         database = FirebaseDatabase.getInstance().reference
 
@@ -107,10 +107,6 @@ class HomeFragment : Fragment() {
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
-    override fun onDestroy() {
-        helper.userActive(false)
-        super.onDestroy()
-    }
 
     fun popUp(layout: Int){
 //        val inflater:LayoutInflater = activity!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
