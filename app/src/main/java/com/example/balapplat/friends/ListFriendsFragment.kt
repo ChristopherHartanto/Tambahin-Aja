@@ -16,10 +16,14 @@ import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.fragment_list_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.okButton
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.yesButton
 
 class ListFriendsFragment : Fragment() {
 
@@ -41,7 +45,28 @@ class ListFriendsFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         adapter = FriendsRecyclerViewAdapter(ctx,ProfileItems){
-            ctx.startActivity(intentFor<WaitingActivity>("facebookId" to ProfileItems[it].facebookId))
+            if (!ProfileItems[it].active!!){
+                alert ("Offline"){
+                    title = ProfileItems[it].name + "   is Offline"
+                    okButton {
+
+                    }
+                }.show()
+            }else{
+                val index = it
+                alert ("Play with " + ProfileItems[it].name + " ?"){
+                    title = "Play"
+                    yesButton {
+                        ctx.startActivity(intentFor<WaitingActivity>("facebookId" to ProfileItems[index].facebookId,
+                            "name" to ProfileItems[index].name))
+                    }
+                    noButton {
+
+                    }
+                }.show()
+            }
+
+
         }
 
         retrieve()

@@ -39,8 +39,10 @@ class CountdownActivity : AppCompatActivity() {
 
                 if (intent.extras != null){
                     if(intent.extras!!.getString("facebookId").equals(null)){
-                        if (intent.extras!!.getString("status").equals("player2")){
-                            startActivity(intentFor<NormalGameActivity>("status" to "player2"))
+                        if (intent.extras!!.getString("inviterFacebookId") != null){
+                            val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
+                            val inviterName = intent.extras!!.getString("inviterName")
+                            startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName))
                         }
                     }
                    else
@@ -53,6 +55,11 @@ class CountdownActivity : AppCompatActivity() {
             timer.start()
         else
             timer.cancel()
+    }
+
+    override fun onBackPressed() {
+        countDown(false)
+        super.onBackPressed()
     }
 
     override fun onDestroy() {

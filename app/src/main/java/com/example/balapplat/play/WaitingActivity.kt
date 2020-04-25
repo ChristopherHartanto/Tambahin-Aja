@@ -9,6 +9,7 @@ import com.example.balapplat.CountdownActivity
 import com.example.balapplat.MainActivity
 import com.example.balapplat.R
 import com.facebook.Profile
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_countdown.*
@@ -17,9 +18,11 @@ import kotlinx.android.synthetic.main.activity_waiting.*
 import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class WaitingActivity : AppCompatActivity() {
 
+    private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     var inviter = false
 
@@ -29,7 +32,7 @@ class WaitingActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
-
+        auth = FirebaseAuth.getInstance()
 
        if (intent.extras != null){
            inviter = true
@@ -67,7 +70,14 @@ class WaitingActivity : AppCompatActivity() {
     }
 
     fun makeInvitation(facebookId : String){
-        database.child("invitation").child(facebookId).child("status").setValue(false).addOnSuccessListener {
+
+        val values: HashMap<String, Any?> = hashMapOf(
+            "name" to Profile.getCurrentProfile().name,
+            "facebookId" to Profile.getCurrentProfile().id,
+            "status" to false
+        )
+
+        database.child("invitation").child(facebookId).setValue(values).addOnSuccessListener {
             toast("invitation sent")
             intent.extras!!.getString("facebookId")?.let { it1 -> getResponse(it1) }
 
