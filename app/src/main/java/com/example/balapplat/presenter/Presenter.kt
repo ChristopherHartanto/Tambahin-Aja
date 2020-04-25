@@ -43,13 +43,7 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
             }
     }
 
-    fun updateStats(winStatus: Boolean, value: Long, auth: FirebaseAuth) {
-        if (winStatus) {
-            database.child("stats").child(auth.currentUser!!.uid).child("win").setValue(value + 1)
-        } else {
-            database.child("stats").child(auth.currentUser!!.uid).child("lose").setValue(value + 1)
-        }
-    }
+
 
     fun removeInvitation(){
 

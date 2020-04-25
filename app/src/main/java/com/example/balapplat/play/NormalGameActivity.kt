@@ -11,6 +11,8 @@ import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.NormalMatch
+import com.example.balapplat.presenter.MatchPresenter
+import com.example.balapplat.view.MatchView
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -21,11 +23,12 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
 
 class NormalGameActivity : AppCompatActivity(),
-    MainView {
+    MainView, MatchView {
 
     private lateinit var database: DatabaseReference
     private lateinit var databaseFetchPoint: DatabaseReference
     private lateinit var auth: FirebaseAuth
+    lateinit var matchPresenter: MatchPresenter
     lateinit var data: Inviter
     lateinit var presenter: Presenter
     private lateinit var countDownTimer : CountDownTimer
@@ -51,6 +54,7 @@ class NormalGameActivity : AppCompatActivity(),
 
         database = FirebaseDatabase.getInstance().reference
         databaseFetchPoint = FirebaseDatabase.getInstance().reference
+        matchPresenter = MatchPresenter(this,database)
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this, database)
 
@@ -58,13 +62,13 @@ class NormalGameActivity : AppCompatActivity(),
             if(intent.extras!!.getString("facebookId").equals(null)){ // jika kamu diinvite main
                 player = 2
                 facebookId = Profile.getCurrentProfile().id
-                fetchOpponent(false)
+                matchPresenter.fetchOpponent(false,facebookId)
                 fetchProfile(false)
             }
             else{ // kamu yang tukang invite
                 player = 1
                 facebookId = intent.extras!!.getString("facebookId")!!
-                fetchOpponent(true) // true kalau kamu tukang invite
+                matchPresenter.fetchOpponent(true,facebookId) // true kalau kamu tukang invite
                 fetchProfile(true)
             }
             tvPoint.visibility = View.INVISIBLE
@@ -126,9 +130,9 @@ class NormalGameActivity : AppCompatActivity(),
                 point -= 5
         }
         if (player == 1)
-            updateValue(true)
+            matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
         else if(player == 2)
-            updateValue(false)
+            matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
 
@@ -174,11 +178,11 @@ class NormalGameActivity : AppCompatActivity(),
                         var text = ""
                         text = when {
                             point > opponentPoint -> {
-                                getStats(true)
+                                matchPresenter.getStats(auth,true)
                                 "win"
                             }
                             point < opponentPoint -> {
-                                getStats(false)
+                                matchPresenter.getStats(auth,false)
                                 "lose"
                             }
                             point == opponentPoint -> {
@@ -262,83 +266,6 @@ class NormalGameActivity : AppCompatActivity(),
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
-    fun updateValue(inviter: Boolean){
-        var values: HashMap<String, Any>
-
-        if (!inviter){
-            values  = hashMapOf(
-                "player1" to opponentPoint,
-                "player2" to point
-            )
-            database.child("onPlay").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
-                toast("save")
-
-            }.addOnFailureListener {
-                toast(""+ it.message)
-            }
-        }
-        else{
-            values  = hashMapOf(
-                "player1" to point,
-                "player2" to opponentPoint
-            )
-
-            database.child("onPlay").child(intent.extras!!.getString("facebookId")!!).setValue(values).addOnSuccessListener {
-                toast("save")
-
-            }.addOnFailureListener {
-                toast(""+ it.message)
-            }
-        }
-
-    }
-
-    fun fetchOpponent(inviter: Boolean){
-        val postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onDataChange(p0: DataSnapshot) {
-                if(p0.exists())
-                {
-                    val check = opponentPoint
-
-                    opponentPoint = if (inviter)
-                        p0.getValue(Play::class.java)?.player2!!
-                    else
-                        p0.getValue(Play::class.java)?.player1!!
-
-                    if (check != opponentPoint){ // jika value tidak sama dengan sebelumnya maka update data
-                        val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-                        tvOpponentPoint.text = "" + opponentPoint
-                        tvOpponentPoint.startAnimation(animationBounce)
-                    }
-
-                }
-            }
-
-        }
-        databaseFetchPoint.child("onPlay").child(facebookId).addValueEventListener(postListener)
-//
-//        val postListener1 = object : ValueEventListener {
-//            override fun onCancelled(p0: DatabaseError) {
-//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//            }
-//
-//            override fun onDataChange(p0: DataSnapshot) {
-//                if(p0.exists())
-//                {
-//                    if (p0.value!! == true)
-//                        control(false)
-//                    else
-//                        control(true)
-//                }
-//            }
-//
-//        }
-//        database.child("onPlay").child(facebookId).child("pause").addValueEventListener(postListener1)
-    }
 
     fun fetchProfile(inviter: Boolean){
         if (!inviter){
@@ -352,33 +279,6 @@ class NormalGameActivity : AppCompatActivity(),
         tvPlayerName.text = "" + Profile.getCurrentProfile().name
     }
 
-    fun getStats(winStatus : Boolean){
-        var temp = 0
-        val postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onDataChange(p0: DataSnapshot) {
-                if (temp == 0){
-                    if(p0.exists())
-                        presenter.updateStats(winStatus, p0.value as Long,auth)
-                    else
-                        presenter.updateStats(winStatus, 0,auth)
-                    temp = 1
-                }
-
-
-            }
-
-        }
-        if (winStatus)
-            databaseFetchPoint.child("stats").child(auth.currentUser!!.uid).child("win").addValueEventListener(postListener)
-        else
-            databaseFetchPoint.child("stats").child(auth.currentUser!!.uid).child("lose").addValueEventListener(postListener)
-
-
-    }
 
     override fun loadData(dataSnapshot: DataSnapshot) {
         presenter.replyInvitation(false)
@@ -424,6 +324,21 @@ class NormalGameActivity : AppCompatActivity(),
         control(true)
 
         super.onResume()
+    }
+
+    override fun fetchOpponentData(dataSnapshot: DataSnapshot, inviter: Boolean) {
+        val check = opponentPoint
+
+        opponentPoint = if (inviter)
+            dataSnapshot.getValue(Play::class.java)?.player2!!
+        else
+            dataSnapshot.getValue(Play::class.java)?.player1!!
+
+        if (check != opponentPoint){ // jika value tidak sama dengan sebelumnya maka update data
+            val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+            tvOpponentPoint.text = "" + opponentPoint
+            tvOpponentPoint.startAnimation(animationBounce)
+        }
     }
 }
 
