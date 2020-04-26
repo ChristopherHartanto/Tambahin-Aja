@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.onRefresh
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,6 +48,9 @@ class AddFriendsActivity : AppCompatActivity(),
         rvAddFriends.layoutManager = LinearLayoutManager(this)
         rvAddFriends.adapter = adapter
 
+        srAddFriend.onRefresh {
+            retrieve()
+        }
     }
 
     fun retrieve(){
@@ -66,7 +70,7 @@ class AddFriendsActivity : AppCompatActivity(),
                 }
 
             }
-            database.child("users").addValueEventListener(postListener)
+            database.child("users").addListenerForSingleValueEvent(postListener)
 
         }
     }
@@ -101,13 +105,15 @@ class AddFriendsActivity : AppCompatActivity(),
                     uids.add(friendUid!!)
 
                     rvAddFriends.adapter?.notifyDataSetChanged()
-
+                    srAddFriend.isRefreshing = false
                 }
 
             }
-            database.child("friends").child(auth.currentUser!!.uid).child(friendUid!!).addValueEventListener(postListener)
+            database.child("friends").child(auth.currentUser!!.uid).child(friendUid!!).addListenerForSingleValueEvent(postListener)
 
         }
+
+
     }
 
     fun addFriend(friendUid: String){

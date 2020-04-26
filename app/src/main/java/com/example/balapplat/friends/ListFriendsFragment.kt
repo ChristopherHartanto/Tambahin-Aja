@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.example.balapplat.R
@@ -19,10 +20,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.intentFor
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.support.v4.*
 import org.jetbrains.anko.yesButton
 
 class ListFriendsFragment : Fragment() {
@@ -69,6 +67,10 @@ class ListFriendsFragment : Fragment() {
 
         }
 
+        srFriendsList.onRefresh {
+            retrieve()
+        }
+
         retrieve()
         rvListFriends.layoutManager = LinearLayoutManager(ctx)
         rvListFriends.adapter = adapter
@@ -77,6 +79,8 @@ class ListFriendsFragment : Fragment() {
     }
 
     fun retrieve(){
+        ProfileItems.clear()
+
         GlobalScope.launch {
             val postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -88,7 +92,7 @@ class ListFriendsFragment : Fragment() {
                 }
 
             }
-            database.child("friends").child(auth.currentUser!!.uid).addValueEventListener(postListener)
+            database.child("friends").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
 
         }
     }
@@ -116,13 +120,14 @@ class ListFriendsFragment : Fragment() {
                 }
 
             }
-            database.child("users").child(friendUid!!).addValueEventListener(postListener)
+            database.child("users").child(friendUid!!).addListenerForSingleValueEvent(postListener)
 
         }
     }
 
     fun fetchProfileFriends(dataSnapshot: DataSnapshot){
 
+        srFriendsList.isRefreshing = false
 //        for (ds in dataSnapshot.children) {
 //            toast("" + ds)
 //            val item = ds.getValue(User::class.java)!!
@@ -132,8 +137,13 @@ class ListFriendsFragment : Fragment() {
         val item = dataSnapshot.getValue(User::class.java)!!
         ProfileItems.add(item)
         //toast("nama teman "+ dataSnapshot)
-
         adapter.notifyDataSetChanged()
+
+    }
+
+    override fun onStart() {
+
+        super.onStart()
     }
 
 }

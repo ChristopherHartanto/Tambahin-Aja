@@ -5,9 +5,19 @@
     android:layout_height="match_parent"
     tools:context=".friends.ListFriendsFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_height="match_parent"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
-        android:id="@+id/rvListFriends"/>
+        android:layout_height="match_parent"
+        android:id="@+id/srFriendsList">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:id="@+id/rvListFriends"/>
+
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </FrameLayout>
