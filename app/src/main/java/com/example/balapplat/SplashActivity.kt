@@ -23,6 +23,7 @@ class SplashActivity : AppCompatActivity() {
             override fun onFinish() {
                 finish()
                 startActivity(intentFor<MainActivity>())
+                overridePendingTransition(R.anim.fade_in,R.anim.fade_out)
             }
         }
         timer.start()
