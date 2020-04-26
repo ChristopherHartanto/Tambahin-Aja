@@ -29,7 +29,8 @@
             android:text="Normal Match"
             android:textSize="32sp"
             android:gravity="center"
-            android:layout_weight="2"/>
+            android:layout_weight="2"
+            android:id="@+id/tvTournamentTitle"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -37,13 +38,15 @@
             android:text="Collect Point in Rank Mode as Much as Possible"
             android:gravity="center"
             android:textSize="24dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:id="@+id/tvTournamentDesc"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Time Left : 01:30"
             android:gravity="center"
+            android:id="@+id/tvTournamentTimeLeft"
             android:textSize="24dp"/>
 
         <Button
