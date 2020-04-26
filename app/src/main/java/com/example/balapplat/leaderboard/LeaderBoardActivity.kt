@@ -57,7 +57,7 @@ class LeaderBoardActivity : AppCompatActivity(),
                 }
 
             }
-            database.child("highscore").orderByChild("score").addValueEventListener(postListener)
+            database.child("highscore").orderByChild("score").addListenerForSingleValueEvent(postListener)
 
         }
     }
@@ -89,7 +89,7 @@ class LeaderBoardActivity : AppCompatActivity(),
                 }
 
             }
-            database.child("users").child(id).addValueEventListener(postListener)
+            database.child("users").child(id).addListenerForSingleValueEvent(postListener)
 
         }
     }

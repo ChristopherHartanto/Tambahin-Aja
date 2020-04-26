@@ -52,7 +52,7 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
 
             val displayMetrics = context.resources.displayMetrics
             val dpWidth = displayMetrics.widthPixels
-            return (dpWidth / 2) // COLUMN_COUNT would be 4 in your case
+            return (dpWidth / 2)
         }
 
     }

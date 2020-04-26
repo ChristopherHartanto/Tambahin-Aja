@@ -50,7 +50,25 @@ class RankActivity : AppCompatActivity(), MainView {
         val items : MutableList<String> = mutableListOf("Normal", "Odd Even", "Rush", "AlphaNum")
         adapter = RankRecyclerViewAdapter(this,items){
             finish()
-            startActivity<CountdownActivity>()
+            when (it) {
+                0 -> {
+                    startActivity(intentFor<CountdownActivity>("mode" to "single",
+                        "type" to "normal"))
+                }
+                1 -> {
+                    startActivity(intentFor<CountdownActivity>("mode" to "single",
+                        "type" to "oddEven"))
+                }
+                3 -> {
+                    startActivity(intentFor<CountdownActivity>("mode" to "single",
+                        "type" to "rush"))
+                }
+                4 -> {
+                    startActivity(intentFor<CountdownActivity>("mode" to "single",
+                        "type" to "alphaNum"))
+                }
+            }
+
         }
 
         rvRank.layoutManager = GridLayoutManager(this,2)
