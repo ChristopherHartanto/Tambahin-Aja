@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import com.example.balapplat.MainActivity
 import com.example.balapplat.view.MainView
 import com.example.balapplat.R
 import com.example.balapplat.presenter.Presenter
@@ -14,6 +15,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_waiting.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,6 +31,7 @@ class WaitingActivity : AppCompatActivity(),
     var inviter = false
     lateinit var presenter: Presenter
     lateinit var waitingPresenter: WaitingPresenter
+    var registerWaitingList = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,14 +50,15 @@ class WaitingActivity : AppCompatActivity(),
                intent.extras!!.getString("facebookId")?.let { waitingPresenter.makeInvitation(it) }
                Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("facebookId")!!)).fit().into(ivOpponentImageWaiting)
                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
+
+               timer("Waiting")
+
            }else if(intent.extras!!.getBoolean("playOnline")){ // jika main online
-               tvWaiting.text = "Searching . . ."
+               timer("Searching")
                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
                waitingPresenter.getWaitingList()
            }
 
-       }else{
-           timer("Waiting")
        }
 
     }
@@ -61,25 +66,24 @@ class WaitingActivity : AppCompatActivity(),
     fun timer(text: String){
         var count = 3
 
-        val timer = object: CountDownTimer(100000, 1000) {
+        val timer = object: CountDownTimer(1000000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                if (count == 3)
-                    tvWaiting.text = "$text ."
-                else if (count == 2)
-                    tvWaiting.text = "$text . ."
-                else if (count == 1)
-                    tvWaiting.text = "$text . . ."
-                else
-                    count = 4
+                when (count) {
+                    3 -> tvWaiting.text = "$text ."
+                    2 -> tvWaiting.text = "$text . ."
+                    1 -> tvWaiting.text = "$text . . ."
+                    else -> count = 4
+                }
                 count--
             }
 
             override fun onFinish() {
                 finish()
-                startActivity(intentFor<NormalGameActivity>().clearTask())
+                startActivity(intentFor<MainActivity>().clearTask())
             }
         }
         timer.start()
+
     }
 
     private fun getFacebookProfilePicture(userID: String): String {
@@ -94,11 +98,14 @@ class WaitingActivity : AppCompatActivity(),
             Picasso.get().load(getFacebookProfilePicture(dataSnapshot.key!!)).fit().into(ivPlayerWaiting)
 
         if (creator){
+            finish()
+
             startActivity(intentFor<CountdownActivity>("facebookId" to dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId
                 , "name" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
                 , "playOnline" to true
                 , "creator" to true))
         }else{
+            finish()
             startActivity(intentFor<CountdownActivity>("facebookId" to dataSnapshot.key
                 , "name" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
                 , "playOnline" to true
@@ -119,6 +126,9 @@ class WaitingActivity : AppCompatActivity(),
                 toast("invitation sent")
                 intent.extras!!.getString("facebookId")?.let { it1 -> waitingPresenter.getResponse(it1) }
             }
+            message === "registerToWaitingList" -> {
+                registerWaitingList = true
+            }
             else // error message
             -> toast(""+message)
         }
@@ -128,19 +138,33 @@ class WaitingActivity : AppCompatActivity(),
         tvTips.text = tips
     }
 
+    override fun onPause() {
+        dismissWaiting()
+
+        super.onPause()
+    }
+
     override fun onDestroy() {
-        if (inviter)
-            waitingPresenter.removeInvitation(intent.extras!!.getString("facebookId")!!)
+        dismissWaiting()
 
         super.onDestroy()
     }
 
     override fun onBackPressed() {
-        waitingPresenter.removeWaitingList()
+        dismissWaiting()
+
         super.onBackPressed()
     }
 
-
+    fun dismissWaiting(){
+        if (intent.extras!!.getBoolean("playOnline")){
+            if (registerWaitingList)
+                waitingPresenter.removeWaitingList()
+            waitingPresenter.dismissListenerOnline()
+        }
+        else if (inviter)
+            waitingPresenter.removeInvitation(intent.extras!!.getString("facebookId")!!)
+    }
 }
 data class Status(var status: Boolean? = false)
 data class OpponentOnline(

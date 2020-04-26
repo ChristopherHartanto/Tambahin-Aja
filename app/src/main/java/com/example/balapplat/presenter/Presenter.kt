@@ -29,7 +29,7 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
             }
 
         }
-        database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
+        database.child("invitation").child(Profile.getCurrentProfile().id).addListenerForSingleValueEvent(postListener)
     }
 
     fun replyInvitation(status: Boolean){

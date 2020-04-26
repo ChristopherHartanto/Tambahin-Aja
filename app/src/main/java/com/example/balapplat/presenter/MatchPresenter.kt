@@ -52,7 +52,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         var temp = 0
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                view.response(p0.message)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -69,9 +69,9 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
         }
         if (winStatus)
-            database.child("stats").child(auth.currentUser!!.uid).child("win").addValueEventListener(postListener)
+            database.child("stats").child(auth.currentUser!!.uid).child("win").addListenerForSingleValueEvent(postListener)
         else
-            database.child("stats").child(auth.currentUser!!.uid).child("lose").addValueEventListener(postListener)
+            database.child("stats").child(auth.currentUser!!.uid).child("lose").addListenerForSingleValueEvent(postListener)
 
     }
 
@@ -115,7 +115,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     fun fetchOpponent(inviter: Boolean, facebookId: String){
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                view.response(p0.message)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -127,6 +127,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
         }
         database.child("onPlay").child(facebookId).addValueEventListener(postListener)
+
 //
 //        val postListener1 = object : ValueEventListener {
 //            override fun onCancelled(p0: DatabaseError) {

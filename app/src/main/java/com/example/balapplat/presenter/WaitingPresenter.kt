@@ -19,10 +19,21 @@ import kotlin.collections.HashMap
 
 class WaitingPresenter(private val view: WaitingView, private val database: DatabaseReference) {
 
+    val postListener = object : ValueEventListener {
+        override fun onCancelled(p0: DatabaseError) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onDataChange(p0: DataSnapshot) {
+
+        }
+
+    }
+
     fun getWaitingList(){
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                view.response(p0.message)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -42,13 +53,14 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                             }
                             return
                         }
-                        if (data.key.equals(Profile.getCurrentProfile().id)){
-                            getResponseOnline()
+                        else if (data.key.equals(Profile.getCurrentProfile().id)){ // ulang bikin
+                            registerToWaitingList()
                             return
                         }
 
                     }
-
+                    registerToWaitingList()
+                    database.child("waitingList").removeEventListener(this)
                 }
                 else
                     registerToWaitingList()
@@ -56,7 +68,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
             }
 
         }
-        database.child("waitingList").addValueEventListener(postListener)
+        database.child("waitingList").addListenerForSingleValueEvent(postListener)
 
     }
 
@@ -67,6 +79,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
             "status" to false
         )
         database.child("waitingList").child(Profile.getCurrentProfile().id).setValue(values).addOnSuccessListener {
+            view.response("registerToWaitingList")
             getResponseOnline()
         }.addOnFailureListener {
             it.message?.let { it1 -> view.response(it1) }
@@ -77,7 +90,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                view.response(""+p0.message)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -87,6 +100,8 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                         view.loadData(p0, true)
                         createGame(Profile.getCurrentProfile().id,true)
                         removeWaitingList()
+
+                        database.child("waitingList").child(Profile.getCurrentProfile().id).removeEventListener(this)
                     }
 
                 }
@@ -116,7 +131,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
     fun getResponse(facebookId : String){
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                view.response("server error")
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -146,8 +161,6 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
     }
 
     fun createGame(facebookId: String, playOnline: Boolean){
-        val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
-        val currentDate = sdf.format(Date())
 
         val values: HashMap<String, Any> = hashMapOf(
             "player1" to 0,
@@ -170,10 +183,14 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
         database.child("waitingList").child(Profile.getCurrentProfile().id).removeValue()
     }
 
+    fun dismissListenerOnline(){
+        database.child("waitingList").child(Profile.getCurrentProfile().id).removeEventListener(postListener)
+    }
+
     fun loadTips(){
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                view.response(p0.message)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -188,6 +205,6 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
             }
 
         }
-        database.child("tips").addValueEventListener(postListener)
+        database.child("tips").addListenerForSingleValueEvent(postListener)
     }
 }

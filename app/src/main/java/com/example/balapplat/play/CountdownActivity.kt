@@ -38,7 +38,7 @@ class CountdownActivity : AppCompatActivity() {
             override fun onFinish() {
                 finish()
 
-                if (intent.extras != null){
+                if (!intent.extras!!.getString("mode").equals("single")){
                     if(intent.extras!!.getString("facebookId").equals(null)){
                         if (intent.extras!!.getString("inviterFacebookId") != null){
                             val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
@@ -56,7 +56,8 @@ class CountdownActivity : AppCompatActivity() {
                         startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
                             "name" to intent.extras!!.getString("name")))
                 }else
-                    startActivity<NormalGameActivity>()
+                    startActivity(intentFor<NormalGameActivity>("type" to intent.extras!!.getString("type"),
+                        "mode" to intent.extras!!.getString("mode")))
                 }
         }
         if (status)

@@ -1,10 +1,18 @@
 package com.example.balapplat.play
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewStub
 import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.LinearLayout
+import androidx.core.content.getSystemService
+import androidx.core.view.isVisible
 import com.example.balapplat.MainActivity
 import com.example.balapplat.view.MainView
 import com.example.balapplat.presenter.Presenter
@@ -36,8 +44,8 @@ class NormalGameActivity : AppCompatActivity(),
     var timer = 30
     var answer = 999
     var highScore = 0
-    var status = "custom"
     var opponentPoint = 0
+    var type = "normal"
     var player = 0 // 1 yang ajak, 2 yang diajak, 0 main sendiri
     var facebookId = ""
     var playOnline = false
@@ -57,30 +65,38 @@ class NormalGameActivity : AppCompatActivity(),
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this, database)
 
-        if (intent.extras != null){
-            if(intent.extras!!.getString("facebookId").equals(null)){ // jika kamu diinvite main
-                player = 2
-                facebookId = Profile.getCurrentProfile().id
-                matchPresenter.fetchOpponent(false,facebookId)
-                fetchProfile(false)
-            }
-            else if (intent.extras!!.getBoolean("playOnline")){
-                creator = intent.extras!!.getBoolean("creator")
-                playOnline = true
-                facebookId = intent.extras!!.getString("facebookId")!!
-            }
-            else{ // kamu yang tukang invite
-                player = 1
-                facebookId = intent.extras!!.getString("facebookId")!!
-                matchPresenter.fetchOpponent(true,facebookId) // true kalau kamu tukang invite
-                fetchProfile(true)
+        if (!intent.extras!!.getString("mode").equals("single")){
+            when {
+                intent.extras!!.getString("facebookId").equals(null) -> { // jika kamu diinvite main
+                    player = 2
+                    facebookId = Profile.getCurrentProfile().id
+                    matchPresenter.fetchOpponent(false,facebookId)
+                    fetchProfile(false)
+                }
+                intent.extras!!.getBoolean("playOnline") -> {
+                    creator = intent.extras!!.getBoolean("creator")
+                    playOnline = true
+                    facebookId = intent.extras!!.getString("facebookId")!!
+                }
+                else -> { // kamu yang tukang invite
+                    player = 1
+                    facebookId = intent.extras!!.getString("facebookId")!!
+                    matchPresenter.fetchOpponent(true,facebookId) // true kalau kamu tukang invite
+                    fetchProfile(true)
+                }
             }
             tvPoint.visibility = View.INVISIBLE
-
+            normalKeyboard()
         }else{
             if (auth.currentUser != null)
             {
                 // jika main sendiri
+                type = intent.extras!!.getString("type")!!
+
+                if (type.equals("normal") || type.equals("rush") || type.equals("alphaNum"))
+                    normalKeyboard()
+                else
+                    oddEvenKeyboard()
                 getHighScore()
                 layoutMultipleGame.visibility = View.INVISIBLE
                 player = 0
@@ -88,7 +104,7 @@ class NormalGameActivity : AppCompatActivity(),
 
         }
 
-        keyboard()
+
         generate()
         control(false)
         
@@ -109,36 +125,59 @@ class NormalGameActivity : AppCompatActivity(),
 
     private fun generateAnswer() : Int {
         var result = 0
-        val temp = numberArr
-        for(x in 0 until count)
-        {
-            if(x != count-1) {
-                temp[x+1] += temp[x]
+        if(type == "normal" || type == "oddEven" || type == "rush"){
+            val temp = numberArr
+            for(x in 0 until count)
+            {
+                if(x != count-1) {
+                    temp[x+1] += temp[x]
 
-                if(temp[x+1] / 10 == 1)
-                    temp[x+1] -= 9
+                    if(temp[x+1] / 10 == 1)
+                        temp[x+1] -= 9
+                }
+                else
+                    result = temp[x]
+
             }
-            else
-                result = temp[x]
-
+            if (type == "oddEven"){
+                result = if (result % 2 == 0)
+                    0 // genap
+                else
+                    1 // ganjil
+            }
         }
+
         return result
     }
 
     private fun checkAnswer(value : Int){
-        if (answer == value){
-            point += 10
-            generate()
-        }else{
-            if(point != 0)
-                point -= 5
+        if (type == "normal"){
+            if (answer == value){
+                point += 10
+                generate()
+            }else{
+                if(point != 0)
+                    point -= 5
+            }
+
+        }else if (type == "oddEven"){
+            if (answer == value){
+                point += 10
+                generate()
+            }else{
+                if(point != 0)
+                    point -= 5
+            }
         }
-        if (player == 1 || creator)
-            matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
-        else if(player == 2 || !creator)
-            matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("inviterFacebookId")!!)
-        else if (!creator)
-            matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
+
+        if (player != 0){
+            if (player == 1 || creator)
+                matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
+            else if(player == 2 || !creator)
+                matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("inviterFacebookId")!!)
+            else if (!creator)
+                matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
+        }
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
 
@@ -232,7 +271,24 @@ class NormalGameActivity : AppCompatActivity(),
             countDownTimer.cancel()
     }
     
-    private fun keyboard(){
+    private fun normalKeyboard(){
+
+        val view = findViewById<View>(R.id.layout_keyboard)
+        val viewHide = findViewById<View>(R.id.layout_odd_even_keyboard)
+
+        viewHide.visibility = View.INVISIBLE
+        layout_odd_even_keyboard.layoutParams = LinearLayout.LayoutParams(0,0)
+
+        val btn1 = view.findViewById<Button>(R.id.btn1)
+        val btn2 = view.findViewById<Button>(R.id.btn2)
+        val btn3 = view.findViewById<Button>(R.id.btn3)
+        val btn4 = view.findViewById<Button>(R.id.btn4)
+        val btn5 = view.findViewById<Button>(R.id.btn5)
+        val btn6 = view.findViewById<Button>(R.id.btn6)
+        val btn7 = view.findViewById<Button>(R.id.btn7)
+        val btn8 = view.findViewById<Button>(R.id.btn8)
+        val btn9 = view.findViewById<Button>(R.id.btn9)
+
         btn1.onClick {
             checkAnswer(1)
         }
@@ -260,10 +316,27 @@ class NormalGameActivity : AppCompatActivity(),
         btn9.onClick {
             checkAnswer(9)
         }
-        btn0.onClick {
+    }
+
+    private fun oddEvenKeyboard(){
+        val view = findViewById<View>(R.id.layout_odd_even_keyboard)
+        val viewHide = findViewById<View>(R.id.layout_keyboard)
+
+        layout_keyboard.layoutParams = LinearLayout.LayoutParams(0,0)
+        viewHide.visibility = View.INVISIBLE
+
+        val btnOdd = view.findViewById<Button>(R.id.btnOdd)
+        val btnEven = view.findViewById<Button>(R.id.btnEven)
+
+        btnOdd.onClick {
+            checkAnswer(1)
+        }
+
+        btnEven.onClick {
             checkAnswer(0)
         }
     }
+
 
     private fun getHighScore(){
         val postListener = object : ValueEventListener {
@@ -307,7 +380,7 @@ class NormalGameActivity : AppCompatActivity(),
     }
 
     override fun response(message: String) {
-
+        toast(""+ message)
     }
 
     override fun onDestroy() {
