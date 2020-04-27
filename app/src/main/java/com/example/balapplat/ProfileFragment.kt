@@ -67,9 +67,9 @@ class ProfileFragment : Fragment() {
                     // Get Post object and use the values to update the UI
                     if(dataSnapshot.exists())
                         highScore = dataSnapshot.getValue(HighScore::class.java)?.score!!
-                    tvHighScore.text = "" + highScore
+//                    tvHighScore.text = "" + highScore
                     val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-                    tvHighScore.startAnimation(animationBounce)
+//                    tvHighScore.startAnimation(animationBounce)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
