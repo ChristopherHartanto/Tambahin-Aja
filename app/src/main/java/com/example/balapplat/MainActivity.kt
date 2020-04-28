@@ -1,8 +1,6 @@
 package com.example.balapplat
 
-import android.nfc.Tag
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.facebook.AccessToken
@@ -21,31 +19,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-/**
- * a
- * s
- * asd
- * a
- * da
- * sda
- * sd
- * asd
- * a
- * d
- * ad
- * a
- * da
- * sd
- *
- * d
- * d
- * d
- * d
- * d
- * d
- * d
- *
- * d**/
         supportActionBar?.hide()
 
         database = FirebaseDatabase.getInstance().reference
