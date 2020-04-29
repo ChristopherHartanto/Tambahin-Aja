@@ -1,12 +1,16 @@
 package com.example.balapplat.friends
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.R
 import com.example.balapplat.model.User
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -14,7 +18,7 @@ import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddFriendsActivity : AppCompatActivity() {
+class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     private lateinit var auth: FirebaseAuth
     private var items: MutableList<User> = mutableListOf()
@@ -111,6 +115,26 @@ class AddFriendsActivity : AppCompatActivity() {
 
         }.addOnFailureListener {
             toast(""+ it.message)
+        }
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_add_friends,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_add_friends,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
         }
     }
 }

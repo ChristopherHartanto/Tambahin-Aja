@@ -3,16 +3,20 @@ package com.example.balapplat.leaderboard
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.database.*
-import kotlinx.android.synthetic.main.activity_leader_board.*
-import kotlinx.coroutines.GlobalScope
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
+import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
+import kotlinx.android.synthetic.main.activity_leader_board.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.toast
 
-class LeaderBoardActivity : AppCompatActivity() {
+class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     private var items: MutableList<HighScore> = mutableListOf()
     private var profileItems: MutableList<User> = mutableListOf()
@@ -98,5 +102,25 @@ class LeaderBoardActivity : AppCompatActivity() {
 
         profileItems.add(item)
         adapter.notifyDataSetChanged()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_leaderboard,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_leaderboard,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 }

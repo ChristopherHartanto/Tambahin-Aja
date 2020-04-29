@@ -1,17 +1,23 @@
 package com.example.balapplat
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.play.NormalGameActivity
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
+import com.quantumhiggs.network.NetworkConstants
 import kotlinx.android.synthetic.main.activity_countdown.*
-import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.startActivity
 
-class CountdownActivity : AppCompatActivity() {
+class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
+
+    private var prevState = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,11 +25,14 @@ class CountdownActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
-        countDown(true)
+        savedInstanceState?.let {
+            prevState = it.getBoolean(NetworkConstants.LOST_CONNECTION)
+        }
 
+        countDown(true)
     }
 
-    fun countDown(status : Boolean){
+    private fun countDown(status: Boolean) {
         var count = 3
 
         val timer = object: CountDownTimer(4000, 1000) {
@@ -58,6 +67,26 @@ class CountdownActivity : AppCompatActivity() {
     override fun onDestroy() {
         countDown(false)
         super.onDestroy()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_countdown,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_countdown,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 
 }

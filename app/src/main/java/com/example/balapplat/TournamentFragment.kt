@@ -1,23 +1,25 @@
 package com.example.balapplat
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.google.firebase.database.*
-import kotlinx.android.synthetic.main.activity_leader_board.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.fragment_tournament.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.toast
 
-class Tournament : Fragment() {
+class Tournament : Fragment(), NetworkConnectivityListener {
 
     private var items: MutableList<HighScore> = mutableListOf()
     private var profileItems: MutableList<User> = mutableListOf()
@@ -103,5 +105,25 @@ class Tournament : Fragment() {
 
         profileItems.add(item)
         adapter.notifyDataSetChanged()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        fragment_tournament,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        fragment_tournament,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 }

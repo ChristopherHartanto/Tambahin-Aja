@@ -1,26 +1,27 @@
 package com.example.balapplat.play
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.provider.ContactsContract
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.MainActivity
 import com.example.balapplat.R
 import com.example.balapplat.model.NormalMatch
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_normal_game.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
 
-class NormalGameActivity : AppCompatActivity(){
+class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     private lateinit var database: DatabaseReference
     private lateinit var databaseFetchPoint: DatabaseReference
@@ -394,6 +395,26 @@ class NormalGameActivity : AppCompatActivity(){
         control(true)
 
         super.onResume()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_normal_game,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_normal_game,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 }
 

@@ -1,20 +1,27 @@
 package com.example.balapplat
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.facebook.AccessToken
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
-import java.util.HashMap
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
+
+    private var prevState = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +30,14 @@ class MainActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
+
+        savedInstanceState?.let {
+            prevState = it.getBoolean(NetworkConstants.LOST_CONNECTION)
+        }
+
+        NetworkEvents.observe(this, Observer {
+            if (it is Event.ConnectivityEvent) handleConnectivityChange(it.state)
+        })
 
         if(AccessToken.getCurrentAccessToken() != null)
             receiveInvitation()
@@ -45,7 +60,34 @@ class MainActivity : AppCompatActivity() {
         bottom_navigation.selectedItemId = R.id.home
     }
 
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        outState.putBoolean(NetworkConstants.LOST_CONNECTION, prevState)
+        super.onSaveInstanceState(outState, outPersistentState)
+    }
 
+    override fun onResume() {
+        super.onResume()
+        handleConnectivityChange(NetworkStateHolder)
+    }
+
+    private fun handleConnectivityChange(networkState: NetworkState) {
+        if (networkState.isConnected && !prevState) {
+            showSnackBar(
+                activity_main,
+                "Connection established",
+                UtilsConstants.SNACKBAR_LONG
+            ).show()
+        }
+        if (!networkState.isConnected && prevState) {
+            showSnackBar(
+                activity_main,
+                "No Network !",
+                UtilsConstants.SNACKBAR_INFINITE
+            ).show()
+        }
+
+        prevState = networkState.isConnected
+    }
 
     private fun loadHomeFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {

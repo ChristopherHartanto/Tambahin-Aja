@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_no_friend"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".friends.NoFriendFragment">
@@ -9,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="You Have No Friend"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:text="You Have No Friend" />
 
 </FrameLayout>

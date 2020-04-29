@@ -1,19 +1,21 @@
 package com.example.balapplat.friends
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.R
-import com.example.balapplat.model.NormalMatch
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_friends.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 
-class FriendsActivity : AppCompatActivity() {
+class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -71,5 +73,25 @@ class FriendsActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_friends,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_friends,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 }

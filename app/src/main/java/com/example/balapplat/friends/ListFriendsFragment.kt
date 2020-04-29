@@ -1,27 +1,29 @@
 package com.example.balapplat.friends
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-
 import com.example.balapplat.R
 import com.example.balapplat.model.Friend
 import com.example.balapplat.model.User
 import com.example.balapplat.play.WaitingActivity
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.fragment_list_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.toast
 
-class ListFriendsFragment : Fragment() {
+class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
 
     private lateinit var auth: FirebaseAuth
     private var items: MutableList<Friend> = mutableListOf()
@@ -109,6 +111,26 @@ class ListFriendsFragment : Fragment() {
         //toast("nama teman "+ dataSnapshot)
 
         adapter.notifyDataSetChanged()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        fragment_list_friends,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        fragment_list_friends,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 
 }

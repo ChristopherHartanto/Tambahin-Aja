@@ -8,22 +8,23 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.ColorUtils
-import com.example.balapplat.model.HighScore
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.facebook.*
 import com.facebook.login.LoginResult
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -31,7 +32,7 @@ import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
     private lateinit var auth: FirebaseAuth
     private var darkStatusBar = true
     private lateinit var callbackManager : CallbackManager
@@ -70,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
         val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), Color.TRANSPARENT, alphaColor)
         colorAnimation.duration = 500 // milliseconds
         colorAnimation.addUpdateListener { animator ->
-            popup_window_background.setBackgroundColor(animator.animatedValue as Int)
+            activity_login.setBackgroundColor(animator.animatedValue as Int)
         }
 
         popup_window_view_with_border.alpha = 0f
@@ -124,7 +125,7 @@ class LoginActivity : AppCompatActivity() {
         val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), alphaColor, Color.TRANSPARENT)
         colorAnimation.duration = 500 // milliseconds
         colorAnimation.addUpdateListener { animator ->
-            popup_window_background.setBackgroundColor(
+            activity_login.setBackgroundColor(
                 animator.animatedValue as Int
             )
         }
@@ -216,5 +217,25 @@ class LoginActivity : AppCompatActivity() {
 
     fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_login,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_login,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 }

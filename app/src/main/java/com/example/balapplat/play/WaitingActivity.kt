@@ -1,24 +1,26 @@
 package com.example.balapplat.play
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.CountdownActivity
-import com.example.balapplat.MainActivity
 import com.example.balapplat.R
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.facebook.Profile
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_countdown.*
-import kotlinx.android.synthetic.main.activity_normal_game.*
 import kotlinx.android.synthetic.main.activity_waiting.*
-import org.jetbrains.anko.*
+import org.jetbrains.anko.clearTask
+import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WaitingActivity : AppCompatActivity() {
+class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     private lateinit var database: DatabaseReference
     var inviter = false
@@ -135,6 +137,26 @@ class WaitingActivity : AppCompatActivity() {
 
     fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(
+                        activity_waiting,
+                        "Connection Established",
+                        UtilsConstants.SNACKBAR_LONG
+                    ).show()
+                } else {
+                    showSnackBar(
+                        activity_waiting,
+                        "No Network !",
+                        UtilsConstants.SNACKBAR_INFINITE
+                    ).show()
+                }
+            }
+        }
     }
 }
 data class Status(var status: Boolean? = false)

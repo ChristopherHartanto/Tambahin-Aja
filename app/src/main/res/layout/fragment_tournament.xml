@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_tournament"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,70 +10,70 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
+        android:layout_weight="1"
         android:background="@color/colorPrimary"
-        android:layout_weight="1">
+        android:orientation="vertical">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/tvTournamenthistory"
-            android:text="Rules"
-            android:textSize="21dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:gravity="right"
-            android:layout_margin="10dp"/>
+            android:text="Rules"
+            android:textSize="21dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
             android:text="Normal Match"
-            android:textSize="32sp"
-            android:gravity="center"
-            android:layout_weight="2"/>
+            android:textSize="32sp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
             android:text="Collect Point in Rank Mode as Much as Possible"
-            android:gravity="center"
-            android:textSize="24dp"
-            android:layout_weight="1"/>
+            android:textSize="24dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Time Left : 01:30"
             android:gravity="center"
-            android:textSize="24dp"/>
+            android:text="Time Left : 01:30"
+            android:textSize="24dp" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorYellow"
             android:layout_margin="5dp"
-            android:text="Join"/>
+            android:background="@color/colorYellow"
+            android:text="Join" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="4dp"
-        android:background="@color/colorPrimaryDark"/>
+        android:background="@color/colorPrimaryDark" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Standings"
-        android:textSize="32sp"
-        android:gravity="center"
         android:layout_margin="5dp"
+        android:gravity="center"
+        android:text="Standings"
         android:textColor="@color/colorPrimaryDark"
-        android:textStyle="bold"/>
+        android:textSize="32sp"
+        android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvStanding"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:id="@+id/rvStanding"/>
+        android:layout_weight="1" />
 
 
 </LinearLayout>
