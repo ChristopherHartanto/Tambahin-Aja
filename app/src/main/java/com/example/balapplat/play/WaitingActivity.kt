@@ -1,29 +1,28 @@
 package com.example.balapplat.play
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.MainActivity
-import com.example.balapplat.view.MainView
 import com.example.balapplat.R
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.presenter.WaitingPresenter
+import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.WaitingView
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_waiting.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.jetbrains.anko.*
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.HashMap
-import kotlin.concurrent.thread
+import org.jetbrains.anko.clearTask
+import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.toast
 
-class WaitingActivity : AppCompatActivity(),
+class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener,
     WaitingView {
 
     private lateinit var auth: FirebaseAuth
@@ -164,6 +163,18 @@ class WaitingActivity : AppCompatActivity(),
         }
         else if (inviter)
             waitingPresenter.removeInvitation(intent.extras!!.getString("facebookId")!!)
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_waiting, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_waiting, "There is no more network", "INFINITE")
+                }
+            }
+        }
     }
 }
 data class Status(var status: Boolean? = false)

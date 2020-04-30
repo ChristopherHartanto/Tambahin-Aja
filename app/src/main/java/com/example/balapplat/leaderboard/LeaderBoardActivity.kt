@@ -3,20 +3,23 @@ package com.example.balapplat.leaderboard
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.balapplat.view.MainView
-import com.example.balapplat.presenter.Presenter
-import com.google.firebase.database.*
-import kotlinx.android.synthetic.main.activity_leader_board.*
-import kotlinx.coroutines.GlobalScope
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.User
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
+import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
+import kotlinx.android.synthetic.main.activity_leader_board.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 
-class LeaderBoardActivity : AppCompatActivity(),
+class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
     MainView {
 
     private var items: MutableList<HighScore> = mutableListOf()
@@ -131,5 +134,17 @@ class LeaderBoardActivity : AppCompatActivity(),
                 "inviterName" to data.name))
         }
 
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_leaderboard, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_leaderboard, "There is no more network", "INFINITE")
+                }
+            }
+        }
     }
 }

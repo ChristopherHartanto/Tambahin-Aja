@@ -9,17 +9,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
+import com.example.balapplat.utils.showSnackBar
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.fragment_tournament.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.support.v4.ctx
-import java.text.SimpleDateFormat
-import java.time.Duration
-import java.util.*
 
 
-class Tournament : Fragment() {
+class Tournament : Fragment(), NetworkConnectivityListener {
 
     private var items: MutableList<HighScore> = mutableListOf()
     private var profileItems: MutableList<User> = mutableListOf()
@@ -153,6 +153,18 @@ class Tournament : Fragment() {
             tvTournamentTitle.text = "No Tournament Right Now"
             tvTournamentDesc.text = ""
             tvTournamentTimeLeft.text = ""
+        }
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(fragment_home, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(fragment_home, "There is no more network", "INFINITE")
+                }
+            }
         }
     }
 }

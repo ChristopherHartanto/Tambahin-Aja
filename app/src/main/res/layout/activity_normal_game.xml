@@ -1,50 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_normal_game"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorWhite"
     android:orientation="vertical"
-    tools:context=".play.NormalGameActivity"
-    android:background="@color/colorWhite">
+    tools:context=".play.NormalGameActivity">
 
     <LinearLayout
+        android:id="@+id/layoutMultipleGame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:id="@+id/layoutMultipleGame"
         android:padding="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_weight="1"
-            android:gravity="left">
+            android:gravity="left"
+            android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvPlayerPoint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorYellow"
                 android:gravity="center"
-                android:textSize="24sp"
                 android:text="0"
-                android:id="@+id/tvPlayerPoint"/>
+                android:textColor="@color/colorYellow"
+                android:textSize="24sp" />
 
             <ImageView
+                android:id="@+id/ivPlayerImage"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_launcher_background"
-                android:id="@+id/ivPlayerImage"
-                android:background="@drawable/button_bg_round"/>
+                android:background="@drawable/button_bg_round"
+                android:src="@drawable/ic_launcher_background" />
 
             <TextView
+                android:id="@+id/tvPlayerName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tvPlayerName"/>
+                android:layout_gravity="center" />
 
         </LinearLayout>
 
@@ -57,27 +56,27 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvOpponentPoint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorYellow"
                 android:gravity="center"
-                android:textSize="24sp"
                 android:text="0"
-                android:id="@+id/tvOpponentPoint"/>
+                android:textColor="@color/colorYellow"
+                android:textSize="24sp" />
 
             <ImageView
+                android:id="@+id/ivOpponentImage"
                 android:layout_width="60dp"
-                android:layout_gravity="center"
                 android:layout_height="60dp"
+                android:layout_gravity="center"
                 android:background="@drawable/button_bg_round"
-                android:src="@drawable/ic_launcher_background"
-                android:id="@+id/ivOpponentImage"/>
+                android:src="@drawable/ic_launcher_background" />
 
             <TextView
+                android:id="@+id/tvOpponentName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tvOpponentName"/>
+                android:layout_gravity="center" />
 
         </LinearLayout>
 
@@ -85,37 +84,38 @@
 
 
     <TextView
+        android:id="@+id/tvPoint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="50sp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:id="@+id/tvPoint"
         android:text="0"
         android:textColor="#000000"
-        android:layout_weight="1"/>
+        android:textSize="50sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_weight="2">
+        android:layout_weight="2"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Time :"
-            android:gravity="right"
             android:layout_weight="1"
-            android:padding="10dp"/>
+            android:gravity="right"
+            android:padding="10dp"
+            android:text="Time :" />
+
         <TextView
+            android:id="@+id/tvTimer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="50sp"
+            android:layout_weight="1"
             android:gravity="left"
-            android:id="@+id/tvTimer"
             android:text="0"
             android:textColor="#000000"
-            android:layout_weight="1"/>
+            android:textSize="50sp" />
 
     </LinearLayout>
 
@@ -123,29 +123,29 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_weight="5"
         android:gravity="center"
-        android:layout_weight="5">
+        android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/tvQuestion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tvQuestion"
-            android:textSize="50sp"
-            android:text="0" />
+            android:text="0"
+            android:textSize="50sp" />
 
     </LinearLayout>
 
     <include
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
         android:id="@+id/layout_keyboard"
-        layout="@layout/keyboard"/>
+        layout="@layout/keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="250dp" />
 
     <include
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
         android:id="@+id/layout_odd_even_keyboard"
-        layout="@layout/odd_even_keyboard"/>
+        layout="@layout/odd_even_keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="250dp" />
 
 </LinearLayout>

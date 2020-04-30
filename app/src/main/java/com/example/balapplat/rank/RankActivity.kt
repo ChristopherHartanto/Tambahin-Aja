@@ -1,14 +1,15 @@
 package com.example.balapplat.rank
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.Helper
-import com.example.balapplat.view.MainView
-import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
+import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -16,10 +17,12 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_rank.*
 import org.jetbrains.anko.*
 
-class RankActivity : AppCompatActivity(), MainView {
+class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView {
 
     lateinit var helper : Helper
     private lateinit var mAdView : AdView
@@ -107,5 +110,17 @@ class RankActivity : AppCompatActivity(), MainView {
                 "inviterName" to data.name))
         }
 
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_rank, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_rank, "There is no more network", "INFINITE")
+                }
+            }
+        }
     }
 }

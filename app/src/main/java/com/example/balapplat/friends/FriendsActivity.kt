@@ -1,25 +1,28 @@
 package com.example.balapplat.friends
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.balapplat.view.MainView
-import com.example.balapplat.presenter.Presenter
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class FriendsActivity : AppCompatActivity(),
+class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
     MainView {
 
     private lateinit var auth: FirebaseAuth
@@ -116,5 +119,17 @@ class FriendsActivity : AppCompatActivity(),
                 "inviterName" to data.name))
         }
 
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_friends, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_friends, "There is no more network", "INFINITE")
+                }
+            }
+        }
     }
 }

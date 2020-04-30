@@ -1,41 +1,30 @@
 package com.example.balapplat
 
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.transition.TransitionManager
+import androidx.fragment.app.Fragment
 import com.example.balapplat.friends.FriendsActivity
 import com.example.balapplat.leaderboard.LeaderBoardActivity
-import com.example.balapplat.model.HighScore
 import com.example.balapplat.play.WaitingActivity
 import com.example.balapplat.rank.RankActivity
+import com.example.balapplat.utils.showSnackBar
 import com.facebook.AccessToken
-import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_main.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import org.jetbrains.anko.*
+import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.startActivity
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), NetworkConnectivityListener {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -174,5 +163,17 @@ class HomeFragment : Fragment() {
 //            0 // Y offset
 //        )
 
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(fragment_home, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(fragment_home, "There is no more network", "INFINITE")
+                }
+            }
+        }
     }
 }

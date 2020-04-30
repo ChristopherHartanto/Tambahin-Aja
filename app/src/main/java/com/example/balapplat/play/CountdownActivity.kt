@@ -1,16 +1,18 @@
 package com.example.balapplat.play
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.R
+import com.example.balapplat.utils.showSnackBar
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_countdown.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.startActivity
 
-class CountdownActivity : AppCompatActivity() {
+class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +77,18 @@ class CountdownActivity : AppCompatActivity() {
     override fun onDestroy() {
         countDown(false)
         super.onDestroy()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_countdown, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_countdown, "There is no more network", "INFINITE")
+                }
+            }
+        }
     }
 
 }

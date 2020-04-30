@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_list_friends"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".friends.ListFriendsFragment">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srFriendsList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/srFriendsList">
+        android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:id="@+id/rvListFriends"/>
-
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvListFriends"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

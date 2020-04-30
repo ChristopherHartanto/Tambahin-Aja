@@ -4,13 +4,22 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.utils.UtilsConstants
+import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkEvents
+import com.quantumhiggs.network.NetworkState
+import com.quantumhiggs.network.NetworkStateHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 
@@ -22,6 +31,8 @@ class MainActivity : AppCompatActivity(), MainView {
     lateinit var helper : Helper
     var data : Inviter = Inviter()
 
+    private var prevState = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,6 +43,14 @@ class MainActivity : AppCompatActivity(), MainView {
         auth = FirebaseAuth.getInstance()
         helper = Helper()
         presenter = Presenter(this, database)
+
+        savedInstanceState?.let {
+            prevState = it.getBoolean(UtilsConstants.LOST_CONNECTION)
+        }
+
+        NetworkEvents.observe(this, Observer {
+            if (it is Event.ConnectivityEvent) handleConnectivityChange(it.state)
+        })
 
         if(AccessToken.getCurrentAccessToken() != null)
             presenter.receiveInvitation()
@@ -52,6 +71,28 @@ class MainActivity : AppCompatActivity(), MainView {
             true
         }
         bottom_navigation.selectedItemId = R.id.home
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(UtilsConstants.LOST_CONNECTION, prevState)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun handleConnectivityChange(networkState: NetworkState) {
+        if (networkState.isConnected && !prevState) {
+            showSnackBar(activity_main, "The network is back !", "LONG")
+        }
+
+        if (!networkState.isConnected && prevState) {
+            showSnackBar(activity_main, "No Network !", "INFINITE")
+        }
+
+        prevState = networkState.isConnected
+    }
+
+    override fun onResume() {
+        super.onResume()
+        handleConnectivityChange(NetworkStateHolder)
     }
 
 

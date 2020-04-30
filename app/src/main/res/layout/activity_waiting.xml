@@ -1,39 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_waiting"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:background="@color/colorPrimary"
+    android:gravity="center"
     tools:context=".play.WaitingActivity">
 
     <LinearLayout
+        android:id="@+id/layout_waiting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/tvWaiting"
-        android:id="@+id/layout_waiting"
-        android:gravity="center"
         android:layout_marginBottom="50dp"
+        android:gravity="center"
         android:orientation="horizontal">
 
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="100dp"
             android:layout_marginEnd="50dp"
-            android:layout_marginRight="50dp">
+            android:layout_marginRight="50dp"
+            app:cardCornerRadius="100dp">
+
             <ImageView
                 android:id="@+id/ivPlayerWaiting"
                 android:layout_width="100dp"
-                android:layout_height="100dp"/>
+                android:layout_height="100dp" />
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:cardCornerRadius="100dp">
+
             <ImageView
                 android:id="@+id/ivOpponentImageWaiting"
                 android:layout_width="100dp"
@@ -44,24 +46,24 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tvWaiting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="21sp"
-        android:id="@+id/tvWaiting"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
         android:text="Waiting . . ."
-        android:textStyle="bold"
         android:textColor="@color/colorWhite"
-        android:layout_marginBottom="10dp"/>
+        android:textSize="21sp"
+        android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/tvTips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tvTips"
-        android:textColor="@color/colorWhite"
-        android:textSize="18dp"
-        android:text="Tips"
+        android:layout_below="@id/tvWaiting"
         android:gravity="center"
-        android:layout_below="@id/tvWaiting"/>
+        android:text="Tips"
+        android:textColor="@color/colorWhite"
+        android:textSize="18dp" />
 
 </RelativeLayout>

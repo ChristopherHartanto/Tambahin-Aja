@@ -1,36 +1,33 @@
 package com.example.balapplat.play
 
-import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.view.ViewStub
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.core.content.getSystemService
-import androidx.core.view.isVisible
+import androidx.appcompat.app.AppCompatActivity
 import com.example.balapplat.MainActivity
-import com.example.balapplat.view.MainView
-import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.NormalMatch
 import com.example.balapplat.presenter.MatchPresenter
+import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_normal_game.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
 
-class NormalGameActivity : AppCompatActivity(),
+class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     MainView, MatchView {
 
     private lateinit var database: DatabaseReference
@@ -433,6 +430,18 @@ class NormalGameActivity : AppCompatActivity(),
             val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
             tvOpponentPoint.text = "" + opponentPoint
             tvOpponentPoint.startAnimation(animationBounce)
+        }
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_normal_game, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_normal_game, "There is no more network", "INFINITE")
+                }
+            }
         }
     }
 }
