@@ -1,3 +1,2 @@
 rootProject.name='Balap Plat'
 include ':app'
-include ':network'

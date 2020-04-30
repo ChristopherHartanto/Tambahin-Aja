@@ -55,6 +55,4 @@ dependencies {
     implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
 
     implementation 'androidx.multidex:multidex:2.0.1'
-
-    implementation project(path: ':network')
 }
