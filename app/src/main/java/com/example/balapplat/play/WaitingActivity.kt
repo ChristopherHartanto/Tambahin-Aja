@@ -1,9 +1,10 @@
 package com.example.balapplat.play
 
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
-import androidx.appcompat.app.AppCompatActivity
-import com.example.balapplat.MainActivity
+import com.example.balapplat.main.MainActivity
+import com.example.balapplat.view.MainView
 import com.example.balapplat.R
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.presenter.WaitingPresenter
@@ -18,11 +19,12 @@ import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_waiting.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.toast
 
-class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener,
+class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainView,
     WaitingView {
 
     private lateinit var auth: FirebaseAuth
@@ -39,7 +41,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener,
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
-       // presenter = Presenter(this,database)
+        presenter = Presenter(this,database)
         waitingPresenter = WaitingPresenter(this,database)
         waitingPresenter.loadTips()
 
@@ -90,11 +92,12 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener,
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, creator: Boolean) {
-        tvWaiting.text = "Preparing"
+        timer("Preparing")
         if (creator)
-            Picasso.get().load(getFacebookProfilePicture(dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId!!)).fit().into(ivPlayerWaiting)
+            Picasso.get().load(getFacebookProfilePicture(dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId!!)).fit().into(ivOpponentImageWaiting)
         else
-            Picasso.get().load(getFacebookProfilePicture(dataSnapshot.key!!)).fit().into(ivPlayerWaiting)
+            Picasso.get().load(getFacebookProfilePicture(dataSnapshot.key!!)).fit().into(ivOpponentImageWaiting)
+
 
         if (creator){
             finish()
@@ -111,6 +114,10 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener,
                 , "creator" to false))
         }
 
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun response(message: String) {

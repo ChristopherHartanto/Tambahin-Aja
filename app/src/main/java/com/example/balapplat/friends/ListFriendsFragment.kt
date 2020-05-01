@@ -1,11 +1,13 @@
 package com.example.balapplat.friends
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
+
 import com.example.balapplat.R
 import com.example.balapplat.model.Friend
 import com.example.balapplat.model.User
@@ -39,18 +41,23 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+//
+//        val stamp = Timestamp(System.currentTimeMillis())
+//        val date = Date(stamp.getTime())
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         adapter = FriendsRecyclerViewAdapter(ctx,ProfileItems){
-            if (!ProfileItems[it].active!!){
-                alert (ProfileItems[it].name + "   is Offline"){
-                    title = "Offline"
-                    okButton {
-
-                    }
-                }.show()
-            }else{
+//            if (!ProfileItems[it].active!!){
+//                alert (ProfileItems[it].name + "   is Offline"){
+//                    title = "Offline"
+//                    okButton {
+//
+//                    }
+//                }.show()
+//            }else{
+//
+//            }
                 val index = it
                 alert ("Play with " + ProfileItems[it].name + " ?"){
                     title = "Play"
@@ -62,8 +69,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
 
                     }
                 }.show()
-            }
-
 
         }
 
@@ -79,7 +84,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
     }
 
     fun retrieve(){
-        ProfileItems.clear()
 
         GlobalScope.launch {
             val postListener = object : ValueEventListener {
@@ -92,13 +96,13 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
                 }
 
             }
-            database.child("friends").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
+            database.child("friends").child(auth.currentUser!!.uid).addValueEventListener(postListener)
 
         }
     }
 
     fun fetchDataFriends(dataSnapshot: DataSnapshot){
-
+        ProfileItems.clear()
         for (ds in dataSnapshot.children) {
             if (ds.key!! != auth.currentUser!!.uid){
                 retrieveProfileFriends(ds.key)
@@ -139,10 +143,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
         //toast("nama teman "+ dataSnapshot)
         adapter.notifyDataSetChanged()
 
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 
     override fun networkConnectivityChanged(event: Event) {

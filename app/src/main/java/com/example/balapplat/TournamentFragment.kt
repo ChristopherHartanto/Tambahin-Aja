@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
+import com.example.balapplat.leaderboard.Leaderboard
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.example.balapplat.utils.showSnackBar
@@ -52,7 +53,7 @@ class Tournament : Fragment(), NetworkConnectivityListener {
                 }
 
             }
-            database.child("highscore").orderByChild("score").addListenerForSingleValueEvent(postListener)
+            database.child("leaderboards").orderByChild("total").addListenerForSingleValueEvent(postListener)
 
         }
     }
@@ -60,7 +61,7 @@ class Tournament : Fragment(), NetworkConnectivityListener {
     fun fetchData(dataSnapshot: DataSnapshot){
 
         for (ds in dataSnapshot.children) {
-            val score = ds.getValue(HighScore::class.java)!!.score
+            val score = ds.getValue(Leaderboard::class.java)!!.total
             val id = ds.key
 
 
@@ -131,31 +132,31 @@ class Tournament : Fragment(), NetworkConnectivityListener {
     }
 
     fun loadData(dataSnapshot: DataSnapshot, status: Boolean){
-        val data = dataSnapshot.getValue(TournamentData::class.java)
-
-        if (data != null && status) {
-            tvTournamentTitle.text = data.title
-            tvTournamentDesc.text = data.description
-            tvTournamentTimeLeft.text = data.deadLine
-
-            retrieve()
-//            GlobalScope.launch {
-//                val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
-//                val currentDate = sdf.format(Date())
+//        val data = dataSnapshot.getValue(TournamentData::class.java)
 //
-//                Duration.
-//                val diff: Long = Date.from() - date2.getTime()
-//                val seconds = diff / 1000
-//                val minutes = seconds / 60
-//                val hours = minutes / 60
-//                val days = hours / 24
-//            }
-        }
-        else{
-            tvTournamentTitle.text = "No Tournament Right Now"
-            tvTournamentDesc.text = ""
-            tvTournamentTimeLeft.text = ""
-        }
+//        if (data != null && status) {
+//            tvTournamentTitle.text = data.title
+//            tvTournamentDesc.text = data.description
+//            tvTournamentTimeLeft.text = data.deadLine
+//
+//            retrieve()
+////            GlobalScope.launch {
+////                val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+////                val currentDate = sdf.format(Date())
+////
+////                Duration.
+////                val diff: Long = Date.from() - date2.getTime()
+////                val seconds = diff / 1000
+////                val minutes = seconds / 60
+////                val hours = minutes / 60
+////                val days = hours / 24
+////            }
+//        }
+//        else{
+//            tvTournamentTitle.text = "No Tournament Right Now"
+//            tvTournamentDesc.text = ""
+//            tvTournamentTimeLeft.text = ""
+//        }
     }
 
     override fun networkConnectivityChanged(event: Event) {

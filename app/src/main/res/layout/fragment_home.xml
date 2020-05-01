@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,38 +10,52 @@
     android:id="@+id/fragment_home"
     tools:context=".HomeFragment">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:background="@color/colorPrimary"
-        android:orientation="horizontal">
+        android:layout_marginTop="30dp">
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fbutton:cardCornerRadius="30dp">
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
             android:text="Rp 1.500"
-            android:textColor="@color/colorWhite"
+                android:textColor="@color/colorSecondaryText"
             android:textStyle="bold"
-            android:textSize="25sp"
-            android:gravity="center"
+                android:textSize="23sp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="37dp"
             android:id="@+id/tvPulsa"/>
-    </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="right"
-        android:backgroundTint="#CCCC00"
-        android:layout_margin="10dp"/>
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/money_bag"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginVertical="12dp"/>
+        </androidx.cardview.widget.CardView>
+
 
     <TextView
-        android:layout_width="match_parent"
+            android:layout_width="20dp"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:text="Puzzle"
-        android:textSize="20dp"
-        android:paddingRight="10dp"/>
+            android:layout_gravity="right"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:text="!"
+            android:textColor="#ff0000"/>
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="end"
+            android:src="@drawable/puzzle"
+            android:id="@+id/ivDailyPuzzle"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="10dp"/>
+    </FrameLayout>
 
     <TextView
         android:layout_width="match_parent"
@@ -48,8 +64,13 @@
         android:text="Tambahin Aja"
         android:textColor="@color/colorPrimary"
         android:gravity="center"
-        android:textSize="36dp"
-        android:layout_weight="3"/>
+        android:textSize="36dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="bottom">
 
     <Button
         android:layout_width="wrap_content"
@@ -58,9 +79,9 @@
         android:layout_gravity="center"
         android:text="Play"
         android:textColor="#ff0000"
+            android:layout_marginBottom="20dp"
         android:textSize="32sp"
-        android:background="@drawable/button_bg_round"
-        android:layout_margin="30dp"/>
+            android:background="@drawable/button_bg_round"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -95,6 +116,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+<!--            <info.hoang8f.widget.FButton-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                fbutton:buttonColor="@color/fbutton_color_peter_river"-->
+<!--                fbutton:shadowColor="@color/fbutton_color_belize_hole"-->
+<!--                fbutton:shadowEnabled="true"-->
+<!--                fbutton:shadowHeight="5dp"-->
+<!--                fbutton:cornerRadius="5dp"/>-->
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -120,13 +149,9 @@
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#000000"
-        android:text="online : 1000"
-        android:layout_margin="5dp"
-        android:id="@+id/tvUserOnline"/>
+    </LinearLayout>
+
+
 
 <!--    <TextView-->
 <!--        android:layout_width="match_parent"-->

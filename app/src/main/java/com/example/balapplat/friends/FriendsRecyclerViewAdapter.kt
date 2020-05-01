@@ -33,10 +33,10 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
         private val image = view.findViewById<ImageView>(R.id.ivFriendProfile)
 
         fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int) {
-            if (items.active == false)
-                active.backgroundResource = R.color.colorGrey
-            else
-                active.backgroundColorResource = R.color.colorPrimary
+//            if (items.active == false)
+//                active.backgroundResource = R.color.colorGrey
+//            else
+//                active.backgroundColorResource = R.color.colorPrimary
 
             name.text = items.name
             items.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(items.facebookId!!)).fit().into(image) }

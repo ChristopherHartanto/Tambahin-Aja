@@ -1,18 +1,18 @@
 package com.example.balapplat.play
 
+import android.annotation.SuppressLint
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
-import com.example.balapplat.MainActivity
+import com.example.balapplat.main.MainActivity
+import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
-import com.example.balapplat.model.NormalMatch
 import com.example.balapplat.presenter.MatchPresenter
-import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
@@ -31,9 +31,9 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     MainView, MatchView {
 
     private lateinit var database: DatabaseReference
-    private lateinit var databaseFetchPoint: DatabaseReference
     private lateinit var auth: FirebaseAuth
     lateinit var matchPresenter: MatchPresenter
+    private lateinit var countDownTimer : CountDownTimer
     lateinit var data: Inviter
     lateinit var presenter: Presenter
     var count = 4
@@ -45,6 +45,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     var type = "normal"
     var player = 0 // 1 yang ajak, 2 yang diajak, 0 main sendiri
     var facebookId = ""
+    var rank = false
     var playOnline = false
     var creator = false
 
@@ -57,10 +58,11 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         supportActionBar?.hide()
 
         database = FirebaseDatabase.getInstance().reference
-        databaseFetchPoint = FirebaseDatabase.getInstance().reference
         matchPresenter = MatchPresenter(this,database)
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this, database)
+        if (intent.extras!!.getBoolean("rank"))
+            rank = true
 
         if (!intent.extras!!.getString("mode").equals("single")){
             when {
@@ -90,24 +92,51 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 // jika main sendiri
                 type = intent.extras!!.getString("type")!!
 
-                if (type.equals("normal") || type.equals("rush") || type.equals("alphaNum"))
+                if (type == "normal" || type == "rush" || type == "alphaNum")
                     normalKeyboard()
                 else
                     oddEvenKeyboard()
-                getHighScore()
+
+                if (rank)
+                    matchPresenter.getHighScore(auth,intent.extras!!.getString("type")!!)
+
                 layoutMultipleGame.visibility = View.INVISIBLE
                 player = 0
             }
 
         }
 
+        if (type == "rush")
+            timer = 5
 
         generate()
         control(false)
         
     }
 
+    @SuppressLint("SetTextI18n")
     private fun generate(){
+        if (type == "alphaNum"){
+            count += point/100
+
+            tvQuestion.text = ""
+            numberArr.clear()
+            for(x in 0 until count)
+            {
+                var value = 0
+                val choose = Random().nextInt(2)
+
+                if (choose == 1){
+                    value = Random().nextInt(10) + 65
+                    numberArr.add(value)
+                    tvQuestion.text = tvQuestion.text.toString() + value.toChar()
+                }else{
+                    value = Random().nextInt(9)
+                    numberArr.add(value)
+                    tvQuestion.text = tvQuestion.text.toString() + value
+                }
+            }
+        }else{
         tvQuestion.text = ""
         numberArr.clear()
         for(x in 0 until count)
@@ -117,6 +146,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
             tvQuestion.text = tvQuestion.text.toString() + value
         }
+        }
+
         answer = generateAnswer()
     }
 
@@ -142,6 +173,25 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 else
                     1 // ganjil
             }
+        }else if(type == "alphaNum"){
+            val temp = numberArr
+            for(x in 0 until count)
+            {
+                if(x != count-1) {
+                    if (temp[x] >= 65)
+                        temp[x] -= 64
+                    if (temp[x+1] >= 65)
+                        temp[x+1] -= 64
+
+                    temp[x+1] += temp[x]
+
+                    if(temp[x+1] / 10 == 1)
+                        temp[x+1] -= 9
+                }
+                else
+                    result = temp[x]
+
+            }
         }
 
         return result
@@ -154,7 +204,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 generate()
             }else{
                 if(point != 0)
-                    point -= 5
+                    point -= 3
             }
 
         }else if (type == "oddEven"){
@@ -164,16 +214,40 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
             }else{
                 if(point != 0)
                     point -= 5
+                generate()
+            }
+        }else if (type == "rush"){
+            if (answer == value){
+                point += 13
+                generate()
+            }else{
+                if(point != 0)
+                    point -= 4
+                generate()
+            }
+            countDownTimer.cancel()
+            timer = 5
+            control(true)
+        }
+        else if(type == "alphaNum"){
+            if (answer == value){
+                point += 12
+                generate()
+            }else{
+                if(point != 0)
+                    point -= 5
             }
         }
 
         if (player != 0){
-            if (player == 1 || creator)
+            if (player == 1)
                 matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
-            else if(player == 2 || !creator)
+            else if(player == 2)
                 matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("inviterFacebookId")!!)
             else if (!creator)
                 matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
+            else if (creator)
+                matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
         }
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
@@ -190,7 +264,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     }
 
     private fun control(status : Boolean){
-        val countDownTimer = object: CountDownTimer(timer.toLong()*1000, 1000) {
+        countDownTimer = object: CountDownTimer(timer.toLong()*1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timer--
                 tvTimer.text = "" + timer
@@ -199,19 +273,11 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
             override fun onFinish() {
 
                 if (auth.currentUser != null){
-                    if (player == 0){
+                    if (intent.extras!!.getString("mode").equals("single")){
                         if(highScore < point){
-
-                            val values: HashMap<String, Any> = hashMapOf(
-                                "score" to point
-                            )
-
-                            database.child("highscore").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-                                toast("save")
-
-                            }.addOnFailureListener {
-                                toast(""+ it.message)
-                            }
+                            if (rank)
+                                matchPresenter.sumHighScore(auth,
+                                    intent.extras!!.getString("type")!!,point)
                             finish()
                             startActivity<MainActivity>()
                         }
@@ -335,21 +401,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     }
 
 
-    private fun getHighScore(){
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                if (dataSnapshot.exists())
-                highScore = dataSnapshot.getValue(NormalMatch::class.java)?.score!!
 
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-
-            }
-        }
-        database.child("highscore").child(auth.currentUser!!.uid).addValueEventListener(postListener)
-    }
 
 
     private fun getFacebookProfilePicture(userID: String): String {
@@ -381,22 +433,22 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     }
 
     override fun onDestroy() {
-        control(false)
-
-
+        countDownTimer.cancel()
         super.onDestroy()
     }
 
     override fun onPause() {
-        control(false)
-
+        countDownTimer.cancel()
 
         super.onPause()
     }
 
     override fun onBackPressed() {
 //        database.child("onPlay").child(facebookId).child("pause").setValue(true)
-        control(false)
+        if (playOnline)
+            toast("Cannot Exist in the Middle Game")
+        else{
+            countDownTimer.cancel()
 
         alert {
             title = "Exit"
@@ -408,6 +460,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 control(true)
             }
         }.show()
+        }
 
     }
 
@@ -416,6 +469,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         control(true)
 
         super.onResume()
+    }
+
+    override fun onStart() {
+        super.onStart()
     }
 
     override fun fetchOpponentData(dataSnapshot: DataSnapshot, inviter: Boolean) {
@@ -443,6 +500,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 }
             }
         }
+    }
+
+    override fun loadHighScore(score: Long) {
+       highScore = score.toInt()
     }
 }
 

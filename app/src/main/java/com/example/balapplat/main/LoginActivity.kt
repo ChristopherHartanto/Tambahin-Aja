@@ -1,4 +1,4 @@
-package com.example.balapplat
+package com.example.balapplat.main
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -8,13 +8,15 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.ColorUtils
+import com.example.balapplat.R
 import com.example.balapplat.utils.showSnackBar
 import com.facebook.*
 import com.facebook.login.LoginResult
@@ -24,6 +26,7 @@ import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -196,20 +199,39 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
     }
 
     fun Init(){
-        val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+        val sdf = SimpleDateFormat("dd MMM yyyy")
         val currentDate = sdf.format(Date())
+        var values: HashMap<String, Any>
 
-        val values: HashMap<String, Any> = hashMapOf(
+        values  = hashMapOf(
             "name" to auth.currentUser!!.displayName.toString(),
             "facebookId" to Profile.getCurrentProfile().id,
-            "active" to true,
             "registerDate" to currentDate
         )
 
-        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-            toast("init success")
+        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {
+            toast(""+ it.message)
+        }
 
-        }.addOnFailureListener {
+        values = hashMapOf(
+            "credit" to 500,
+            "energy" to 100,
+            "energyLimit" to 100,
+            "point" to 200
+        )
+
+        database.child("users").child(auth.currentUser!!.uid).child("balance").setValue(values).addOnFailureListener {
+            toast(""+ it.message)
+        }
+
+        values = hashMapOf(
+            "win" to 0,
+            "lose" to 0,
+            "joinTournament" to 0,
+            "tournamentWin" to 0
+        )
+
+        database.child("stats").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {
             toast(""+ it.message)
         }
     }

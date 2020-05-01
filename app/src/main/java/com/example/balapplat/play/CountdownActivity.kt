@@ -31,7 +31,7 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
             override fun onTick(millisUntilFinished: Long) {
                 tvCountdown.text = count.toString()
                 val animationSlideDown = AnimationUtils.loadAnimation(ctx,
-                    R.anim.slide_down
+                    R.anim.zoom_out
                 )
                 tvCountdown.startAnimation(animationSlideDown)
                 count--
@@ -59,7 +59,7 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
                             "name" to intent.extras!!.getString("name")))
                 }else
                     startActivity(intentFor<NormalGameActivity>("type" to intent.extras!!.getString("type"),
-                        "mode" to intent.extras!!.getString("mode")))
+                        "mode" to intent.extras!!.getString("mode"),"rank" to intent.extras!!.getBoolean("rank")))
                 }
         }
         if (status)

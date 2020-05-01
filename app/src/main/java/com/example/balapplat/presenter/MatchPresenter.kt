@@ -3,6 +3,7 @@ package com.example.balapplat.presenter
 import android.annotation.SuppressLint
 import android.view.animation.AnimationUtils
 import com.example.balapplat.R
+import com.example.balapplat.leaderboard.Leaderboard
 import com.example.balapplat.play.Play
 import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
@@ -19,6 +20,49 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MatchPresenter (private val view: MatchView, private val database: DatabaseReference){
+
+
+    fun getHighScore(auth: FirebaseAuth, type: String){
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if (dataSnapshot.exists())
+                    view.loadHighScore(dataSnapshot.value as Long)
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("leaderboards").child(auth.currentUser!!.uid).child(type).addListenerForSingleValueEvent(postListener)
+    }
+
+    fun sumHighScore(auth: FirebaseAuth, type: String, highScore: Int){
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if (dataSnapshot.exists()) {
+                    newHighScore(auth,dataSnapshot.value as Long,type,highScore)
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("leaderboards").child(auth.currentUser!!.uid).child("total").addListenerForSingleValueEvent(postListener)
+    }
+
+    fun newHighScore(auth: FirebaseAuth,total: Long, type: String, highScore: Int){
+        database.child("leaderboards").child(auth.currentUser!!.uid).child("total").setValue(total).addOnFailureListener {
+            view.response(it.message!!)
+        }
+        database.child("leaderboards").child(auth.currentUser!!.uid).child(type).setValue(highScore).addOnFailureListener {
+            view.response(it.message!!)
+        }
+    }
 
     fun updateValue(inviter: Boolean,playerPoint: Int, opponentPoint: Int,facebookId: String){
         val values: HashMap<String, Any>
@@ -85,7 +129,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     @SuppressLint("SimpleDateFormat")
     fun addToHistory(auth: FirebaseAuth, playerPoint: Int, opponentPoint: Int, opponentFacebookId: String, opponentName: String){
-        val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
+        val sdf = SimpleDateFormat("dd MMM yyyy")
         val currentDate = sdf.format(Date())
 
         val status = when {
@@ -105,7 +149,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             "opponentName" to opponentName,
             "opponentPoint" to opponentPoint
         )
-        database.child("history").child(auth.currentUser!!.uid).child("" +currentDate).setValue(values)
+        database.child("history").child(auth.currentUser!!.uid).child("online").child("" +currentDate).setValue(values)
     }
 
     fun removeOnPlay(){
@@ -128,23 +172,5 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         }
         database.child("onPlay").child(facebookId).addValueEventListener(postListener)
 
-//
-//        val postListener1 = object : ValueEventListener {
-//            override fun onCancelled(p0: DatabaseError) {
-//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//            }
-//
-//            override fun onDataChange(p0: DataSnapshot) {
-//                if(p0.exists())
-//                {
-//                    if (p0.value!! == true)
-//                        control(false)
-//                    else
-//                        control(true)
-//                }
-//            }
-//
-//        }
-//        database.child("onPlay").child(facebookId).child("pause").addValueEventListener(postListener1)
     }
 }

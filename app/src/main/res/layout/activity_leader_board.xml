@@ -1,26 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_leaderboard"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite"
     android:orientation="vertical"
+    android:background="@color/colorWhite"
     tools:context=".leaderboard.LeaderBoardActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    android:orientation="vertical"
+        android:background="@color/colorPrimary">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:gravity="center"
         android:text="LeaderBoard"
-        android:textColor="@color/colorPrimary"
-        android:textSize="36dp"
-        android:textStyle="bold" />
+            android:textSize="32sp"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/button_bg_round"
+            android:id="@+id/ivLeaderboard"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvLeaderboardInfo"
+            android:textColor="@color/colorSecondaryText"
+            android:textSize="20sp"
+            android:gravity="center_horizontal"
+            android:padding="10dp"/>
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvLeaderBoard"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:id="@+id/rvLeaderBoard"/>
 
 </LinearLayout>

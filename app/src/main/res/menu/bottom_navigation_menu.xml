@@ -5,21 +5,21 @@
     <item
         android:id="@+id/home"
         android:enabled="true"
-        android:icon="@drawable/home_icon"
+        android:icon="@drawable/home"
         android:title="home"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/tournament"
         android:enabled="true"
-        android:icon="@drawable/cup_icon"
+        android:icon="@drawable/award"
         app:showAsAction="ifRoom"
         android:title="tournament"/>
 
     <item
         android:id="@+id/profile"
         android:enabled="true"
-        android:icon="@drawable/profile_icon"
+        android:icon="@drawable/user"
         app:showAsAction="ifRoom"
         android:title="profile"/>
 </menu>
