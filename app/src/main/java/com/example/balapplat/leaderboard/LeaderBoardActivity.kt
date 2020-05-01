@@ -2,6 +2,7 @@ package com.example.balapplat.leaderboard
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.presenter.Presenter
 import com.google.firebase.database.*
@@ -23,6 +24,7 @@ import kotlinx.android.synthetic.main.activity_leader_board.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.ctx
 
 class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
     MainView {
@@ -46,6 +48,10 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
         presenter = Presenter(this, database)
         presenter.receiveInvitation()
+
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvLeaderboardInfo.typeface = typeface
+        tvLeaderboardTitle.typeface = typeface
 
         rvLeaderBoard.layoutManager = LinearLayoutManager(this)
         rvLeaderBoard.adapter = adapter

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.R
 import com.example.balapplat.utils.showSnackBar
 import com.quantumhiggs.network.Event
@@ -20,6 +21,8 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
 
         supportActionBar?.hide()
 
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvCountdown.typeface = typeface
         countDown(true)
 
     }

@@ -9,6 +9,31 @@
     tools:context=".play.NormalGameActivity">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:padding="10dp"
+            android:id="@+id/tvTimerTitle"
+            android:text="Time :" />
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="left"
+            android:text="0"
+            android:textSize="36dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/layoutMultipleGame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,12 +56,11 @@
                 android:textColor="@color/colorYellow"
                 android:textSize="24sp" />
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/ivPlayerImage"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
-                android:background="@drawable/button_bg_round"
                 android:src="@drawable/ic_launcher_background" />
 
             <TextView
@@ -64,12 +88,11 @@
                 android:textColor="@color/colorYellow"
                 android:textSize="24sp" />
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/ivOpponentImage"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
-                android:background="@drawable/button_bg_round"
                 android:src="@drawable/ic_launcher_background" />
 
             <TextView
@@ -88,36 +111,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:gravity="center"
+        android:gravity="center_horizontal"
         android:text="0"
         android:textColor="#000000"
         android:textSize="50sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:padding="10dp"
-            android:text="Time :" />
-
-        <TextView
-            android:id="@+id/tvTimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="left"
-            android:text="0"
-            android:textColor="#000000"
-            android:textSize="50sp" />
-
-    </LinearLayout>
 
 
     <LinearLayout

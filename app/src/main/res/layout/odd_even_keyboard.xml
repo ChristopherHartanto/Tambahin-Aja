@@ -5,21 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <info.hoang8f.widget.FButton
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/btnOdd"
         android:layout_weight="1"
-        android:background="@drawable/button_border"
         android:layout_margin="10dp"
+        android:textColor="@color/colorWhite"
         android:text="Odd"/>
 
-    <Button
+    <info.hoang8f.widget.FButton
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/btnEven"
         android:text="Even"
-        android:background="@drawable/button_border"
+        android:textColor="@color/colorWhite"
         android:layout_margin="10dp"
         android:layout_weight="1"/>
 

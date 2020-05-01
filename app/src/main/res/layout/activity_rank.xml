@@ -52,12 +52,11 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:src="@mipmap/ic_launcher_round"
                 android:id="@+id/ivProfile"
-                android:background="@drawable/button_bg_round"
                 android:layout_margin="10dp"/>
 
             <LinearLayout

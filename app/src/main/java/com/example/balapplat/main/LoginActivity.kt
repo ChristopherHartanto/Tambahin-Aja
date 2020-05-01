@@ -227,7 +227,6 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         values = hashMapOf(
             "win" to 0,
             "lose" to 0,
-            "joinTournament" to 0,
             "tournamentWin" to 0
         )
 

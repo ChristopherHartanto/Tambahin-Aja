@@ -57,6 +57,12 @@
             android:layout_marginRight="10dp"/>
     </FrameLayout>
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/shopping_cart"
+        android:layout_margin="10dp"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -72,11 +78,20 @@
         android:orientation="vertical"
         android:gravity="bottom">
 
+<!--        <info.hoang8f.widget.FButton-->
+<!--            android:id="@+id/primary_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="left|top"-->
+<!--            android:layout_margin="10dp"-->
+<!--            android:text="Primary Button"-->
+<!--            android:textColor="@android:color/white"/>-->
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnCustomPlay"
         android:layout_gravity="center"
+        android:id="@+id/btnRank"
         android:text="Play"
         android:textColor="#ff0000"
             android:layout_marginBottom="20dp"
@@ -87,27 +102,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Rank"
-            android:id="@+id/btnRank"
-            android:background="@drawable/button_border"
-            android:textColor="@color/colorBrown"
+            android:text="Custom"
+            android:id="@+id/btnCustomPlay"
+            android:textColor="@color/colorWhite"
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"/>
 
-        <Button
-            android:id="@+id/btnPlayOnline"
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btnOnline"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:alpha="0.9"
-            android:background="@drawable/button_border"
-            android:text="Play\nOnline"
-            android:textColor="@color/colorBrown" />
+            android:text="Online"
+            android:textColor="@color/colorWhite" />
 
 
     </LinearLayout>
@@ -116,35 +129,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-<!--            <info.hoang8f.widget.FButton-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                fbutton:buttonColor="@color/fbutton_color_peter_river"-->
-<!--                fbutton:shadowColor="@color/fbutton_color_belize_hole"-->
-<!--                fbutton:shadowEnabled="true"-->
-<!--                fbutton:shadowHeight="5dp"-->
-<!--                fbutton:cornerRadius="5dp"/>-->
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Play\nFriend"
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"
-            android:background="@drawable/button_border"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:id="@+id/btnPlayFriend"/>
 
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Leader\nBoard"
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"
-            android:background="@drawable/button_border"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:id="@+id/btnLeaderboard"/>
 
     </LinearLayout>

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.main.MainActivity
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
@@ -61,6 +62,17 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         matchPresenter = MatchPresenter(this,database)
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this, database)
+
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvPlayerName.typeface = typeface
+        tvOpponentName.typeface = typeface
+        tvPoint.typeface = typeface
+        tvTimer.typeface = typeface
+        tvQuestion.typeface = typeface
+        tvTimerTitle.typeface = typeface
+        tvPlayerPoint.typeface = typeface
+        tvOpponentPoint.typeface = typeface
+
         if (intent.extras!!.getBoolean("rank"))
             rank = true
 
@@ -279,7 +291,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                                 matchPresenter.sumHighScore(auth,
                                     intent.extras!!.getString("type")!!,point)
                             finish()
-                            startActivity<MainActivity>()
+                            startActivity<PostGameActivity>()
                         }
                     }else{
                         toast("your point : "+ point + "opponent point : " + opponentPoint)
@@ -318,7 +330,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                             title = "End"
                             okButton {
                                 finish()
-                                startActivity<MainActivity>()
+                                startActivity<PostGameActivity>()
                             }
                         }.show()
                     }

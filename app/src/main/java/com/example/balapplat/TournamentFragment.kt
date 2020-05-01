@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
@@ -98,6 +99,10 @@ class Tournament : Fragment(), NetworkConnectivityListener {
 
         items.clear()
         profileItems.clear()
+
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvTournamentTitle.typeface = typeface
+        tvStandingTitle.typeface = typeface
 
         fetchTournament()
         super.onStart()

@@ -24,13 +24,12 @@
             android:textColor="@color/colorWhite"
             android:gravity="center"
             android:layout_margin="10dp"
-            android:textStyle="bold"/>
+        android:id="@+id/tvLeaderboardTitle"/>
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center_horizontal"
-            android:background="@drawable/button_bg_round"
             android:id="@+id/ivLeaderboard"/>
 
         <TextView

@@ -2,6 +2,7 @@ package com.example.balapplat.rank
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.play.CountdownActivity
@@ -26,6 +27,7 @@ import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_rank.*
 import kotlinx.android.synthetic.main.activity_rank.ivProfile
 import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlinx.android.synthetic.main.row_rank.*
 import org.jetbrains.anko.*
 
 class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView {
@@ -48,6 +50,12 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         presenter.receiveInvitation()
         auth = FirebaseAuth.getInstance()
 
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvRank.typeface = typeface
+        tvPoint.typeface = typeface
+        tvEnergy.typeface = typeface
+        tvPayGame.typeface = typeface
+        tvTotalScore.typeface = typeface
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
         fetchScore()
 
@@ -143,17 +151,17 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         if (dataSnapshot.exists()){
             tvTotalScore.text = "" + dataSnapshot.getValue(LeaderBoard::class.java)!!.total
 
-            items.add(ChooseGame("Normal", dataSnapshot.getValue(LeaderBoard::class.java)!!.normal))
-            items.add(ChooseGame("Odd Even", dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven))
-            items.add(ChooseGame("Rush", dataSnapshot.getValue(LeaderBoard::class.java)!!.rush))
-            items.add(ChooseGame("AlphaNum", dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum))
+            items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal))
+            items.add(ChooseGame("Odd Even", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven))
+            items.add(ChooseGame("Rush", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush))
+            items.add(ChooseGame("AlphaNum", 30,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum))
         }else{
             tvTotalScore.text = "" + 0
 
-            items.add(ChooseGame("Normal", 0))
-            items.add(ChooseGame("Odd Even", 0))
-            items.add(ChooseGame("Rush", 0))
-            items.add(ChooseGame("AlphaNum", 0))
+            items.add(ChooseGame("Normal", 15,0))
+            items.add(ChooseGame("Odd Even", 20,0))
+            items.add(ChooseGame("Rush", 25,0))
+            items.add(ChooseGame("AlphaNum", 30,0))
         }
 
 
@@ -175,5 +183,6 @@ data class LeaderBoard(
 
 data class ChooseGame(
     var title: String? = "",
+    var energy: Int? = 0,
     var score: Int? = 0
 )
