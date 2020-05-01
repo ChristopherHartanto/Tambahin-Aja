@@ -11,6 +11,7 @@ import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
+import org.jetbrains.anko.backgroundResource
 
 class LeaderBoardRecyclerViewAdapter(private val context: Context, private val scoreItems: List<HighScore>
                                      , private val profileItems: List<User>)
@@ -33,8 +34,15 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
         private val image = view.findViewById<ImageView>(R.id.ivLeader)
 
         fun bindItem(highScore: HighScore, profileItems: User, position: Int) {
-            var counter = position + 1
-            count.text = "" + counter + ". "
+            val counter = position + 1
+
+            when (position) {
+                0 -> count.backgroundResource = R.drawable.first_medal
+                1 -> count.backgroundResource = R.drawable.second_medal
+                2 -> count.backgroundResource = R.drawable.third_medal
+                else -> count.text = "" + counter + ". "
+            }
+
             name.text = profileItems.name
             score.text = "" + highScore.score
             profileItems.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(profileItems.facebookId!!)).fit().into(image) }

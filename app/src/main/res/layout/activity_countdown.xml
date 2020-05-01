@@ -4,14 +4,15 @@
     android:id="@+id/activity_countdown"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".play.CountdownActivity"
     android:orientation="vertical"
-    tools:context=".play.CountdownActivity">
+    android:background="@color/colorPrimary">
 
     <TextView
-        android:id="@+id/tvCountdown"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/tvCountdown"
         android:gravity="center"
-        android:textSize="50sp" />
+        android:textSize="50sp"/>
 
 </LinearLayout>

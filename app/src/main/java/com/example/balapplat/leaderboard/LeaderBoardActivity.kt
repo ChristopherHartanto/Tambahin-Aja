@@ -3,12 +3,17 @@ package com.example.balapplat.leaderboard
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.balapplat.presenter.Presenter
+import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_leader_board.*
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.User
 import com.example.balapplat.play.CountdownActivity
-import com.example.balapplat.presenter.Presenter
+import com.facebook.Profile
+import com.google.firebase.auth.FirebaseAuth
+import com.squareup.picasso.Picasso
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.google.firebase.database.*
@@ -24,6 +29,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
 
     private var items: MutableList<HighScore> = mutableListOf()
     private var profileItems: MutableList<User> = mutableListOf()
+    private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     lateinit var data: Inviter
     lateinit var presenter: Presenter
@@ -36,6 +42,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
 
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
+        auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
         presenter = Presenter(this, database)
         presenter.receiveInvitation()
@@ -43,6 +50,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
         rvLeaderBoard.layoutManager = LinearLayoutManager(this)
         rvLeaderBoard.adapter = adapter
 
+        Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivLeaderboard)
+        ivLeaderboard.backgroundResource = R.drawable.button_bg_round
     }
 
     fun retrieve(){
@@ -60,20 +69,25 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
                 }
 
             }
-            database.child("highscore").orderByChild("score").addListenerForSingleValueEvent(postListener)
+            database.child("leaderboards").orderByChild("total").addListenerForSingleValueEvent(postListener)
 
         }
     }
 
     fun fetchData(dataSnapshot: DataSnapshot){
+        var count = dataSnapshot.childrenCount
+        for ((index,ds) in dataSnapshot.children.withIndex()) {
 
-        for (ds in dataSnapshot.children) {
-            val score = ds.getValue(HighScore::class.java)!!.score
+            if (auth.currentUser != null){
+                if (ds.key.equals(auth.currentUser!!.uid)){
+                    tvLeaderboardInfo.text = "#$count " + auth.currentUser!!.displayName +" "+ ds.getValue(Leaderboard::class.java)!!.total
+                }
+            }
+            count--
+            val total = ds.getValue(Leaderboard::class.java)!!.total
             val id = ds.key
 
-
-
-            id?.let { retrieveUser(it,score) }
+            id?.let { retrieveUser(it,total) }
         }
         toast("" + items)
     }
@@ -95,13 +109,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
             database.child("users").child(id).addListenerForSingleValueEvent(postListener)
 
         }
-    }
-
-    override fun onStart() {
-        items.clear()
-        profileItems.clear()
-        retrieve()
-        super.onStart()
     }
 
     fun fetchDataUser(dataSnapshot: DataSnapshot){
@@ -147,4 +154,24 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
             }
         }
     }
+
+    fun getFacebookProfilePicture(userID: String): String {
+        return "https://graph.facebook.com/$userID/picture?type=large"
+    }
+
+    override fun onStart() {
+        items.clear()
+        profileItems.clear()
+        retrieve()
+        super.onStart()
 }
+
+}
+
+data class Leaderboard(
+    var normal: Int? = 0,
+    var oddEven: Int? = 0,
+    var rush: Int? = 0,
+    var alphaNum: Int? = 0,
+    var total:Int? = 0
+)

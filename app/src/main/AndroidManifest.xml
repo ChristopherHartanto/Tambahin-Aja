@@ -14,11 +14,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        <activity android:name=".rank.RankActivity"></activity>
+        <activity android:name=".profile.SettingActivity"></activity>
+        <activity android:name=".rank.RankActivity" />
         <activity android:name=".play.OddEvenGameActivity" />
         <activity android:name=".play.WaitingActivity" />
         <activity android:name=".leaderboard.LeaderBoardActivity" />
-        <activity android:name=".SplashActivity">
+        <activity android:name=".main.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,11 +29,11 @@
         <activity android:name=".PlayActivity" />
         <activity android:name=".play.CountdownActivity" />
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".main.LoginActivity" />
         <activity android:name=".friends.AddFriendsActivity" />
         <activity android:name=".friends.FriendsActivity" />
         <activity android:name=".play.NormalGameActivity" />
-        <activity android:name=".MainActivity" />
+        <activity android:name=".main.MainActivity" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
