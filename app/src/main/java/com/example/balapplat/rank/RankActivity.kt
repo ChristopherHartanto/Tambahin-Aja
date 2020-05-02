@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -46,12 +47,14 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
 
     private lateinit var adapter: RankRecyclerViewAdapter
     private lateinit var taskAdapter: TaskRecyclerViewAdapter
+    private lateinit var rankDetailAdapter: RankDetailRecyclerViewAdapter
     private lateinit var database: DatabaseReference
     lateinit var presenter: Presenter
     private lateinit var auth: FirebaseAuth
     lateinit var data: Inviter
     private lateinit var popupWindow : PopupWindow
     private val items : MutableList<ChooseGame> = mutableListOf()
+    private val rankDetailItems : MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,9 +73,15 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         tvTotalScore.typeface = typeface
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
         fetchScore()
+        val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
         ivTask.onClick {
-            popUp()
+            ivTask.startAnimation(clickAnimation)
+            popUpTask()
+        }
+
+        layout_rank_detail.onClick {
+            popUpRankDetail()
         }
 
         layout_point_energy.onClick {
@@ -183,7 +192,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
-    private fun popUp(){
+    private fun popUpTask(){
         val inflater: LayoutInflater = this.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_task,null)
@@ -217,6 +226,59 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         rvTask.adapter = taskAdapter
 
         btnTask.onClick {
+            activity_rank.alpha = 1F
+            popupWindow.dismiss()
+        }
+
+        // Finally, show the popup window on app
+        TransitionManager.beginDelayedTransition(activity_rank)
+        popupWindow.showAtLocation(
+                activity_rank, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+        )
+
+    }
+
+    private fun popUpRankDetail(){
+        val inflater: LayoutInflater = this.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        val view = inflater.inflate(R.layout.pop_up_rank_detail,null)
+
+
+        // Initialize a new instance of popup window
+        popupWindow = PopupWindow(
+                view, // Custom view to show in popup window
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+        )
+
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+
+        activity_rank.alpha = 0.1F
+        val btnRankDetail = view.findViewById<Button>(R.id.btnRankDetail)
+        val rankTitle = view.findViewById<TextView>(R.id.tvRankTitle)
+        val rvRankDetail = view.findViewById<RecyclerView>(R.id.rvRankDetail)
+        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        rankTitle.typeface = typeface
+        btnRankDetail.typeface = typeface
+
+        rankTitle.text = "Beginner"
+        rankDetailItems.clear()
+        rankDetailItems.add("Get 10 Extra Credit when Solve Puzzle")
+        rankDetailItems.add("Energy Limit 110")
+        rankDetailItems.add("Extra 2 Point in Rank Mode")
+
+        rankDetailAdapter = RankDetailRecyclerViewAdapter(this, rankDetailItems)
+        rvRankDetail.layoutManager = LinearLayoutManager(this)
+        rvRankDetail.adapter = rankDetailAdapter
+
+        btnRankDetail.onClick {
             activity_rank.alpha = 1F
             popupWindow.dismiss()
         }

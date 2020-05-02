@@ -2,6 +2,7 @@ package com.example.balapplat.friends
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
@@ -21,6 +22,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.ctx
 
 class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
     MainView {
@@ -35,10 +37,13 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends)
 
+        supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         presenter = Presenter(this, database)
         presenter.receiveInvitation()
+        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        tvFriendsTitle.typeface = typeface
 
         mAdView = findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()

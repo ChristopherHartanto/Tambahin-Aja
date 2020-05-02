@@ -363,7 +363,11 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         val btn7 = view.findViewById<Button>(R.id.btn7)
         val btn8 = view.findViewById<Button>(R.id.btn8)
         val btn9 = view.findViewById<Button>(R.id.btn9)
+        val btn0 = view.findViewById<Button>(R.id.btn0)
 
+        btn0.onClick {
+            checkAnswer(0)
+        }
         btn1.onClick {
             checkAnswer(1)
         }

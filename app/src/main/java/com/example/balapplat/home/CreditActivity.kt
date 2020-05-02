@@ -23,6 +23,7 @@ class CreditActivity : AppCompatActivity() {
         supportActionBar?.hide()
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvCredit.typeface = typeface
+        tvCreditTitle.typeface = typeface
 
         adapter = CreditRecyclerViewAdapter(this)
 

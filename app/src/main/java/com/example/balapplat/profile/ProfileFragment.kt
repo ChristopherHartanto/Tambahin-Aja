@@ -71,6 +71,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         fun updateUI(){
             val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
             tvProfileName.typeface = typeface
+            tvHistoryTitle.typeface = typeface
 
         if (auth.currentUser != null){
             tvProfileName.text = auth.currentUser!!.displayName.toString()

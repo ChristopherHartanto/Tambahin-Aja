@@ -132,6 +132,15 @@
         ads:adSize="SMART_BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvHistoryTitle"
+        android:textColor="@color/colorPrimaryDark"
+        android:text="History"
+        android:layout_margin="10dp"
+        android:textSize="20sp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

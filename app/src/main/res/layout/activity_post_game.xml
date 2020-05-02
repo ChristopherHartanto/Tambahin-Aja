@@ -35,7 +35,7 @@
         android:id="@+id/tvSinglePoint"
         android:gravity="center_horizontal"
         android:text="0"
-        android:textSize="24sp"
+        android:textSize="32sp"
         android:layout_weight="1"/>
 
     <LinearLayout
@@ -124,6 +124,7 @@
             android:id="@+id/tvGetPoint"
             android:text="+ 0"
             android:layout_margin="5dp"
+            android:textSize="20sp"
             android:gravity="center"/>
         <ImageView
             android:layout_width="35dp"
@@ -136,6 +137,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/tvGetCredit"
             android:text="+ 0"
+            android:textSize="20sp"
             android:gravity="center"/>
 
         <ImageView

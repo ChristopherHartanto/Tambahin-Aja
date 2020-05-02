@@ -24,7 +24,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
             android:text="1.500"
-                android:textColor="@color/colorSecondaryText"
+                android:textColor="@color/fbutton_color_sun_flower"
             android:textStyle="bold"
                 android:textSize="23sp"
                 android:layout_gravity="center"
@@ -39,32 +39,35 @@
                 android:layout_marginVertical="12dp"/>
         </androidx.cardview.widget.CardView>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="end"
+            android:src="@drawable/puzzle"
+            android:id="@+id/ivDailyPuzzle"
+            android:elevation="5dp"
+            android:padding="15dp"
+        android:background="@drawable/button_bg_round"
+            android:layout_margin="20dp"/>
 
-    <TextView
+        <TextView
             android:layout_width="20dp"
-        android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_gravity="right"
             android:textSize="25dp"
             android:textStyle="bold"
             android:text="!"
+            android:id="@+id/tvPuzzleInfo"
+            android:src="@drawable/lightning"
             android:textColor="#ff0000"/>
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="end"
-            android:src="@drawable/puzzle"
-            android:id="@+id/ivDailyPuzzle"
-            android:layout_marginTop="20dp"
-            fbutton:civ_border_width="1dp"
-            android:elevation="10dp"
-            android:layout_marginRight="10dp"/>
     </FrameLayout>
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="15dp"
         android:src="@drawable/shopping_cart"
-        fbutton:civ_border_width="1dp"
+        android:background="@drawable/button_bg_round"
         android:layout_margin="10dp"
         android:id="@+id/ivShop"/>
 
@@ -98,7 +101,7 @@
         android:layout_gravity="center"
         android:id="@+id/btnRank"
         android:text="Play"
-        android:textColor="#ff0000"
+        android:textColor="@color/colorPrimary"
             android:layout_marginBottom="20dp"
         android:textSize="32sp"
             android:background="@drawable/button_bg_round"/>
