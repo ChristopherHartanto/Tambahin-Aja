@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:id="@+id/layout_puzzle_pop_up"
-    android:background="@color/colorPrimaryDark">
+    android:id="@+id/layout_puzzle_pop_up">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Daily Puzzle"
+            android:id="@+id/tvDailyPuzzleTitle"
             android:textSize="32sp"
             android:gravity="center"
             android:layout_marginBottom="30dp"/>

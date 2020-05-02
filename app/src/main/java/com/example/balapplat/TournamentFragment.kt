@@ -100,7 +100,7 @@ class Tournament : Fragment(), NetworkConnectivityListener {
         items.clear()
         profileItems.clear()
 
-        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvTournamentTitle.typeface = typeface
         tvStandingTitle.typeface = typeface
 

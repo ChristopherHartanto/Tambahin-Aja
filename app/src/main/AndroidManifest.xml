@@ -14,7 +14,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        <activity android:name=".play.PostGameActivity"></activity>
+        <activity android:name=".home.CreditActivity"></activity>
+        <activity android:name=".home.MarketActivity" />
+        <activity android:name=".play.PostGameActivity" />
         <activity android:name=".profile.SettingActivity" />
         <activity android:name=".rank.RankActivity" />
         <activity android:name=".play.OddEvenGameActivity" />

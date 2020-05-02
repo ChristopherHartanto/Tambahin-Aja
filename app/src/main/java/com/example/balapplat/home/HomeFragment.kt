@@ -1,10 +1,8 @@
-package com.example.balapplat
+package com.example.balapplat.home
 
-import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -16,6 +14,7 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.transition.TransitionManager
+import com.example.balapplat.R
 import com.example.balapplat.friends.FriendsActivity
 import com.example.balapplat.leaderboard.LeaderBoardActivity
 import com.example.balapplat.main.LoginActivity
@@ -23,20 +22,19 @@ import com.example.balapplat.play.WaitingActivity
 import com.example.balapplat.rank.RankActivity
 import com.example.balapplat.utils.showSnackBar
 import com.facebook.AccessToken
-import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
-import com.google.firebase.database.*
-import com.quantumhiggs.network.NetworkStateHolder
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_home.fragment_home
+import kotlinx.android.synthetic.main.fragment_tournament.*
 import org.jetbrains.anko.clearTask
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.*
+import org.jetbrains.anko.backgroundResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
@@ -79,8 +77,15 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         btnRank.startAnimation(animationBounce)
 
         checkPlayedPuzzle()
+        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
 
-        //var typeFace: Typeface? = ResourcesCompat.getFont(ctx, R.font.FredokaOne_Regular)
+        tvCredit.typeface = typeface
+        tvTitle.typeface = typeface
+        btnCustomPlay.typeface = typeface
+        btnRank.typeface = typeface
+        btnPlayFriend.typeface = typeface
+        btnOnline.typeface = typeface
+        btnLeaderboard.typeface = typeface
 
         btnCustomPlay.onClick {
             startActivity<WaitingActivity>()
@@ -115,6 +120,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
                 toast("You Already Played Today")
             else
                 popUp()
+        }
+
+        ivShop.onClick {
+            startActivity<MarketActivity>()
+        }
+
+        cvCredit.onClick {
+            startActivity<CreditActivity>()
         }
 
         if(AccessToken.getCurrentAccessToken() == null)
@@ -202,6 +215,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
 
         checkPlayedPuzzle()
         popupWindow.dismiss()
+        fragment_home.alpha = 1F
     }
 
     private fun popUp(){
@@ -237,19 +251,24 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
 //
 //        }
 
-        val layoutPreEnterRoom = view.findViewById<LinearLayout>(R.id.layout_puzzle_pop_up)
+        fragment_home.alpha = 0.1F
+        val dailyPuzzleTitle = view.findViewById<TextView>(R.id.tvDailyPuzzleTitle)
+        val layoutPuzzle = view.findViewById<LinearLayout>(R.id.layout_puzzle_pop_up)
 
-        layoutPreEnterRoom.onClick {
+        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        dailyPuzzleTitle.typeface = typeface
+        layoutPuzzle.onClick {
+            fragment_home.alpha = 1F
             popupWindow.dismiss()
         }
 
         val btnAnswerPuzzle = view.findViewById<Button>(R.id.btnAnswerPuzzle)
         val etAnswerPuzzle = view.findViewById<EditText>(R.id.etAnswerPuzzle)
 
+        etAnswerPuzzle.typeface = typeface
         btnAnswerPuzzle.onClick {
             checkAnswer(etAnswerPuzzle.text.toString())
         }
-
         generate(view)
         // Finally, show the popup window on app
         TransitionManager.beginDelayedTransition(fragment_home)

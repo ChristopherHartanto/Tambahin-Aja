@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
 import com.example.balapplat.model.User
@@ -21,7 +22,7 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_friend, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],listener,position)
+        holder.bindItem(items[position],listener,position, context)
     }
 
     override fun getItemCount(): Int = items.size
@@ -32,11 +33,14 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
         private val name = view.findViewById<TextView>(R.id.tvFriendName)
         private val image = view.findViewById<ImageView>(R.id.ivFriendProfile)
 
-        fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int) {
+        fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int, context: Context) {
 //            if (items.active == false)
 //                active.backgroundResource = R.color.colorGrey
 //            else
 //                active.backgroundColorResource = R.color.colorPrimary
+
+            val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
+            name.typeface = typeface
 
             name.text = items.name
             items.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(items.facebookId!!)).fit().into(image) }

@@ -14,6 +14,7 @@ import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.row_rank.*
 import org.jetbrains.anko.support.v4.ctx
 
 
@@ -36,6 +37,7 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
         private val name = view.findViewById<TextView>(R.id.tvRankName)
         private val image = view.findViewById<ImageView>(R.id.ivRank)
         private val energy = view.findViewById<TextView>(R.id.tvGameEnergy)
+        private val payGame = view.findViewById<TextView>(R.id.tvPayGame)
         private val llPayGame = view.findViewById<LinearLayout>(R.id.layout_pay_game)
 
         fun bindItem(chooseGame: ChooseGame, listener: (position: Int) -> Unit,position: Int, context: Context) {
@@ -47,7 +49,7 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
             name.typeface = typeface
             score.typeface = typeface
             energy.typeface = typeface
-
+            payGame.typeface = typeface
             score.text = ""+chooseGame.score
             name.text = chooseGame.title
             energy.text = ""+chooseGame.energy

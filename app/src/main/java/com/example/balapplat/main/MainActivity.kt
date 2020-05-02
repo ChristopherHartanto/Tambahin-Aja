@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.example.balapplat.HomeFragment
+import com.example.balapplat.home.HomeFragment
 import com.example.balapplat.R
 import com.example.balapplat.Tournament
 import com.example.balapplat.model.Inviter
@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 .beginTransaction()
                 .replace(
                     R.id.main_container,
-                    HomeFragment(), HomeFragment::class.java.simpleName)
+                        HomeFragment(), HomeFragment::class.java.simpleName)
                 .commit()
         }
     }

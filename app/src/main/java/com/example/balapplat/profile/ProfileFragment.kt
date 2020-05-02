@@ -23,7 +23,9 @@ import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_profile.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.startActivity
 
 class ProfileFragment : Fragment(), NetworkConnectivityListener {
 
@@ -59,6 +61,10 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
         updateUI()
+
+        ivSetting.onClick {
+            startActivity<SettingActivity>()
+        }
         super.onStart()
     }
 

@@ -29,8 +29,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:weightSum="2"
-                android:background="@color/colorGrey"
-                android:alpha="0.9"
+                android:background="@color/colorPrimaryDark"
+                android:alpha="0.95"
                 android:id="@+id/layout_pay_game"
                 android:visibility="gone">
 

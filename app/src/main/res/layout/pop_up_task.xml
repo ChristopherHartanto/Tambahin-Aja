@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorPrimary"
+        android:layout_marginHorizontal="20dp"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvTaskTitle"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/fbutton_color_sun_flower"
+            android:text="Task"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rvTask"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="20dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvTaskNextRank"
+            android:layout_marginHorizontal="10dp"
+            android:text="Next Rank : Beginner"
+            android:layout_marginBottom="20dp"/>
+
+        <info.hoang8f.widget.FButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/colorWhite"
+            android:text="Okay"
+            android:id="@+id/btnTask"/>
+
+    </LinearLayout>
+
+</LinearLayout>
