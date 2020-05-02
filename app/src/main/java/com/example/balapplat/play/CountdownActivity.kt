@@ -43,26 +43,34 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
             override fun onFinish() {
                 finish()
 
-                if (!intent.extras!!.getString("mode").equals("single")){
-                    if(intent.extras!!.getString("facebookId").equals(null)){
-                        if (intent.extras!!.getString("inviterFacebookId") != null){
-                            val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
-                            val inviterName = intent.extras!!.getString("inviterName")
+                val mode = intent.extras!!.getString("mode")
+                val faceBookId = intent.extras!!.getString("facebookId")
+                val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
+                val inviterName = intent.extras!!.getString("inviterName")
+                val type = intent.extras!!.getString("type")
+                val name = intent.extras!!.getString("name")
+                val rank = intent.extras!!.getBoolean("rank")
+                val playOnline = intent.extras!!.getBoolean("playOnline")
+                val creator = intent.extras!!.getBoolean("creator")
+
+                if (!mode.equals("single")){
+                    if(faceBookId.equals(null)){
+                        if (inviterFacebookId != null){
                             startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName))
                         }
                         else{
-                            startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
-                                "name" to intent.extras!!.getString("name")
-                                ,"playOnline" to intent.extras!!.getString("playOnline")
-                                ,"creator" to intent.extras!!.getString("creator")))
+                            startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
+                                "name" to name
+                                ,"playOnline" to playOnline
+                                ,"creator" to creator))
                         }
                     }
                    else
-                        startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
-                            "name" to intent.extras!!.getString("name")))
+                        startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
+                            "name" to name))
                 }else
-                    startActivity(intentFor<NormalGameActivity>("type" to intent.extras!!.getString("type"),
-                        "mode" to intent.extras!!.getString("mode"),"rank" to intent.extras!!.getBoolean("rank")))
+                    startActivity(intentFor<NormalGameActivity>("type" to type,
+                        "mode" to mode,"rank" to rank))
                 }
         }
         if (status)

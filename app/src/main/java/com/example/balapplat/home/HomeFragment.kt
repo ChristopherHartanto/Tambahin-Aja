@@ -19,11 +19,13 @@ import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.example.balapplat.R
 import com.example.balapplat.friends.FriendsActivity
 import com.example.balapplat.leaderboard.LeaderBoardActivity
 import com.example.balapplat.main.LoginActivity
+import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.play.WaitingActivity
 import com.example.balapplat.rank.RankActivity
 import com.example.balapplat.rank.RankRecyclerViewAdapter
@@ -36,6 +38,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
+import kotlinx.android.synthetic.main.activity_normal_game.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_home.fragment_home
 import kotlinx.android.synthetic.main.fragment_tournament.*
@@ -44,6 +47,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.backgroundResource
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
@@ -61,6 +65,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     var puzzleType = 1
     var puzzleAnswer = 0
     var playedPuzzleToday = false
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
 
     private var currentDate = ""
@@ -98,9 +103,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         btnOnline.typeface = typeface
         btnLeaderboard.typeface = typeface
 
-        val clickAnimation = AlphaAnimation(1.2F,0.6F)
+
         btnCustomPlay.onClick {
-            startActivity<WaitingActivity>()
+            popUpCustomGame()
         }
 
         btnRank.onClick {
@@ -187,10 +192,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun generate(view: View){
-        val tvDailyPuzzleQuestion = view.findViewById<TextView>(R.id.tvDailyPuzzleQuestion)
-        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
-        tvDailyPuzzleQuestion.typeface = typeface
+    private fun generate(tvDailyPuzzleQuestion: TextView){
 
         if (puzzleType == 1){
 
@@ -213,6 +215,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
                 }
             }
         }
+        val editor = sharedPreference.edit()
+        editor.putInt("puzzleAnswer",generateAnswer())
+        editor.putString("puzzleQuestion", tvDailyPuzzleQuestion.text.toString())
+        editor.apply()
 
         puzzleAnswer = generateAnswer()
     }
@@ -241,12 +247,15 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     }
 
     private fun checkAnswer(value : String) {
+        val editor = sharedPreference.edit()
+
         if (value == puzzleAnswer.toString()){
             toast("True")
+            editor.remove("puzzleAnswer")
+            editor.remove("puzzleQuestion")
         }else
             toast("false")
 
-        val editor = sharedPreference.edit()
         editor.putString("playedTime",currentDate)
         editor.apply()
 
@@ -298,29 +307,17 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
 
         fragment_home.alpha = 0.1F
         main_activity.alpha = 0.1F
-        layoutPuzzle.onClick {
-            fragment_home.alpha = 1F
-            main_activity.alpha = 1F
-            popupWindow.dismiss()
-        }
+//        layoutPuzzle.onClick {
+//            fragment_home.alpha = 1F
+//            main_activity.alpha = 1F
+//            popupWindow.dismiss()
+//        }
 
-        normalKeyboard(view)
-        generate(view)
-        // Finally, show the popup window on app
-        TransitionManager.beginDelayedTransition(fragment_home)
-        popupWindow.showAtLocation(
-            fragment_home, // Location to display popup window
-            Gravity.CENTER, // Exact position of layout to display popup
-            0, // X offset
-            0 // Y offset
-        )
-
-    }
-
-    private fun normalKeyboard(view: View){
         val btnAnswerPuzzle = view.findViewById<Button>(R.id.btnAnswerPuzzle)
         val tvAnswerPuzzle = view.findViewById<TextView>(R.id.tvAnswerPuzzle)
-        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        val btnClose = view.findViewById<Button>(R.id.btnClose)
+        val tvDailyPuzzleQuestion = view.findViewById<TextView>(R.id.tvDailyPuzzleQuestion)
+        tvDailyPuzzleQuestion.typeface = typeface
         btnAnswerPuzzle.typeface = typeface
         tvAnswerPuzzle.typeface = typeface
 
@@ -335,11 +332,22 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         val btn8 = keyboardView.findViewById<Button>(R.id.btn8)
         val btn9 = keyboardView.findViewById<Button>(R.id.btn9)
         val btn2 = keyboardView.findViewById<Button>(R.id.btn2)
+        val btn0 = keyboardView.findViewById<Button>(R.id.btn0)
 
         btnAnswerPuzzle.onClick {
             checkAnswer(tvAnswerPuzzle.text.toString())
         }
 
+        btnClose.onClick {
+            btnClose.startAnimation(clickAnimation)
+            fragment_home.alpha = 1F
+            main_activity.alpha = 1F
+            popupWindow.dismiss()
+        }
+
+        btn0.onClick {
+            tvAnswerPuzzle.text = "0"
+        }
         btn1.onClick {
             tvAnswerPuzzle.text = "1"
         }
@@ -367,6 +375,23 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         btn9.onClick {
             tvAnswerPuzzle.text = "9"
         }
+
+        if(sharedPreference.getInt("puzzleAnswer",0) == 0)
+            generate(tvDailyPuzzleQuestion)
+        else{
+            puzzleAnswer = sharedPreference.getInt("puzzleAnswer",0)
+            tvDailyPuzzleQuestion.text = sharedPreference.getString("puzzleQuestion","0000")
+        }
+
+        // Finally, show the popup window on app
+        TransitionManager.beginDelayedTransition(fragment_home)
+        popupWindow.showAtLocation(
+            fragment_home, // Location to display popup window
+            Gravity.CENTER, // Exact position of layout to display popup
+            0, // X offset
+            0 // Y offset
+        )
+
     }
 
     private fun popUpCustomGame(){
@@ -390,15 +415,42 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         var position = -1
         val main_activity = main_view.findViewById<RelativeLayout>(R.id.activity_main)
         val rvCustomGame = view.findViewById<RecyclerView>(R.id.rvCustomGame)
-        val ivCustomGame = view.findViewById<RecyclerView>(R.id.ivCustomGame)
+        val ivCustomGame = view.findViewById<ImageView>(R.id.ivCustomGame)
         val tvChooseGame = view.findViewById<TextView>(R.id.tvClickToChooseGame)
         val tvCustomGameTitle = view.findViewById<TextView>(R.id.tvCustomGameTitle)
-        val btnPlay = view.findViewById<Button>(R.id.btnCustomPlay)
+        val tvCustomGameTime = view.findViewById<TextView>(R.id.tvCustomGameTime)
+        val sbTime = view.findViewById<SeekBar>(R.id.sbTime)
+        val btnPlay = view.findViewById<Button>(R.id.btnStartCustomGame)
+        val btnClose = view.findViewById<Button>(R.id.btnClose)
         val layoutCustomGame = view.findViewById<LinearLayout>(R.id.layout_custom_game)
 
         val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvChooseGame.typeface = typeface
         tvCustomGameTitle.typeface = typeface
+        tvCustomGameTime.typeface = typeface
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            sbTime.min = 30
+        }
+        sbTime.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+
+                if(progress < 30)
+                    tvCustomGameTime.text = "Time : 30"
+                else
+                    tvCustomGameTime.text = "Time : $progress"
+
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+
+        })
+
+
         customGameAdapter = CustomGameRecyclerViewAdapter(ctx){
             position = it
             rvCustomGame.visibility = View.GONE
@@ -412,18 +464,29 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
             position = -1
         }
 
-
-        rvCustomGame.adapter = customGameAdapter
-        fragment_home.alpha = 0.1F
-        main_activity.alpha = 0.1F
-        layoutCustomGame.onClick {
+        btnClose.onClick {
+            btnClose.startAnimation(clickAnimation)
             fragment_home.alpha = 1F
             main_activity.alpha = 1F
             popupWindow.dismiss()
         }
 
-        normalKeyboard(view)
-        generate(view)
+        btnPlay.onClick {
+            if (position == -1)
+                toast("Choose game First")
+            else
+                startActivity(intentFor<CountdownActivity>("mode" to "single",
+                        "type" to "normal","rank" to false))
+        }
+
+        rvCustomGame.adapter = customGameAdapter
+        fragment_home.alpha = 0.1F
+        main_activity.alpha = 0.1F
+//        layoutCustomGame.onClick {
+//            fragment_home.alpha = 1F
+//            main_activity.alpha = 1F
+//            popupWindow.dismiss()
+//        }
         // Finally, show the popup window on app
         TransitionManager.beginDelayedTransition(fragment_home)
         popupWindow.showAtLocation(

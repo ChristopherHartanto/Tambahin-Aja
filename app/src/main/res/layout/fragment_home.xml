@@ -23,7 +23,7 @@
         <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-            android:text="1.500"
+            android:text="1500"
                 android:textColor="@color/fbutton_color_sun_flower"
             android:textStyle="bold"
                 android:textSize="23sp"
