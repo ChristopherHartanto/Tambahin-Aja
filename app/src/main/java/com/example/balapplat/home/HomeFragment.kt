@@ -3,6 +3,7 @@ package com.example.balapplat.home
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -77,6 +78,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 

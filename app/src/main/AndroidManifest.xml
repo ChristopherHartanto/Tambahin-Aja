@@ -16,14 +16,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         tools:ignore="LockedOrientationActivity">
-        <activity android:name=".home.CreditActivity"></activity>
-        <activity android:name=".home.MarketActivity" />
-        <activity android:name=".play.PostGameActivity" />
-        <activity android:name=".profile.SettingActivity" />
-        <activity android:name=".rank.RankActivity" />
-        <activity android:name=".play.OddEvenGameActivity" />
-        <activity android:name=".play.WaitingActivity" />
-        <activity android:name=".leaderboard.LeaderBoardActivity" />
+        <activity android:name=".home.CreditActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".home.MarketActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".play.PostGameActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".profile.SettingActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".rank.RankActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".play.OddEvenGameActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".play.WaitingActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".leaderboard.LeaderBoardActivity" android:screenOrientation="portrait"/>
         <activity android:name=".main.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -32,13 +32,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlayActivity" />
-        <activity android:name=".play.CountdownActivity" />
-        <activity android:name=".RegisterActivity" />
-        <activity android:name=".main.LoginActivity" />
-        <activity android:name=".friends.AddFriendsActivity" />
-        <activity android:name=".friends.FriendsActivity" />
-        <activity android:name=".play.NormalGameActivity" />
+        <activity android:name=".PlayActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".play.CountdownActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".RegisterActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".main.LoginActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".friends.AddFriendsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".friends.FriendsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".play.NormalGameActivity" android:screenOrientation="portrait"/>
         <activity android:name=".main.MainActivity"
             android:screenOrientation="portrait" />
 

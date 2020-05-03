@@ -1,5 +1,6 @@
 package com.example.balapplat.profile
 
+import android.content.pm.ActivityInfo
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -37,6 +38,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
@@ -117,6 +119,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
             }
         }
     }
+
 }
 
 data class Stats(
