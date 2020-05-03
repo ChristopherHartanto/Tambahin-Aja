@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:background="@color/colorWhite"
     android:id="@+id/fragment_home"
-    tools:context=".HomeFragment">
+    tools:context=".home.HomeFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -18,44 +18,58 @@
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fbutton:cardCornerRadius="30dp">
+            fbutton:cardCornerRadius="30dp"
+            android:id="@+id/cvCredit">
         <TextView
-                android:layout_width="130dp"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-            android:text="Rp 1.500"
-                android:textColor="@color/colorSecondaryText"
+            android:text="1500"
+                android:textColor="@color/fbutton_color_sun_flower"
             android:textStyle="bold"
                 android:textSize="23sp"
                 android:layout_gravity="center"
                 android:layout_marginLeft="37dp"
-            android:id="@+id/tvPulsa"/>
+            android:id="@+id/tvCredit"/>
 
             <ImageView
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:src="@drawable/money_bag"
+                android:src="@drawable/credit"
                 android:layout_marginHorizontal="15dp"
                 android:layout_marginVertical="12dp"/>
         </androidx.cardview.widget.CardView>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="end"
+            android:src="@drawable/puzzle"
+            android:id="@+id/ivDailyPuzzle"
+            android:elevation="5dp"
+            android:padding="15dp"
+        android:background="@drawable/button_bg_round"
+            android:layout_margin="20dp"/>
 
-    <TextView
+        <TextView
             android:layout_width="20dp"
-        android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_gravity="right"
             android:textSize="25dp"
             android:textStyle="bold"
             android:text="!"
+            android:id="@+id/tvPuzzleInfo"
+            android:src="@drawable/lightning"
             android:textColor="#ff0000"/>
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="end"
-            android:src="@drawable/puzzle"
-            android:id="@+id/ivDailyPuzzle"
-            android:layout_marginTop="20dp"
-            android:layout_marginRight="10dp"/>
     </FrameLayout>
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="15dp"
+        android:src="@drawable/shopping_cart"
+        android:background="@drawable/button_bg_round"
+        android:layout_margin="10dp"
+        android:id="@+id/ivShop"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -72,13 +86,22 @@
         android:orientation="vertical"
         android:gravity="bottom">
 
+<!--        <info.hoang8f.widget.FButton-->
+<!--            android:id="@+id/primary_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="left|top"-->
+<!--            android:layout_margin="10dp"-->
+<!--            android:text="Primary Button"-->
+<!--            android:textColor="@android:color/white"/>-->
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnCustomPlay"
         android:layout_gravity="center"
+        android:id="@+id/btnRank"
         android:text="Play"
-        android:textColor="#ff0000"
+        android:textColor="@color/colorPrimary"
             android:layout_marginBottom="20dp"
         android:textSize="32sp"
             android:background="@drawable/button_bg_round"/>
@@ -87,27 +110,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Rank"
-            android:id="@+id/btnRank"
-            android:background="@drawable/button_border"
-            android:textColor="@color/colorBrown"
+            android:text="Custom"
+            android:id="@+id/btnCustomPlay"
+            android:textColor="@color/colorWhite"
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"/>
 
-        <Button
-            android:id="@+id/btnPlayOnline"
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btnOnline"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:alpha="0.9"
-            android:background="@drawable/button_border"
-            android:text="Play\nOnline"
-            android:textColor="@color/colorBrown" />
+            android:text="Online"
+            android:textColor="@color/colorWhite" />
 
 
     </LinearLayout>
@@ -116,35 +137,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-<!--            <info.hoang8f.widget.FButton-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                fbutton:buttonColor="@color/fbutton_color_peter_river"-->
-<!--                fbutton:shadowColor="@color/fbutton_color_belize_hole"-->
-<!--                fbutton:shadowEnabled="true"-->
-<!--                fbutton:shadowHeight="5dp"-->
-<!--                fbutton:cornerRadius="5dp"/>-->
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Play\nFriend"
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"
-            android:background="@drawable/button_border"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:id="@+id/btnPlayFriend"/>
 
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Leader\nBoard"
             android:layout_weight="1"
             android:alpha="0.9"
             android:layout_margin="5dp"
-            android:background="@drawable/button_border"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:id="@+id/btnLeaderboard"/>
 
     </LinearLayout>

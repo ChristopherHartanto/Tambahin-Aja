@@ -13,37 +13,31 @@
         android:layout_weight="1"
         android:gravity="center">
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn1"
             android:text="1"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn2"
             android:text="2"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
             android:layout_margin="5dp"/>
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn3"
             android:text="3"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
     </LinearLayout>
@@ -55,37 +49,31 @@
         android:gravity="center"
         android:layout_weight="1">
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn4"
             android:text="4"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn5"
             android:text="5"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn6"
             android:text="6"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
     </LinearLayout>
@@ -97,41 +85,53 @@
         android:layout_weight="1"
         android:gravity="center">
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn7"
             android:text="7"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn8"
             android:text="8"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn9"
             android:text="9"
             android:layout_weight="1"
-            android:background="@color/colorPrimaryDark"
-            android:alpha="0.9"
-            android:textColor="@color/colorBrown"
+            android:textColor="@color/colorWhite"
             android:layout_margin="5dp"/>
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:weightSum="9">
+
+        <info.hoang8f.widget.FButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn0"
+            android:layout_weight="1"
+            android:text="0"
+            android:textColor="@color/colorWhite"
+            android:layout_margin="5dp"/>
+
+    </LinearLayout>
 
 
 </LinearLayout>

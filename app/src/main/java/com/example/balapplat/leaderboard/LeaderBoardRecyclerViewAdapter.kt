@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
@@ -21,7 +22,7 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_leaderboard, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(scoreItems[position],profileItems[position], position)
+        holder.bindItem(scoreItems[position],profileItems[position], position, context)
     }
 
     override fun getItemCount(): Int = scoreItems.size
@@ -33,9 +34,11 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
         private val score = view.findViewById<TextView>(R.id.tvScoreLeader)
         private val image = view.findViewById<ImageView>(R.id.ivLeader)
 
-        fun bindItem(highScore: HighScore, profileItems: User, position: Int) {
+        fun bindItem(highScore: HighScore, profileItems: User, position: Int, context: Context) {
             val counter = position + 1
-
+            val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
+            name.typeface = typeface
+            score.typeface = typeface
             when (position) {
                 0 -> count.backgroundResource = R.drawable.first_medal
                 1 -> count.backgroundResource = R.drawable.second_medal

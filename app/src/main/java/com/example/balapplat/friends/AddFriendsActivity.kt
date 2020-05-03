@@ -2,6 +2,7 @@ package com.example.balapplat.friends
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
@@ -18,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,9 +41,13 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_friends)
 
+        supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
         presenter = Presenter(this, database)
         presenter.receiveInvitation()
+
+        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        tvAddFriendsTitle.typeface = typeface
 
         adapter = AddFriendRecyclerViewAdapter(this,items,statusItems){
             addFriend(uids[it])

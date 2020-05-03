@@ -7,13 +7,12 @@
     android:orientation="vertical"
     tools:context=".profile.ProfileFragment">
 
-
-
     <LinearLayout
         android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        android:layout_marginBottom="10dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -26,16 +25,17 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
                 android:src="@drawable/setting_icon"
+            android:id="@+id/ivSetting"
                 android:layout_marginRight="10dp"/>
 
     </LinearLayout>
 
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-                android:layout_gravity="center"
-                android:layout_margin="5dp"
-            android:src="@mipmap/ic_launcher_round"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_launcher_background"
             android:id="@+id/ivProfile"/>
 
             <TextView
@@ -44,9 +44,8 @@
             android:id="@+id/tvProfileName"
                 android:layout_weight="1"
                 android:gravity="center"
-            android:textSize="16sp"
+            android:textSize="20sp"
                 android:text="Unknown"
-                android:textColor="@color/colorBrown"
             android:layout_margin="5dp"/>
         </LinearLayout>
 
@@ -63,7 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-                android:weightSum="4">
+                android:weightSum="3">
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -76,14 +75,6 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Lose"
-                    android:textSize="16sp"
-                    android:gravity="center"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="Join Tournament"
                     android:textSize="16sp"
                     android:gravity="center"/>
 
@@ -100,7 +91,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-                android:weightSum="4">
+        android:weightSum="3">
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -118,14 +109,6 @@
                     android:textSize="16sp"
                     android:gravity="center"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-                    android:text="0"
-                    android:id="@+id/tvJoinTournament"
-            android:textSize="16sp" />
 
         <TextView
             android:layout_width="0dp"
@@ -148,6 +131,15 @@
         android:id="@+id/adView"
         ads:adSize="SMART_BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvHistoryTitle"
+        android:textColor="@color/colorPrimaryDark"
+        android:text="History"
+        android:layout_margin="10dp"
+        android:textSize="20sp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.main.MainActivity
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
@@ -61,6 +62,17 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         matchPresenter = MatchPresenter(this,database)
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this, database)
+
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvPlayerName.typeface = typeface
+        tvOpponentName.typeface = typeface
+        tvPoint.typeface = typeface
+        tvTimer.typeface = typeface
+        tvQuestion.typeface = typeface
+        tvTimerTitle.typeface = typeface
+        tvPlayerPoint.typeface = typeface
+        tvOpponentPoint.typeface = typeface
+
         if (intent.extras!!.getBoolean("rank"))
             rank = true
 
@@ -203,8 +215,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 point += 10
                 generate()
             }else{
-                if(point != 0)
+                if(point > 3)
                     point -= 3
+                else
+                    point = 0
             }
 
         }else if (type == "oddEven"){
@@ -212,8 +226,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 point += 10
                 generate()
             }else{
-                if(point != 0)
+                if(point > 5)
                     point -= 5
+                else
+                    point = 0
                 generate()
             }
         }else if (type == "rush"){
@@ -221,8 +237,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 point += 13
                 generate()
             }else{
-                if(point != 0)
+                if(point > 4)
                     point -= 4
+                else
+                    point = 0
                 generate()
             }
             countDownTimer.cancel()
@@ -234,8 +252,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 point += 12
                 generate()
             }else{
-                if(point != 0)
+                if(point > 5)
                     point -= 5
+                else
+                    point = 0
             }
         }
 
@@ -278,9 +298,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                             if (rank)
                                 matchPresenter.sumHighScore(auth,
                                     intent.extras!!.getString("type")!!,point)
-                            finish()
-                            startActivity<MainActivity>()
                         }
+
                     }else{
                         toast("your point : "+ point + "opponent point : " + opponentPoint)
                         var text = ""
@@ -318,10 +337,12 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                             title = "End"
                             okButton {
                                 finish()
-                                startActivity<MainActivity>()
+                                startActivity<PostGameActivity>()
                             }
                         }.show()
                     }
+                    finish()
+                    startActivity<PostGameActivity>()
 
                 }
 
@@ -351,7 +372,11 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         val btn7 = view.findViewById<Button>(R.id.btn7)
         val btn8 = view.findViewById<Button>(R.id.btn8)
         val btn9 = view.findViewById<Button>(R.id.btn9)
+        val btn0 = view.findViewById<Button>(R.id.btn0)
 
+        btn0.onClick {
+            checkAnswer(0)
+        }
         btn1.onClick {
             checkAnswer(1)
         }

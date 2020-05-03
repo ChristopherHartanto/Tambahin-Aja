@@ -18,30 +18,15 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="50dp"
-            android:layout_marginRight="50dp"
-            app:cardCornerRadius="100dp">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivPlayerWaiting"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
 
-            <ImageView
-                android:id="@+id/ivPlayerWaiting"
-                android:layout_width="100dp"
-                android:layout_height="100dp" />
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="100dp">
-
-            <ImageView
-                android:id="@+id/ivOpponentImageWaiting"
-                android:layout_width="100dp"
-                android:layout_height="100dp" />
-        </androidx.cardview.widget.CardView>
-
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivOpponentImageWaiting"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
 
     </LinearLayout>
 

@@ -56,7 +56,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     }
 
     fun newHighScore(auth: FirebaseAuth,total: Long, type: String, highScore: Int){
-        database.child("leaderboards").child(auth.currentUser!!.uid).child("total").setValue(total).addOnFailureListener {
+        database.child("leaderboards").child(auth.currentUser!!.uid).child("total").setValue(total+highScore).addOnFailureListener {
             view.response(it.message!!)
         }
         database.child("leaderboards").child(auth.currentUser!!.uid).child(type).setValue(highScore).addOnFailureListener {

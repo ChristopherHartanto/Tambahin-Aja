@@ -9,15 +9,11 @@ import com.example.balapplat.R
 import com.example.balapplat.utils.showSnackBar
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
-
 import kotlinx.android.synthetic.main.activity_countdown.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
 
-
 class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +21,8 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
 
         supportActionBar?.hide()
 
-
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvCountdown.typeface = typeface
         countDown(true)
 
     }
@@ -68,13 +65,13 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
                                 ,"creator" to creator))
                         }
                     }
-                    else
+                   else
                         startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
                             "name" to name))
                 }else
                     startActivity(intentFor<NormalGameActivity>("type" to type,
                         "mode" to mode,"rank" to rank))
-            }
+                }
         }
         if (status)
             timer.start()
@@ -98,16 +95,8 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
             is Event.ConnectivityEvent -> {
                 if (event.state.isConnected) {
                     showSnackBar(activity_countdown, "The network is back !", "LONG")
-
-
-
-
                 } else {
                     showSnackBar(activity_countdown, "There is no more network", "INFINITE")
-
-
-
-
                 }
             }
         }

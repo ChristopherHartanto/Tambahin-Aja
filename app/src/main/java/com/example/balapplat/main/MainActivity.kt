@@ -3,10 +3,12 @@ package com.example.balapplat.main
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.example.balapplat.HomeFragment
+import com.example.balapplat.home.HomeFragment
 import com.example.balapplat.R
 import com.example.balapplat.Tournament
 import com.example.balapplat.model.Inviter
@@ -33,6 +35,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var auth: FirebaseAuth
     var data : Inviter = Inviter()
     private var prevState = true
+    private var doubleBackToExitPressedOnce = false
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +86,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 .beginTransaction()
                 .replace(
                     R.id.main_container,
-                    HomeFragment(), HomeFragment::class.java.simpleName)
+                        HomeFragment(), HomeFragment::class.java.simpleName)
                 .commit()
         }
     }
@@ -150,6 +153,18 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun onStart() {
         handleConnectivityChange(NetworkStateHolder)
         super.onStart()
+    }
+
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+
+        this.doubleBackToExitPressedOnce = true
+        toast("Please click BACK again to exit")
+
+        Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 }
 

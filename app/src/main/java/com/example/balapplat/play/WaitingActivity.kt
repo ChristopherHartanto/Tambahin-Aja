@@ -3,6 +3,7 @@ package com.example.balapplat.play
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.main.MainActivity
 import com.example.balapplat.view.MainView
 import com.example.balapplat.R
@@ -44,6 +45,10 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
         presenter = Presenter(this,database)
         waitingPresenter = WaitingPresenter(this,database)
         waitingPresenter.loadTips()
+
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        tvTips.typeface = typeface
+        tvWaiting.typeface = typeface
 
        if (intent.extras != null){
            if (intent.extras!!.getString("facebookId") != null){ // jika main bareng teman
