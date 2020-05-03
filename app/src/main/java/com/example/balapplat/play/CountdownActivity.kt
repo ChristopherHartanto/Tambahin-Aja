@@ -4,21 +4,27 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.R
 import com.example.balapplat.utils.showSnackBar
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
+
 import kotlinx.android.synthetic.main.activity_countdown.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
 
+
 class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_countdown)
 
         supportActionBar?.hide()
+
 
         countDown(true)
 
@@ -40,27 +46,35 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
             override fun onFinish() {
                 finish()
 
-                if (!intent.extras!!.getString("mode").equals("single")){
-                    if(intent.extras!!.getString("facebookId").equals(null)){
-                        if (intent.extras!!.getString("inviterFacebookId") != null){
-                            val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
-                            val inviterName = intent.extras!!.getString("inviterName")
+                val mode = intent.extras!!.getString("mode")
+                val faceBookId = intent.extras!!.getString("facebookId")
+                val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
+                val inviterName = intent.extras!!.getString("inviterName")
+                val type = intent.extras!!.getString("type")
+                val name = intent.extras!!.getString("name")
+                val rank = intent.extras!!.getBoolean("rank")
+                val playOnline = intent.extras!!.getBoolean("playOnline")
+                val creator = intent.extras!!.getBoolean("creator")
+
+                if (!mode.equals("single")){
+                    if(faceBookId.equals(null)){
+                        if (inviterFacebookId != null){
                             startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName))
                         }
                         else{
-                            startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
-                                "name" to intent.extras!!.getString("name")
-                                ,"playOnline" to intent.extras!!.getString("playOnline")
-                                ,"creator" to intent.extras!!.getString("creator")))
+                            startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
+                                "name" to name
+                                ,"playOnline" to playOnline
+                                ,"creator" to creator))
                         }
                     }
-                   else
-                        startActivity(intentFor<NormalGameActivity>("facebookId" to intent.extras!!.getString("facebookId"),
-                            "name" to intent.extras!!.getString("name")))
+                    else
+                        startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
+                            "name" to name))
                 }else
-                    startActivity(intentFor<NormalGameActivity>("type" to intent.extras!!.getString("type"),
-                        "mode" to intent.extras!!.getString("mode"),"rank" to intent.extras!!.getBoolean("rank")))
-                }
+                    startActivity(intentFor<NormalGameActivity>("type" to type,
+                        "mode" to mode,"rank" to rank))
+            }
         }
         if (status)
             timer.start()
@@ -84,8 +98,16 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
             is Event.ConnectivityEvent -> {
                 if (event.state.isConnected) {
                     showSnackBar(activity_countdown, "The network is back !", "LONG")
+
+
+
+
                 } else {
                     showSnackBar(activity_countdown, "There is no more network", "INFINITE")
+
+
+
+
                 }
             }
         }

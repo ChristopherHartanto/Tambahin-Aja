@@ -8,6 +8,7 @@ import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import com.example.balapplat.friends.FriendsActivity
 import com.example.balapplat.leaderboard.LeaderBoardActivity
+import com.example.balapplat.main.LoginActivity
 import com.example.balapplat.play.WaitingActivity
 import com.example.balapplat.rank.RankActivity
 import com.example.balapplat.utils.showSnackBar
