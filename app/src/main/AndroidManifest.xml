@@ -16,6 +16,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         tools:ignore="LockedOrientationActivity">
+        <service
+            android:name=".push_notification.MyFirebaseInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name=".push_notification.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <activity android:name=".home.CreditActivity"></activity>
+        <activity android:name=".home.MarketActivity" />
+        <activity android:name=".play.PostGameActivity" />
+        <activity android:name=".profile.SettingActivity" />
+        <activity android:name=".rank.RankActivity" />
+        <activity android:name=".play.OddEvenGameActivity" />
+        <activity android:name=".play.WaitingActivity" />
+        <activity android:name=".leaderboard.LeaderBoardActivity" />
         <activity android:name=".home.CreditActivity" android:screenOrientation="portrait"></activity>
         <activity android:name=".home.MarketActivity" android:screenOrientation="portrait"/>
         <activity android:name=".play.PostGameActivity" android:screenOrientation="portrait"/>

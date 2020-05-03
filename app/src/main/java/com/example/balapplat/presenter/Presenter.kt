@@ -8,20 +8,27 @@ import com.google.firebase.database.*
 
 class Presenter(private val view: MainView, private val database: DatabaseReference) {
 
-    companion object {
-        var idlingResourceCounter = 1
+    var postListener = object : ValueEventListener {
+        override fun onCancelled(p0: DatabaseError) {
+        }
+
+        override fun onDataChange(p0: DataSnapshot) {
+        }
+
     }
 
     fun receiveInvitation(){
-        val postListener = object : ValueEventListener {
+        postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                database.removeEventListener(this)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
                     if (p0.getValue(Inviter::class.java)!!.status == false)
                         view.loadData(p0)
+
+                    database.removeEventListener(this)
                 }
             }
 
@@ -45,5 +52,9 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
         if (auth.currentUser != null){
             database.child("users").child(auth.currentUser!!.uid).child("active").setValue(status)
         }
+    }
+
+    fun dismissListener(){
+        database.removeEventListener(postListener)
     }
 }

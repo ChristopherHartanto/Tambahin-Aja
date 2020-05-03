@@ -38,86 +38,84 @@
             android:src="@drawable/ic_launcher_background"
             android:id="@+id/ivProfile"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="20dp"
+            android:id="@+id/layout_edit_profile"
+            android:gravity="center">
+
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-            android:id="@+id/tvProfileName"
-                android:layout_weight="1"
+                android:id="@+id/tvProfileName"
                 android:gravity="center"
-            android:textSize="20sp"
+                android:textSize="24sp"
                 android:text="Unknown"
-            android:layout_margin="5dp"/>
+                android:layout_margin="5dp"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/edit_tools"/>
+        </LinearLayout>
+
         </LinearLayout>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_marginVertical="10dp"
         android:padding="5dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="10dp"
+            android:weightSum="2">
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:src="@drawable/medal"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:src="@drawable/award" />
+        </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-                android:weightSum="3">
+        android:weightSum="2">
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Win"
-                    android:textSize="16sp"
-                    android:gravity="center"/>
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Lose"
-                    android:textSize="16sp"
-                    android:gravity="center"/>
+            android:text="0"
+            android:textSize="18sp"
+            android:textColor="@color/colorPrimary"
+            android:id="@+id/tvWin"
+            android:gravity="center"/>
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Tournament\nWin"
-            android:textSize="16sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="3">
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-                    android:text="0"
-                    android:textSize="16sp"
-                    android:id="@+id/tvWin"
-                    android:gravity="center"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="0"
-                    android:id="@+id/tvLose"
-                    android:textSize="16sp"
-                    android:gravity="center"/>
-
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-                    android:text="0"
-                    android:id="@+id/tvWinTournament"
-            android:textSize="16sp" />
+            android:text="0"
+            android:id="@+id/tvWinTournament"
+            android:textSize="18sp"
+            android:textColor="@color/colorPrimary"/>
     </LinearLayout>
         </LinearLayout>
 

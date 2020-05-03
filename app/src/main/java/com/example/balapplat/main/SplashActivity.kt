@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import com.example.balapplat.R
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import org.jetbrains.anko.intentFor
@@ -19,7 +20,9 @@ class SplashActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        if (FirebaseApp.getApps(this).size == 0)
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+
         if (auth.currentUser != null){
             val database = FirebaseDatabase.getInstance()
             val myConnectionsRef = database.reference.child("users").child(auth.currentUser!!.uid).child("online")

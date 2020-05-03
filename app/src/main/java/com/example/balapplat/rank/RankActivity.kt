@@ -85,6 +85,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         }
 
         layout_point_energy.onClick {
+            finish()
             startActivity<MarketActivity>()
         }
 
@@ -150,6 +151,24 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
                 }
             }
         }
+    }
+
+    fun fetchBalance(){
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if (dataSnapshot.exists()){
+                    tvEnergy.text = "${dataSnapshot.getValue(Balance::class.java)!!.energy}/${dataSnapshot.getValue(Balance::class.java)!!.energyLimit}"
+                    tvPoint.text = "${dataSnapshot.getValue(Balance::class.java)!!.point}"
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").addListenerForSingleValueEvent(postListener)
     }
 
     fun fetchScore(){
@@ -307,4 +326,11 @@ data class ChooseGame(
     var title: String? = "",
     var energy: Int? = 0,
     var score: Int? = 0
+)
+
+data class Balance(
+    var credit: Int? = 0,
+    var energy: Int? = 0,
+    var energyLimit: Int? = 0,
+    var point: Int? = 0
 )

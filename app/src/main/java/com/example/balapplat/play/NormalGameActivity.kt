@@ -297,7 +297,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                         if(highScore < point){
                             if (rank)
                                 matchPresenter.sumHighScore(auth,
-                                    intent.extras!!.getString("type")!!,point)
+                                    intent.extras!!.getString("type")!!,point,highScore)
                         }
 
                     }else{
@@ -459,6 +459,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
     override fun onDestroy() {
         countDownTimer.cancel()
+        matchPresenter.dismissListener()
         super.onDestroy()
     }
 

@@ -476,9 +476,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         btnPlay.onClick {
             if (position == -1)
                 toast("Choose game First")
-            else
+            else{
+                fragment_home.alpha = 1F
+                main_activity.alpha = 1F
+                popupWindow.dismiss()
                 startActivity(intentFor<CountdownActivity>("mode" to "single",
                         "type" to "normal","rank" to false))
+            }
+
         }
 
         rvCustomGame.adapter = customGameAdapter

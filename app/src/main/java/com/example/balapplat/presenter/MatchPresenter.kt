@@ -21,14 +21,24 @@ import java.util.*
 
 class MatchPresenter (private val view: MatchView, private val database: DatabaseReference){
 
+    var postListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+
+        }
+    }
 
     fun getHighScore(auth: FirebaseAuth, type: String){
-        val postListener = object : ValueEventListener {
+        postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
                 if (dataSnapshot.exists())
                     view.loadHighScore(dataSnapshot.value as Long)
-
+                else
+                    view.loadHighScore(0)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -38,13 +48,14 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         database.child("leaderboards").child(auth.currentUser!!.uid).child(type).addListenerForSingleValueEvent(postListener)
     }
 
-    fun sumHighScore(auth: FirebaseAuth, type: String, highScore: Int){
-        val postListener = object : ValueEventListener {
+    fun sumHighScore(auth: FirebaseAuth, type: String, highScore: Int, oldScore: Int){
+        postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
-                if (dataSnapshot.exists()) {
-                    newHighScore(auth,dataSnapshot.value as Long,type,highScore)
-                }
+                if (dataSnapshot.exists())
+                    newHighScore(auth,dataSnapshot.value as Long - oldScore.toLong(),type,highScore)
+                else
+                    newHighScore(auth,0,type,highScore)
 
             }
 
@@ -94,7 +105,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     fun getStats(auth: FirebaseAuth,winStatus : Boolean){
         var temp = 0
-        val postListener = object : ValueEventListener {
+        postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 view.response(p0.message)
             }
@@ -153,11 +164,11 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     }
 
     fun removeOnPlay(){
-        database.child("history").child(Profile.getCurrentProfile().id).removeValue()
+        database.child("onPlay").child(Profile.getCurrentProfile().id).removeValue()
     }
 
     fun fetchOpponent(inviter: Boolean, facebookId: String){
-        val postListener = object : ValueEventListener {
+        postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 view.response(p0.message)
             }
@@ -172,5 +183,9 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         }
         database.child("onPlay").child(facebookId).addValueEventListener(postListener)
 
+    }
+
+    fun dismissListener(){
+        database.removeEventListener(postListener)
     }
 }
