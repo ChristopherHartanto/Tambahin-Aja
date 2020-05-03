@@ -44,6 +44,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     var highScore = 0
     var opponentPoint = 0
     var type = "normal"
+    var mix = false
     var player = 0 // 1 yang ajak, 2 yang diajak, 0 main sendiri
     var facebookId = ""
     var rank = false
@@ -104,7 +105,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 // jika main sendiri
                 type = intent.extras!!.getString("type")!!
 
-                if (type == "normal" || type == "rush" || type == "alphaNum")
+                if (type == "normal" || type == "rush" || type == "alphaNum" || type == "doubleAttack")
                     normalKeyboard()
                 else
                     oddEvenKeyboard()
@@ -121,6 +122,9 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         if (type == "rush")
             timer = 5
 
+        if (type == "mix")
+            mix = true
+
         generate()
         control(false)
         
@@ -128,6 +132,22 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
     @SuppressLint("SetTextI18n")
     private fun generate(){
+        if (mix){
+            when((0 until 2).random()){
+                0 -> {
+                    type = "normal"
+                    normalKeyboard()
+                }
+                1 -> {
+                    type = "rush"
+                    normalKeyboard()
+                }
+                2 -> {
+                    type = "oddEven"
+                    oddEvenKeyboard()
+                }
+            }
+        }
         if (type == "alphaNum"){
             count += point/100
 
@@ -149,16 +169,18 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 }
             }
         }else{
-        tvQuestion.text = ""
-        numberArr.clear()
-        for(x in 0 until count)
-        {
-            val value = Random().nextInt(9)
-            numberArr.add(value)
+            count += point/100
+            tvQuestion.text = ""
+            numberArr.clear()
+            for(x in 0 until count)
+            {
+                val value = Random().nextInt(9)
+                numberArr.add(value)
 
-            tvQuestion.text = tvQuestion.text.toString() + value
+                tvQuestion.text = tvQuestion.text.toString() + value
+            }
         }
-        }
+
 
         answer = generateAnswer()
     }
@@ -204,6 +226,25 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     result = temp[x]
 
             }
+        }else if (type == "doubleAttack"){
+            val temp = numberArr
+            for(x in 0 until count)
+            {
+                if(x != count-1) {
+                    if(temp[0]*2 / 10 == 1)
+                        temp[0] -= 9
+
+                    if(temp[x+1]*2 / 10 == 1)
+                        temp[x+1] -= 9
+
+                    temp[x+1] += temp[x]
+                    if(temp[x+1] / 10 == 1)
+                        temp[x+1] -= 9
+                }
+                else
+                    result = temp[x]
+
+            }
         }
 
         return result
@@ -226,8 +267,19 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 point += 10
                 generate()
             }else{
-                if(point > 5)
-                    point -= 5
+                if(point > 6)
+                    point -= 6
+                else
+                    point = 0
+                generate()
+            }
+        }else if (type == "doubleAttack"){
+            if (answer == value){
+                point += 15
+                generate()
+            }else{
+                if(point > 7)
+                    point -= 7
                 else
                     point = 0
                 generate()
@@ -329,17 +381,17 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                                 intent.extras!!.getString("name")!!
                             )
                         }
-
-                        if (player == 2 || creator)
-                            matchPresenter.removeOnPlay()
-
-                        alert ("You $text"){
-                            title = "End"
-                            okButton {
-                                finish()
-                                startActivity<PostGameActivity>()
-                            }
-                        }.show()
+//
+//                        if (player == 2 || creator)
+//                            matchPresenter.removeOnPlay()
+//
+//                        alert ("You $text"){
+//                            title = "End"
+//                            okButton {
+//                                finish()
+//                                startActivity<PostGameActivity>()
+//                            }
+//                        }.show()
                     }
                     finish()
                     startActivity<PostGameActivity>()
@@ -360,8 +412,9 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         val view = findViewById<View>(R.id.layout_keyboard)
         val viewHide = findViewById<View>(R.id.layout_odd_even_keyboard)
 
-        viewHide.visibility = View.INVISIBLE
-        layout_odd_even_keyboard.layoutParams = LinearLayout.LayoutParams(0,0)
+        view.visibility = View.VISIBLE
+        viewHide.visibility = View.GONE
+        //layout_odd_even_keyboard.layoutParams = LinearLayout.LayoutParams(0,0)
 
         val btn1 = view.findViewById<Button>(R.id.btn1)
         val btn2 = view.findViewById<Button>(R.id.btn2)
@@ -410,8 +463,9 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         val view = findViewById<View>(R.id.layout_odd_even_keyboard)
         val viewHide = findViewById<View>(R.id.layout_keyboard)
 
-        layout_keyboard.layoutParams = LinearLayout.LayoutParams(0,0)
-        viewHide.visibility = View.INVISIBLE
+        //layout_keyboard.layoutParams = LinearLayout.LayoutParams(0,0)
+        viewHide.visibility = View.GONE
+        view.visibility = View.VISIBLE
 
         val btnOdd = view.findViewById<Button>(R.id.btnOdd)
         val btnEven = view.findViewById<Button>(R.id.btnEven)

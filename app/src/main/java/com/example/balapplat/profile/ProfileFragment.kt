@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.example.balapplat.home.CustomGameRecyclerViewAdapter
 import com.example.balapplat.model.HighScore
+import com.example.balapplat.model.User
 import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.utils.showSnackBar
 import com.facebook.AccessToken
@@ -39,6 +41,7 @@ import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.startActivity
 import org.jetbrains.anko.support.v4.toast
+import java.util.regex.Pattern
 
 class ProfileFragment : Fragment(), NetworkConnectivityListener {
 
@@ -46,6 +49,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
     private lateinit var database: DatabaseReference
     private lateinit var mAdView : AdView
     private lateinit var popupWindow : PopupWindow
+    private lateinit var user: User
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
     override fun onCreateView(
@@ -65,6 +69,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
             auth.signOut()
 
         getStats()
+        fetchUserProfile()
 
         mAdView = view!!.findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()
@@ -119,7 +124,24 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
 
             }
         }
-        database.child("stats").child(auth.currentUser!!.uid).addValueEventListener(postListener)
+        database.child(auth.currentUser!!.uid).child("stats").addValueEventListener(postListener)
+    }
+
+    fun fetchUserProfile(){
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if (dataSnapshot.exists()){
+                    user = User(dataSnapshot.getValue(User::class.java)!!.name,"", dataSnapshot.getValue(User::class.java)?.email, dataSnapshot.getValue(User::class.java)?.noHandphone)
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).addValueEventListener(postListener)
     }
 
     fun getFacebookProfilePicture(userID: String): String {
@@ -177,11 +199,27 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         etEditProfileHandphone.typeface = typeface
         etEditProfileName.typeface = typeface
 
+        etEditProfileName.setText("${user.name}")
+        etEditProfileEmail.setText("${user.email}")
+        etEditProfileHandphone.setText("${user.noHandphone}")
 
         btnClose.onClick {
             btnClose.startAnimation(clickAnimation)
             fragment_profile.alpha = 1F
             popupWindow.dismiss()
+        }
+
+        btnSave.onClick {
+            if (!isValidEmail(etEditProfileEmail.text.toString()))
+                toast("Input Valid Email Address")
+            else if(!isValidMobile(etEditProfileHandphone.text.toString()))
+                toast("Input Valid No Handphone")
+            else {
+                saveProfile(etEditProfileName.text.toString(),etEditProfileEmail.text.toString(),etEditProfileHandphone.text.toString())
+                btnClose.startAnimation(clickAnimation)
+                fragment_profile.alpha = 1F
+                popupWindow.dismiss()
+            }
         }
 
         fragment_profile.alpha = 0.1F
@@ -196,6 +234,29 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
 
     }
 
+    fun isValidEmail(target: CharSequence): Boolean {
+        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches()
+    }
+    fun isValidMobile(phone: String) : Boolean {
+        if(!Pattern.matches("[a-zA-Z]+", phone)) {
+            return phone.length in 7..13;
+        }
+        return false;
+    }
+
+    fun saveProfile(name: String, email: String, noHandphone: String){
+        val values  = hashMapOf(
+                "name" to name,
+                "email" to email,
+                "noHandphone" to noHandphone
+        )
+        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+            toast("Save")
+        }.addOnFailureListener {
+            toast("${it.message}")
+        }
+
+    }
 }
 
 data class Stats(

@@ -337,7 +337,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         val btn0 = keyboardView.findViewById<Button>(R.id.btn0)
 
         btnAnswerPuzzle.onClick {
-            checkAnswer(tvAnswerPuzzle.text.toString())
+            if (tvAnswerPuzzle.text == "")
+                toast("Please Select Your Answer")
+            else
+                checkAnswer(tvAnswerPuzzle.text.toString())
         }
 
         btnClose.onClick {

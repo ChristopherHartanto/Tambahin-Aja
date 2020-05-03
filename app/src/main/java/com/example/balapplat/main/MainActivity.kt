@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
         activity_main.alpha = 0.1F
 
-        TransitionManager.beginDelayedTransition(fragment_profile)
+        TransitionManager.beginDelayedTransition(activity_main)
         popupWindow.showAtLocation(
                 activity_main, // Location to display popup window
                 Gravity.CENTER, // Exact position of layout to display popup

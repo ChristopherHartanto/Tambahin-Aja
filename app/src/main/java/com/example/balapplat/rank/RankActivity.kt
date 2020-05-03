@@ -1,10 +1,12 @@
 package com.example.balapplat.rank
 
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -33,11 +35,14 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
+import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_rank.*
 import kotlinx.android.synthetic.main.activity_rank.ivProfile
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.pop_up_task.*
+import kotlinx.android.synthetic.main.row_choose_game.*
 import kotlinx.android.synthetic.main.row_rank.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -53,7 +58,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
     private lateinit var auth: FirebaseAuth
     lateinit var data: Inviter
     private lateinit var popupWindow : PopupWindow
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private val items : MutableList<ChooseGame> = mutableListOf()
+    private val availableGameList : MutableList<Boolean> = mutableListOf()
     private val rankDetailItems : MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +80,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         tvTotalScore.typeface = typeface
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
         fetchScore()
+        fetchBalance()
+        fetchGameAvailable()
         val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
         ivTask.onClick {
@@ -89,24 +98,39 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
             startActivity<MarketActivity>()
         }
 
-        adapter = RankRecyclerViewAdapter(this,items){
-            finish()
-            when (it) {
-                0 -> {
-                    startActivity(intentFor<CountdownActivity>("mode" to "single",
-                        "type" to "normal","rank" to true))
-                }
-                1 -> {
-                    startActivity(intentFor<CountdownActivity>("mode" to "single",
-                        "type" to "oddEven","rank" to true))
-                }
-                2 -> {
-                    startActivity(intentFor<CountdownActivity>("mode" to "single",
-                        "type" to "rush","rank" to true))
-                }
-                3 -> {
-                    startActivity(intentFor<CountdownActivity>("mode" to "single",
-                        "type" to "alphaNum","rank" to true))
+        adapter = RankRecyclerViewAdapter(this,items,availableGameList){
+            if (!availableGameList[it]){
+                if (items[it].priceGame!! < tvPoint.text.toString().toInt())
+                    popUpMessage(1,"Do You Want to Buy?",it)
+                else
+                    popUpMessage(2,"Not Enough Money",it)
+            }else{
+                finish()
+                when (it) {
+                    0 -> {
+                        startActivity(intentFor<CountdownActivity>("mode" to "single",
+                                "type" to "normal","rank" to true))
+                    }
+                    1 -> {
+                        startActivity(intentFor<CountdownActivity>("mode" to "single",
+                                "type" to "oddEven","rank" to true))
+                    }
+                    2 -> {
+                        startActivity(intentFor<CountdownActivity>("mode" to "single",
+                                "type" to "rush","rank" to true))
+                    }
+                    3 -> {
+                        startActivity(intentFor<CountdownActivity>("mode" to "single",
+                                "type" to "alphaNum","rank" to true))
+                    }
+                    4 ->{
+                        startActivity(intentFor<CountdownActivity>("mode" to "single",
+                                "type" to "mix","rank" to true))
+                    }
+                    5 ->{
+                        startActivity(intentFor<CountdownActivity>("mode" to "single",
+                                "type" to "doubleAttack","rank" to true))
+                    }
                 }
             }
 
@@ -171,6 +195,52 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         database.child("users").child(auth.currentUser!!.uid).child("balance").addListenerForSingleValueEvent(postListener)
     }
 
+    fun fetchGameAvailable(){
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if (dataSnapshot.exists()){
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.alphaNum!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.mix!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.doubleAttack!!)
+
+                    adapter.notifyDataSetChanged()
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("availableGame").addListenerForSingleValueEvent(postListener)
+    }
+
+    fun buyGame(position: Int){
+        var gameName = ""
+        val point = tvPoint.text.toString().toLong() - items[position].priceGame!!
+        when(position){
+            1 -> gameName = "oddEven"
+            2 -> gameName = "rush"
+            3 -> gameName = "alphaNum"
+            4 -> gameName = "mix"
+            5 -> gameName = "doubleAttack"
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("availableGame").child(gameName).setValue(true).addOnFailureListener {
+            popUpMessage(2, it.message.toString(),0)
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").setValue(point).addOnFailureListener {
+            popUpMessage(2, it.message.toString(),0)
+        }.addOnSuccessListener {
+            popUpMessage(2,"Success Buy this Game",0)
+            fetchBalance()
+            fetchGameAvailable()
+        }
+    }
+
     fun fetchScore(){
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -190,17 +260,21 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         if (dataSnapshot.exists()){
             tvTotalScore.text = "" + dataSnapshot.getValue(LeaderBoard::class.java)!!.total
 
-            items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal))
-            items.add(ChooseGame("Odd Even", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven))
-            items.add(ChooseGame("Rush", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush))
-            items.add(ChooseGame("AlphaNum", 30,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum))
+            items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal,0))
+            items.add(ChooseGame("Odd Even", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
+            items.add(ChooseGame("Rush", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
+            items.add(ChooseGame("AlphaNum", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum,500))
+            items.add(ChooseGame("Mix", 28,dataSnapshot.getValue(LeaderBoard::class.java)!!.mix,800))
+            items.add(ChooseGame("Double Attack", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.doubleAttack,1000))
         }else{
             tvTotalScore.text = "" + 0
 
-            items.add(ChooseGame("Normal", 15,0))
-            items.add(ChooseGame("Odd Even", 20,0))
-            items.add(ChooseGame("Rush", 25,0))
-            items.add(ChooseGame("AlphaNum", 30,0))
+            items.add(ChooseGame("Normal", 15,0,0))
+            items.add(ChooseGame("Odd Even", 20,0,100))
+            items.add(ChooseGame("Rush", 25,0,300))
+            items.add(ChooseGame("AlphaNum", 30,0,500))
+            items.add(ChooseGame("Mix", 28,0,800))
+            items.add(ChooseGame("Double Attack", 25,0,1000))
         }
 
 
@@ -310,6 +384,82 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
                 0, // X offset
                 0 // Y offset
         )
+    }
+
+    private fun popUpMessage(type: Int,message: String, position: Int){
+        val inflater: LayoutInflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        val view = inflater.inflate(R.layout.pop_up_message,null)
+
+        // Initialize a new instance of popup window
+        popupWindow = PopupWindow(
+                view, // Custom view to show in popup window
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+        )
+
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        val layoutMessageInvitation = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
+        val layoutMessageBasic = view.findViewById<LinearLayout>(R.id.layout_message_basic)
+        val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
+        val tvMessageInfo = view.findViewById<TextView>(R.id.tvMessageInfo)
+        val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
+        val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
+        val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
+
+        if (type == 1){
+            layoutMessageInvitation.visibility = View.GONE
+            layoutMessageBasic.visibility = View.VISIBLE
+            layoutMessageReward.visibility = View.GONE
+
+            btnReject.text = "No"
+            tvMessageInfo.text = message
+
+            btnClose.onClick {
+                buyGame(position)
+                btnClose.startAnimation(clickAnimation)
+                activity_rank.alpha = 1F
+                popupWindow.dismiss()
+            }
+
+            btnReject.onClick {
+                btnReject.startAnimation(clickAnimation)
+                activity_rank.alpha = 1F
+                popupWindow.dismiss()
+            }
+
+        }
+        else if(type == 2){
+            layoutMessageInvitation.visibility = View.GONE
+            layoutMessageBasic.visibility = View.VISIBLE
+            layoutMessageReward.visibility = View.GONE
+
+            btnReject.visibility = View.GONE
+            tvMessageInfo.text = message
+
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_rank.alpha = 1F
+                popupWindow.dismiss()
+            }
+        }
+
+        tvMessageTitle.typeface = typeface
+
+        activity_rank.alpha = 0.1F
+
+        TransitionManager.beginDelayedTransition(activity_rank)
+        popupWindow.showAtLocation(
+                activity_rank, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+        )
 
     }
 }
@@ -319,13 +469,16 @@ data class LeaderBoard(
     var normal: Int? = 0,
     var oddEven: Int? = 0,
     var rush: Int? = 0,
-    var alphaNum: Int? = 0
+    var alphaNum: Int? = 0,
+    var mix: Int? = 0,
+    var doubleAttack: Int? = 0
 )
 
 data class ChooseGame(
     var title: String? = "",
     var energy: Int? = 0,
-    var score: Int? = 0
+    var score: Int? = 0,
+    var priceGame: Long? = 0
 )
 
 data class Balance(
@@ -333,4 +486,13 @@ data class Balance(
     var energy: Int? = 0,
     var energyLimit: Int? = 0,
     var point: Int? = 0
+)
+
+data class AvailableGame(
+    var normal: Boolean? = true,
+    var rush: Boolean? = false,
+    var oddEven: Boolean? = false,
+    var alphaNum: Boolean? = false,
+    var mix: Boolean? = false,
+    var doubleAttack: Boolean? = false
 )

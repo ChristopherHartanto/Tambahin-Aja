@@ -18,9 +18,8 @@
             android:background="@color/colorPrimary">
 
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
             android:id="@+id/ivRank"
             android:layout_gravity="center_horizontal"
             android:src="@mipmap/ic_launcher_round"/>

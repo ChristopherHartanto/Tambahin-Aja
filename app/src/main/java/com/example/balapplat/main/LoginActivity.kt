@@ -15,6 +15,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import com.example.balapplat.R
 import com.example.balapplat.utils.showSnackBar
@@ -47,6 +48,9 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
 
         supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        popup_window_button.typeface = typeface
+        popup_window_title.typeface = typeface
 
         database = FirebaseDatabase.getInstance().reference
         if (Build.VERSION.SDK_INT in 19..20) {
@@ -206,7 +210,8 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         values  = hashMapOf(
             "name" to auth.currentUser!!.displayName.toString(),
             "facebookId" to Profile.getCurrentProfile().id,
-            "registerDate" to currentDate
+            "registerDate" to currentDate,
+            "dailyPuzzle" to currentDate
         )
 
         database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {
@@ -214,7 +219,7 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         }
 
         values = hashMapOf(
-            "credit" to 500,
+            "credit" to 0,
             "energy" to 100,
             "energyLimit" to 100,
             "point" to 200
@@ -225,12 +230,26 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         }
 
         values = hashMapOf(
-            "win" to 0,
-            "lose" to 0,
-            "tournamentWin" to 0
+                "normal" to true,
+                "rush" to false,
+                "oddEven" to false,
+                "alphaNum" to false,
+                "mix" to false,
+                "doubleAttack" to false
         )
 
-        database.child("stats").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {
+        database.child("users").child(auth.currentUser!!.uid).child("availableGame").setValue(values).addOnFailureListener {
+            toast(""+ it.message)
+        }
+
+        values = hashMapOf(
+            "win" to 0,
+            "lose" to 0,
+            "tournamentWin" to 0,
+            "tournamentJoined" to 0
+        )
+
+        database.child(auth.currentUser!!.uid).child("stats").setValue(values).addOnFailureListener {
             toast(""+ it.message)
         }
     }

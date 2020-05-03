@@ -124,9 +124,9 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
         }
         if (winStatus)
-            database.child("stats").child(auth.currentUser!!.uid).child("win").addListenerForSingleValueEvent(postListener)
+            database.child(auth.currentUser!!.uid).child("stats").child("win").addListenerForSingleValueEvent(postListener)
         else
-            database.child("stats").child(auth.currentUser!!.uid).child("lose").addListenerForSingleValueEvent(postListener)
+            database.child(auth.currentUser!!.uid).child("stats").child("lose").addListenerForSingleValueEvent(postListener)
 
     }
 

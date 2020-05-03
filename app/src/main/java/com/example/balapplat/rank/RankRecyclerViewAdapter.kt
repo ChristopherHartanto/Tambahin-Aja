@@ -18,7 +18,8 @@ import kotlinx.android.synthetic.main.row_rank.*
 import org.jetbrains.anko.support.v4.ctx
 
 
-class RankRecyclerViewAdapter(private val context: Context, private val items: List<ChooseGame>,private val listener: (position: Int) -> Unit)
+class RankRecyclerViewAdapter(private val context: Context, private val items: List<ChooseGame>,
+                              private val availableGameList: List<Boolean>,private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<RankRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -26,10 +27,10 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.bindItem(items[position], listener, position, context)
+        holder.bindItem(availableGameList[position],items[position], listener, position, context)
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = availableGameList.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
@@ -40,7 +41,7 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
         private val payGame = view.findViewById<TextView>(R.id.tvPayGame)
         private val llPayGame = view.findViewById<LinearLayout>(R.id.layout_pay_game)
 
-        fun bindItem(chooseGame: ChooseGame, listener: (position: Int) -> Unit,position: Int, context: Context) {
+        fun bindItem(availableGame: Boolean,chooseGame: ChooseGame, listener: (position: Int) -> Unit,position: Int, context: Context) {
                     val size = calculateSizeOfView(context)
 
             val layoutParams = GridLayout.LayoutParams(ViewGroup.LayoutParams(size - 40, size-20))
@@ -54,9 +55,19 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
             name.text = chooseGame.title
             energy.text = ""+chooseGame.energy
             //score.text = "" + highScore.score
+            when(position){
+                0 -> image.setImageResource(R.drawable.normal_game)
+                1 -> image.setImageResource(R.drawable.odd_even_game)
+                2 -> image.setImageResource(R.drawable.rush_game)
+                3 -> image.setImageResource(R.drawable.alpha_num_game)
+            }
+            if (position > 0){
+                if (!availableGame) {
+                    payGame.text = "${chooseGame.priceGame}"
+                    llPayGame.visibility = View.VISIBLE
+                }
+            }
 
-            if (position == 2)
-                llPayGame.visibility = View.VISIBLE
 
             itemView.setOnClickListener{
                 listener(position)

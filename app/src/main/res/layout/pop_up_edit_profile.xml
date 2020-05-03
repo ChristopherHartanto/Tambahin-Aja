@@ -71,7 +71,7 @@
                 android:layout_margin="5dp"
                 android:textColor="@color/colorWhite"
                 android:textSize="18sp"
-                android:text="Name"
+                android:text="Email"
                 android:id="@+id/tvEditProfileEmail"/>
 
             <EditText
@@ -90,7 +90,7 @@
                 android:layout_margin="5dp"
                 android:textColor="@color/colorWhite"
                 android:textSize="18sp"
-                android:text="Name"
+                android:text="No Handphone"
                 android:id="@+id/tvEditProfileHandphone"/>
 
             <EditText
