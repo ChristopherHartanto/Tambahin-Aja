@@ -117,7 +117,6 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
             }
         }
     }
-
 }
 
 data class Stats(
