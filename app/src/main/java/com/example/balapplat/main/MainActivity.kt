@@ -21,6 +21,7 @@ import com.example.balapplat.R
 import com.example.balapplat.Tournament
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.play.StatusPlayer
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.profile.ProfileFragment
 import com.example.balapplat.utils.UtilsConstants
@@ -131,7 +132,8 @@ class MainActivity : AppCompatActivity(), MainView {
             toast("acceptedGame")
 
             startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                "inviterName" to data.name))
+                "inviterName" to data.name,
+                    "status" to StatusPlayer.JoinFriend))
         }
 
     }

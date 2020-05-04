@@ -21,6 +21,8 @@ import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.home.MarketActivity
 import com.example.balapplat.model.Inviter
+import com.example.balapplat.play.GameType
+import com.example.balapplat.play.StatusPlayer
 import com.facebook.Profile
 import com.example.balapplat.utils.showSnackBar
 import com.google.android.gms.ads.AdRequest
@@ -68,20 +70,14 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         setContentView(R.layout.activity_rank)
 
         supportActionBar?.hide()
-        database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this, database)
-        presenter.receiveInvitation()
-        auth = FirebaseAuth.getInstance()
+
 
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvRank.typeface = typeface
         tvPoint.typeface = typeface
         tvEnergy.typeface = typeface
         tvTotalScore.typeface = typeface
-        Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
-        fetchScore()
-        fetchBalance()
-        fetchGameAvailable()
+
         val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
         ivTask.onClick {
@@ -108,28 +104,28 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
                 finish()
                 when (it) {
                     0 -> {
-                        startActivity(intentFor<CountdownActivity>("mode" to "single",
-                                "type" to "normal","rank" to true))
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.Normal))
                     }
                     1 -> {
-                        startActivity(intentFor<CountdownActivity>("mode" to "single",
-                                "type" to "oddEven","rank" to true))
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.OddEven))
                     }
                     2 -> {
-                        startActivity(intentFor<CountdownActivity>("mode" to "single",
-                                "type" to "rush","rank" to true))
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.Rush))
                     }
                     3 -> {
-                        startActivity(intentFor<CountdownActivity>("mode" to "single",
-                                "type" to "alphaNum","rank" to true))
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.AlphaNum))
                     }
                     4 ->{
-                        startActivity(intentFor<CountdownActivity>("mode" to "single",
-                                "type" to "mix","rank" to true))
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.Mix))
                     }
                     5 ->{
-                        startActivity(intentFor<CountdownActivity>("mode" to "single",
-                                "type" to "doubleAttack","rank" to true))
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.DoubleAttack))
                     }
                 }
             }
@@ -200,6 +196,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
                 if (dataSnapshot.exists()){
+                    availableGameList.clear()
                     availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
                     availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
                     availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
@@ -461,6 +458,23 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
                 0 // Y offset
         )
 
+    }
+
+    override fun onStart() {
+        database = FirebaseDatabase.getInstance().reference
+        presenter = Presenter(this, database)
+        presenter.receiveInvitation()
+        auth = FirebaseAuth.getInstance()
+        Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
+        fetchScore()
+        fetchBalance()
+        fetchGameAvailable()
+        super.onStart()
+    }
+
+    override fun onDestroy() {
+        presenter.dismissListener()
+        super.onDestroy()
     }
 }
 

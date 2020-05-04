@@ -164,7 +164,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         val inflater:LayoutInflater = activity!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_edit_profile,null)
-
+        val main_view = inflater.inflate(R.layout.activity_main,null)
         // Initialize a new instance of popup window
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
@@ -177,7 +177,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             popupWindow.elevation = 10.0F
         }
-
+        val main_activity = main_view.findViewById<RelativeLayout>(R.id.activity_main)
         val btnClose = view.findViewById<Button>(R.id.btnClose)
         val btnSave = view.findViewById<Button>(R.id.btnEditProfileSave)
         val tvEdiProfileTitle = view.findViewById<TextView>(R.id.tvEditProfileTitle)
@@ -206,6 +206,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         btnClose.onClick {
             btnClose.startAnimation(clickAnimation)
             fragment_profile.alpha = 1F
+            main_activity.alpha = 1F
             popupWindow.dismiss()
         }
 
@@ -218,10 +219,11 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
                 saveProfile(etEditProfileName.text.toString(),etEditProfileEmail.text.toString(),etEditProfileHandphone.text.toString())
                 btnClose.startAnimation(clickAnimation)
                 fragment_profile.alpha = 1F
+                main_activity.alpha = 1F
                 popupWindow.dismiss()
             }
         }
-
+        main_activity.alpha = 0.1F
         fragment_profile.alpha = 0.1F
 
         TransitionManager.beginDelayedTransition(fragment_profile)
@@ -257,6 +259,8 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         }
 
     }
+
+
 }
 
 data class Stats(

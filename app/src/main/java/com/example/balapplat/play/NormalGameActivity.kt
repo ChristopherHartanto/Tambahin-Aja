@@ -1,6 +1,7 @@
 package com.example.balapplat.play
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -37,19 +38,23 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     private lateinit var countDownTimer : CountDownTimer
     lateinit var data: Inviter
     lateinit var presenter: Presenter
+    var creatorFacebookId = ""
+    var creatorName = ""
+    var joinOnlineFacebookId = ""
+    var joinOnlineName = ""
+    var joinFriendFacebookId = ""
+    var joinFriendName = ""
+    var inviterFacebookId = ""
+    var inviterName = ""
     var count = 4
     var point = 0
     var timer = 30
     var answer = 999
     var highScore = 0
     var opponentPoint = 0
-    var type = "normal"
+    var type = GameType.Normal
     var mix = false
-    var player = 0 // 1 yang ajak, 2 yang diajak, 0 main sendiri
-    var facebookId = ""
-    var rank = false
-    var playOnline = false
-    var creator = false
+    var player = StatusPlayer.Single
 
     private var numberArr : MutableList<Int> = mutableListOf()
 
@@ -74,55 +79,53 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         tvPlayerPoint.typeface = typeface
         tvOpponentPoint.typeface = typeface
 
-        if (intent.extras!!.getBoolean("rank"))
-            rank = true
+        creatorFacebookId = intent.extras!!.getString("creatorFacebookId").toString()
+        creatorName = intent.extras!!.getString("creatorName").toString()
+        joinOnlineFacebookId = intent.extras!!.getString("joinOnlineFacebookId").toString()
+        joinOnlineName = intent.extras!!.getString("joinOnlineName").toString()
+        joinFriendFacebookId = intent.extras!!.getString("joinFriendFacebookId").toString()
+        joinFriendName = intent.extras!!.getString("joinFriendName").toString()
+        inviterFacebookId = intent.extras!!.getString("inviterFacebookId").toString()
+        inviterName = intent.extras!!.getString("inviterName").toString()
 
-        if (!intent.extras!!.getString("mode").equals("single")){
-            when {
-                intent.extras!!.getString("facebookId").equals(null) -> { // jika kamu diinvite main
-                    player = 2
-                    facebookId = Profile.getCurrentProfile().id
-                    matchPresenter.fetchOpponent(false,facebookId)
-                    fetchProfile(false)
-                }
-                intent.extras!!.getBoolean("playOnline") -> {
-                    creator = intent.extras!!.getBoolean("creator")
-                    playOnline = true
-                    facebookId = intent.extras!!.getString("facebookId")!!
-                }
-                else -> { // kamu yang tukang invite
-                    player = 1
-                    facebookId = intent.extras!!.getString("facebookId")!!
-                    matchPresenter.fetchOpponent(true,facebookId) // true kalau kamu tukang invite
-                    fetchProfile(true)
-                }
-            }
+
+        player = intent.extras!!.getSerializable("status") as StatusPlayer
+        type = intent.extras!!.getSerializable("type") as GameType
+
+        if (player != StatusPlayer.Single && player != StatusPlayer.Rank){
+            fetchProfile()
             tvPoint.visibility = View.INVISIBLE
+        }else
+            layoutMultipleGame.visibility = View.INVISIBLE
+
+
+        if (type == GameType.OddEven)
+            oddEvenKeyboard()
+        else
             normalKeyboard()
-        }else{
-            if (auth.currentUser != null)
-            {
-                // jika main sendiri
-                type = intent.extras!!.getString("type")!!
 
-                if (type == "normal" || type == "rush" || type == "alphaNum" || type == "doubleAttack")
-                    normalKeyboard()
-                else
-                    oddEvenKeyboard()
-
-                if (rank)
-                    matchPresenter.getHighScore(auth,intent.extras!!.getString("type")!!)
-
-                layoutMultipleGame.visibility = View.INVISIBLE
-                player = 0
+        when(player){
+            StatusPlayer.Creator->{
+                matchPresenter.fetchOpponent(joinOnlineFacebookId)
             }
-
+            StatusPlayer.JoinOnline->{
+                matchPresenter.fetchOpponent(Profile.getCurrentProfile().id)
+            }
+            StatusPlayer.JoinFriend->{
+                matchPresenter.fetchOpponent(Profile.getCurrentProfile().id)
+            }
+            StatusPlayer.Inviter->{
+                matchPresenter.fetchOpponent(joinFriendFacebookId)
+            }
+            StatusPlayer.Rank->{
+                matchPresenter.getHighScore(auth,type)
+            }
         }
 
-        if (type == "rush")
+        if (type == GameType.Rush)
             timer = 5
 
-        if (type == "mix")
+        if (type == GameType.Mix)
             mix = true
 
         generate()
@@ -132,25 +135,30 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
     @SuppressLint("SetTextI18n")
     private fun generate(){
+        count = if (point > 200)
+            6
+        else if (point > 100)
+            5
+        else
+            4
+
         if (mix){
-            when((0 until 2).random()){
+            when((0 until 4).random()){
                 0 -> {
-                    type = "normal"
+                    type = GameType.Normal
                     normalKeyboard()
                 }
                 1 -> {
-                    type = "rush"
+                    type = GameType.AlphaNum
                     normalKeyboard()
                 }
-                2 -> {
-                    type = "oddEven"
+                else -> {
+                    type = GameType.OddEven
                     oddEvenKeyboard()
                 }
             }
         }
-        if (type == "alphaNum"){
-            count += point/100
-
+        if (type == GameType.AlphaNum){
             tvQuestion.text = ""
             numberArr.clear()
             for(x in 0 until count)
@@ -168,8 +176,18 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     tvQuestion.text = tvQuestion.text.toString() + value
                 }
             }
+        }else if(type == GameType.DoubleAttack){
+
+            tvQuestion.text = ""
+            numberArr.clear()
+            for(x in 0 until count)
+            {
+                val value = Random().nextInt(5)
+                numberArr.add(value)
+
+                tvQuestion.text = tvQuestion.text.toString() + value
+            }
         }else{
-            count += point/100
             tvQuestion.text = ""
             numberArr.clear()
             for(x in 0 until count)
@@ -181,13 +199,13 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
             }
         }
 
-
         answer = generateAnswer()
+        toast(""+answer)
     }
 
     private fun generateAnswer() : Int {
         var result = 0
-        if(type == "normal" || type == "oddEven" || type == "rush"){
+        if(type == GameType.Normal|| type == GameType.OddEven || type == GameType.Rush){
             val temp = numberArr
             for(x in 0 until count)
             {
@@ -201,13 +219,13 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     result = temp[x]
 
             }
-            if (type == "oddEven"){
+            if (type == GameType.OddEven){
                 result = if (result % 2 == 0)
                     0 // genap
                 else
                     1 // ganjil
             }
-        }else if(type == "alphaNum"){
+        }else if(type == GameType.AlphaNum){
             val temp = numberArr
             for(x in 0 until count)
             {
@@ -226,16 +244,20 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     result = temp[x]
 
             }
-        }else if (type == "doubleAttack"){
+        }else if (type == GameType.DoubleAttack){
             val temp = numberArr
             for(x in 0 until count)
             {
                 if(x != count-1) {
-                    if(temp[0]*2 / 10 == 1)
-                        temp[0] -= 9
+                    if (x == 0){
+                        temp[0] *= 2
+                        if(temp[0] / 10 == 1)
+                            temp[0] = temp[0] * 2 - 9
+                    }
 
-                    if(temp[x+1]*2 / 10 == 1)
-                        temp[x+1] -= 9
+                    temp[x+1] *= 2
+                    if(temp[x+1] / 10 == 1)
+                        temp[x+1] = temp[x+1] * 2 - 9
 
                     temp[x+1] += temp[x]
                     if(temp[x+1] / 10 == 1)
@@ -251,7 +273,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     }
 
     private fun checkAnswer(value : Int){
-        if (type == "normal"){
+        if (type == GameType.Normal){
             if (answer == value){
                 point += 10
                 generate()
@@ -262,7 +284,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     point = 0
             }
 
-        }else if (type == "oddEven"){
+        }else if (type == GameType.OddEven){
             if (answer == value){
                 point += 10
                 generate()
@@ -271,9 +293,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     point -= 6
                 else
                     point = 0
-                generate()
             }
-        }else if (type == "doubleAttack"){
+        }else if (type == GameType.AlphaNum){
             if (answer == value){
                 point += 15
                 generate()
@@ -282,9 +303,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     point -= 7
                 else
                     point = 0
-                generate()
             }
-        }else if (type == "rush"){
+        }else if (type == GameType.Rush){
             if (answer == value){
                 point += 13
                 generate()
@@ -293,13 +313,12 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     point -= 4
                 else
                     point = 0
-                generate()
             }
             countDownTimer.cancel()
             timer = 5
             control(true)
         }
-        else if(type == "alphaNum"){
+        else if(type == GameType.AlphaNum){
             if (answer == value){
                 point += 12
                 generate()
@@ -309,22 +328,31 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                 else
                     point = 0
             }
+        }else if (type == GameType.DoubleAttack){
+            if (answer == value){
+                point += 14
+                generate()
+            }else{
+                if(point > 4)
+                    point -= 4
+                else
+                    point = 0
+            }
+
         }
 
-        if (player != 0){
-            if (player == 1)
-                matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
-            else if(player == 2)
-                matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("inviterFacebookId")!!)
-            else if (!creator)
-                matchPresenter.updateValue(false,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
-            else if (creator)
-                matchPresenter.updateValue(true,point,opponentPoint,intent.extras!!.getString("facebookId")!!)
+        if (player != StatusPlayer.Single){
+            when (player) {
+                StatusPlayer.Inviter -> matchPresenter.updateValue(true,point,opponentPoint,joinFriendFacebookId)
+                StatusPlayer.JoinFriend -> matchPresenter.updateValue(false,point,opponentPoint,inviterFacebookId)
+                StatusPlayer.JoinOnline -> matchPresenter.updateValue(false,point,opponentPoint,creatorFacebookId)
+                StatusPlayer.Creator -> matchPresenter.updateValue(true,point,opponentPoint,joinOnlineFacebookId)
+            }
         }
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
 
-        if(player == 0){
+        if(player == StatusPlayer.Single || player == StatusPlayer.Rank){
             tvPoint.text = "" + point
             tvPoint.startAnimation(animationBounce)
         }else{
@@ -343,61 +371,76 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
             }
             override fun onFinish() {
-
+                var text = ""
                 if (auth.currentUser != null){
-                    if (intent.extras!!.getString("mode").equals("single")){
+                    if (player == StatusPlayer.Rank){
                         if(highScore < point){
-                            if (rank)
                                 matchPresenter.sumHighScore(auth,
-                                    intent.extras!!.getString("type")!!,point,highScore)
+                                    type,point,highScore)
                         }
 
                     }else{
                         toast("your point : "+ point + "opponent point : " + opponentPoint)
-                        var text = ""
+
                         text = when {
                             point > opponentPoint -> {
                                 matchPresenter.getStats(auth,true)
-                                "win"
+                                "Win"
                             }
                             point < opponentPoint -> {
                                 matchPresenter.getStats(auth,false)
-                                "lose"
+                                "Lose"
                             }
                             point == opponentPoint -> {
                                 toast("1.  your point : "+ point + "opponent point : " + opponentPoint)
-                                "draw"
+                                "Draw"
                             }
                             else -> "error"
                         }
 
-                        when {
-                            player == 1 -> matchPresenter.addToHistory(auth,point,opponentPoint, facebookId,
-                                intent.extras!!.getString("name")!!)
-                            player == 2 -> matchPresenter.addToHistory(auth,point,opponentPoint, intent.extras!!.getString("inviterFacebookId")!!,
-                                intent.extras!!.getString("inviterName")!!
-                            )
-                            playOnline -> matchPresenter.addToHistory(auth,point,opponentPoint, facebookId,
-                                intent.extras!!.getString("name")!!
-                            )
-                        }
-//
-//                        if (player == 2 || creator)
-//                            matchPresenter.removeOnPlay()
-//
-//                        alert ("You $text"){
-//                            title = "End"
-//                            okButton {
-//                                finish()
-//                                startActivity<PostGameActivity>()
-//                            }
-//                        }.show()
+                        if (player == StatusPlayer.JoinFriend || player == StatusPlayer.Creator)
+                            matchPresenter.removeOnPlay()
+
                     }
-                    finish()
-                    startActivity<PostGameActivity>()
+                    when (player) {
+                        StatusPlayer.Inviter -> {
+                            matchPresenter.addToHistory(auth,point,opponentPoint, joinFriendFacebookId,
+                                    joinFriendName)
+                            startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
+                                    "scoreOpponent" to opponentPoint, "opponentName" to joinFriendName, "opponentFacebookId" to joinFriendFacebookId, "gameResult" to text))
+                        }
+                        StatusPlayer.JoinFriend -> {
+                            matchPresenter.addToHistory(auth,point,opponentPoint, inviterFacebookId,
+                                    inviterName
+                            )
+                            startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
+                                    "scoreOpponent" to opponentPoint, "opponentName" to inviterName, "opponentFacebookId" to inviterFacebookId, "gameResult" to text))
+                        }
+                        StatusPlayer.Creator -> {
+                            matchPresenter.addToHistory(auth,point,opponentPoint, joinOnlineFacebookId,
+                                    joinOnlineName
+                            )
+                            startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
+                                    "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineName, "gameResult" to text))
+                        }
+                        StatusPlayer.JoinOnline -> {
+                            matchPresenter.addToHistory(auth,point,opponentPoint, creatorFacebookId,
+                                    creatorName
+                            )
+                            startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
+                                    "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineFacebookId, "gameResult" to text))
+                        }
+                        StatusPlayer.Rank ->{
+                            startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to 0, "rewardPoint" to 0))
+                        }
+                        StatusPlayer.Single->{
+                            startActivity(intentFor<PostGameActivity>("status" to StatusPlayer.Single,"score" to point))
+                        }
+                    }
+                }else
+                    startActivity(intentFor<PostGameActivity>("status" to StatusPlayer.Single,"score" to point))
 
-                }
-
+                finish()
 
             }
         }
@@ -479,25 +522,31 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         }
     }
 
-
-
-
-
     private fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
 
-    private fun fetchProfile(inviter: Boolean){
+    private fun fetchProfile(){
 
-        if (!inviter){
-            Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("inviterFacebookId")!!)).fit().into(ivOpponentImage)
-            tvOpponentName.text = "" + intent.extras!!.getString("inviterName")
-        }else if (inviter || playOnline){
-            Picasso.get().load(getFacebookProfilePicture(facebookId)).fit().into(ivOpponentImage)
-            tvOpponentName.text = "" + intent.extras!!.getString("name")
+        when (player) {
+            StatusPlayer.JoinFriend -> {
+                Picasso.get().load(getFacebookProfilePicture(inviterFacebookId)).fit().into(ivOpponentImage)
+                tvOpponentName.text = "" + inviterName
+            }
+            StatusPlayer.Inviter -> {
+                Picasso.get().load(getFacebookProfilePicture(joinFriendFacebookId)).fit().into(ivOpponentImage)
+                tvOpponentName.text = ""+joinFriendName
+            }
+            StatusPlayer.Creator -> {
+                Picasso.get().load(getFacebookProfilePicture(joinOnlineFacebookId)).fit().into(ivOpponentImage)
+                tvOpponentName.text = ""+joinOnlineName
+            }
+            StatusPlayer.JoinOnline -> {
+                Picasso.get().load(getFacebookProfilePicture(joinOnlineFacebookId)).fit().into(ivOpponentImage)
+                tvOpponentName.text = ""+joinOnlineName
+            }
         }
-
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerImage)
         tvPlayerName.text = "" + Profile.getCurrentProfile().name
     }
@@ -519,13 +568,13 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
     override fun onPause() {
         countDownTimer.cancel()
-
+        matchPresenter.dismissListener()
         super.onPause()
     }
 
     override fun onBackPressed() {
 //        database.child("onPlay").child(facebookId).child("pause").setValue(true)
-        if (playOnline)
+        if (player == StatusPlayer.JoinOnline || player == StatusPlayer.Creator)
             toast("Cannot Exist in the Middle Game")
         else{
             countDownTimer.cancel()
@@ -558,7 +607,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     override fun fetchOpponentData(dataSnapshot: DataSnapshot, inviter: Boolean) {
         val check = opponentPoint
 
-        opponentPoint = if (inviter || creator)
+        opponentPoint = if (player == StatusPlayer.Inviter || player == StatusPlayer.Creator)
             dataSnapshot.getValue(Play::class.java)?.player2!!
         else
             dataSnapshot.getValue(Play::class.java)?.player1!!
@@ -591,3 +640,21 @@ data class Play(
     var player1: Int? = 0,
     var player2: Int? = 0
 )
+
+enum class GameType(var price: Long){
+    Normal(0),
+    OddEven(100),
+    Rush(300),
+    AlphaNum(500),
+    Mix(800),
+    DoubleAttack(1000)
+}
+
+enum class StatusPlayer{
+    Single,
+    Inviter,
+    JoinFriend,
+    Creator,
+    JoinOnline,
+    Rank
+}

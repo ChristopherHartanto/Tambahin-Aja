@@ -12,7 +12,9 @@ import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_countdown.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.toast
 
+@Suppress("NAME_SHADOWING")
 class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,35 +45,40 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
             override fun onFinish() {
                 finish()
 
-                val mode = intent.extras!!.getString("mode")
-                val faceBookId = intent.extras!!.getString("facebookId")
-                val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
-                val inviterName = intent.extras!!.getString("inviterName")
-                val type = intent.extras!!.getString("type")
-                val name = intent.extras!!.getString("name")
-                val rank = intent.extras!!.getBoolean("rank")
-                val playOnline = intent.extras!!.getBoolean("playOnline")
-                val creator = intent.extras!!.getBoolean("creator")
-
-                if (!mode.equals("single")){
-                    if(faceBookId.equals(null)){
-                        if (inviterFacebookId != null){
-                            startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName))
-                        }
-                        else{
-                            startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
-                                "name" to name
-                                ,"playOnline" to playOnline
-                                ,"creator" to creator))
-                        }
+                val status = intent.extras!!.getSerializable("status")
+                var type = intent.extras!!.getSerializable("type")
+                if (type == null)
+                    type = GameType.Normal
+                toast("status")
+                when (status) {
+                    StatusPlayer.JoinOnline -> {
+                        val creatorFacebookId = intent.extras!!.getString("creatorFacebookId")
+                        val creatorName = intent.extras!!.getString("creatorName")
+                        startActivity(intentFor<NormalGameActivity>("creatorFacebookId" to creatorFacebookId, "creatorName" to creatorName,"status" to status, "type" to type))
                     }
-                   else
-                        startActivity(intentFor<NormalGameActivity>("facebookId" to faceBookId,
-                            "name" to name))
-                }else
-                    startActivity(intentFor<NormalGameActivity>("type" to type,
-                        "mode" to mode,"rank" to rank))
+                    StatusPlayer.Creator -> {
+                        val joinOnlineFacebookId = intent.extras!!.getString("joinOnlineFacebookId")
+                        val joinOnlineName = intent.extras!!.getString("joinOnlineName")
+                        startActivity(intentFor<NormalGameActivity>("joinOnlineFacebookId" to joinOnlineFacebookId, "joinOnlineName" to joinOnlineName,"status" to status, "type" to type))
+                    }
+                    StatusPlayer.Inviter -> {
+                        val joinFriendFacebookId = intent.extras!!.getString("joinFriendFacebookId")
+                        val joinFriendName = intent.extras!!.getString("joinFriendName")
+                        startActivity(intentFor<NormalGameActivity>("joinFriendFacebookId" to joinFriendFacebookId, "joinName" to joinFriendName,"status" to status, "type" to type))
+                    }
+                    StatusPlayer.JoinFriend -> {
+                        val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
+                        val inviterName = intent.extras!!.getString("inviterName")
+                        startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName,"status" to status, "type" to type))
+                    }
+                    StatusPlayer.Rank ->{
+                        startActivity(intentFor<NormalGameActivity>("status" to status, "type" to type))
+                    }
+                    StatusPlayer.Single->{
+                        startActivity(intentFor<NormalGameActivity>("status" to status, "type" to type))
+                    }
                 }
+            }
         }
         if (status)
             timer.start()

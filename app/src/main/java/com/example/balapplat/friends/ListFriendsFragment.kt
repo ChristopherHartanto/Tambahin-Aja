@@ -62,8 +62,8 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener {
                 alert ("Play with " + ProfileItems[it].name + " ?"){
                     title = "Play"
                     yesButton {
-                        ctx.startActivity(intentFor<WaitingActivity>("facebookId" to ProfileItems[index].facebookId,
-                            "name" to ProfileItems[index].name))
+                        ctx.startActivity(intentFor<WaitingActivity>("joinFriendFacebookId" to ProfileItems[index].facebookId,
+                            "joinFriendName" to ProfileItems[index].name))
                     }
                     noButton {
 

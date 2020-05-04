@@ -174,4 +174,9 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
             }
         }
     }
+
+    override fun onPause() {
+        presenter.dismissListener()
+        super.onPause()
+    }
 }

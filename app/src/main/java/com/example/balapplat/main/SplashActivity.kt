@@ -28,7 +28,7 @@ class SplashActivity : AppCompatActivity() {
             val myConnectionsRef = database.reference.child("users").child(auth.currentUser!!.uid).child("online")
 
 // Stores the timestamp of my last disconnect (the last time I was seen online)
-            val lastOnlineRef = database.reference.child(auth.currentUser!!.uid).child("lastOnline")
+            val lastOnlineRef = database.reference.child("users").child(auth.currentUser!!.uid).child("lastOnline")
 
             val connectedRef = database.getReference(".info/connected")
             connectedRef.addValueEventListener(object : ValueEventListener {

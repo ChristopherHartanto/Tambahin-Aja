@@ -144,16 +144,10 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                     }
 
                 }
-                //else{
+                else
+                    view.response("rejected")
 
-//                           alert{
-//                            title = "Reject"
-//                            yesButton {
-//                                startActivity(intentFor<MainActivity>())
-//                            }
-//                               noButton {  }
-//                        }.show()
-      //          }
+                database.removeEventListener(this)
             }
 
         }

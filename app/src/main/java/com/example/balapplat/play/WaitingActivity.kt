@@ -51,10 +51,10 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
         tvWaiting.typeface = typeface
 
        if (intent.extras != null){
-           if (intent.extras!!.getString("facebookId") != null){ // jika main bareng teman
+           if (intent.extras!!.getString("joinFriendFacebookId") != null){ // jika main bareng teman
                inviter = true
-               intent.extras!!.getString("facebookId")?.let { waitingPresenter.makeInvitation(it) }
-               Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("facebookId")!!)).fit().into(ivOpponentImageWaiting)
+               intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.makeInvitation(it) }
+               Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("joinFriendFacebookId")!!)).fit().into(ivOpponentImageWaiting)
                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
 
                timer("Waiting")
@@ -107,16 +107,14 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
         if (creator){
             finish()
 
-            startActivity(intentFor<CountdownActivity>("facebookId" to dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId
-                , "name" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
-                , "playOnline" to true
-                , "creator" to true))
+            startActivity(intentFor<CountdownActivity>("joinOnlineFacebookId" to dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId
+                , "joinOnlineName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
+                , "status" to StatusPlayer.Creator, "type" to GameType.Normal))
         }else{
             finish()
-            startActivity(intentFor<CountdownActivity>("facebookId" to dataSnapshot.key
-                , "name" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
-                , "playOnline" to true
-                , "creator" to false))
+            startActivity(intentFor<CountdownActivity>("creatorFacebookId" to dataSnapshot.key
+                , "creatorName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
+                , "status" to StatusPlayer.JoinOnline, "type" to GameType.Normal))
         }
 
     }
@@ -131,11 +129,13 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
             message === "createGame" -> {
                 toast("create game")
                 finish()
-                startActivity(intentFor<CountdownActivity>("facebookId" to intent.extras!!.getString("facebookId"), "name" to intent.extras!!.getString("name")))
+                startActivity(intentFor<CountdownActivity>("joinFriendFacebookId" to intent.extras!!.getString("joinFriendFacebookId"),
+                        "joinFriendName" to intent.extras!!.getString("joinFriendName"),
+                        "status" to StatusPlayer.Inviter, "type" to GameType.Normal))
             }
             message === "invitationSent" -> {
                 toast("invitation sent")
-                intent.extras!!.getString("facebookId")?.let { it1 -> waitingPresenter.getResponse(it1) }
+                intent.extras!!.getString("joinFriendFacebookId")?.let { it1 -> waitingPresenter.getResponse(it1) }
             }
             message === "registerToWaitingList" -> {
                 registerWaitingList = true
@@ -174,7 +174,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
             waitingPresenter.dismissListenerOnline()
         }
         else if (inviter)
-            waitingPresenter.removeInvitation(intent.extras!!.getString("facebookId")!!)
+            waitingPresenter.removeInvitation(intent.extras!!.getString("joinFriendFacebookId")!!)
     }
 
     override fun networkConnectivityChanged(event: Event) {

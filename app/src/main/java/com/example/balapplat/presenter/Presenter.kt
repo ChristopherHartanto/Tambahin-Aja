@@ -2,12 +2,14 @@ package com.example.balapplat.presenter
 
 import com.example.balapplat.view.MainView
 import com.example.balapplat.model.Inviter
+import com.example.balapplat.rank.Balance
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class Presenter(private val view: MainView, private val database: DatabaseReference) {
 
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
     var postListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
         }
@@ -33,7 +35,7 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
             }
 
         }
-        database.child("invitation").child(Profile.getCurrentProfile().id).addListenerForSingleValueEvent(postListener)
+        database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
     }
 
     fun replyInvitation(status: Boolean){
@@ -48,10 +50,28 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
     }
 
     fun userActive(status : Boolean) {
-        val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
         if (auth.currentUser != null){
             database.child("users").child(auth.currentUser!!.uid).child("active").setValue(status)
         }
+    }
+
+    fun fetchCredit(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                        view.loadData(p0)
+                }
+                database.removeEventListener(this)
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").addListenerForSingleValueEvent(postListener)
+
     }
 
     fun dismissListener(){

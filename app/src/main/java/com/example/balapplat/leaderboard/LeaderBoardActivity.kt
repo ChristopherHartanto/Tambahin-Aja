@@ -47,7 +47,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
         auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
         presenter = Presenter(this, database)
-        presenter.receiveInvitation()
 
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvLeaderboardInfo.typeface = typeface
@@ -166,11 +165,18 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
     }
 
     override fun onStart() {
+
         items.clear()
         profileItems.clear()
         retrieve()
+        presenter.receiveInvitation()
         super.onStart()
-}
+    }
+
+    override fun onPause() {
+        presenter.dismissListener()
+        super.onPause()
+    }
 
 }
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.animation.AnimationUtils
 import com.example.balapplat.R
 import com.example.balapplat.leaderboard.Leaderboard
+import com.example.balapplat.play.GameType
 import com.example.balapplat.play.Play
 import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
@@ -31,7 +32,15 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         }
     }
 
-    fun getHighScore(auth: FirebaseAuth, type: String){
+    fun getHighScore(auth: FirebaseAuth, type: GameType){
+        val gameType  = when(type){
+            GameType.Normal -> "normal"
+            GameType.OddEven -> "oddEven"
+            GameType.Rush -> "rush"
+            GameType.AlphaNum -> "alpaNum"
+            GameType.DoubleAttack -> "doubleAttack"
+            GameType.Mix -> "mix"
+        }
         postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
@@ -45,17 +54,25 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
                 view.response(databaseError.message)
             }
         }
-        database.child("leaderboards").child(auth.currentUser!!.uid).child(type).addListenerForSingleValueEvent(postListener)
+        database.child("leaderboards").child(auth.currentUser!!.uid).child(gameType).addListenerForSingleValueEvent(postListener)
     }
 
-    fun sumHighScore(auth: FirebaseAuth, type: String, highScore: Int, oldScore: Int){
+    fun sumHighScore(auth: FirebaseAuth, type: GameType, highScore: Int, oldScore: Int){
+        val gameType  = when(type){
+            GameType.Normal -> "normal"
+            GameType.OddEven -> "oddEven"
+            GameType.Rush -> "rush"
+            GameType.AlphaNum -> "alpaNum"
+            GameType.DoubleAttack -> "doubleAttack"
+            GameType.Mix -> "mix"
+        }
         postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
                 if (dataSnapshot.exists())
-                    newHighScore(auth,dataSnapshot.value as Long - oldScore.toLong(),type,highScore)
+                    newHighScore(auth,dataSnapshot.value as Long - oldScore.toLong(),gameType,highScore)
                 else
-                    newHighScore(auth,0,type,highScore)
+                    newHighScore(auth,0,gameType,highScore)
 
             }
 
@@ -167,7 +184,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
         database.child("onPlay").child(Profile.getCurrentProfile().id).removeValue()
     }
 
-    fun fetchOpponent(inviter: Boolean, facebookId: String){
+    fun fetchOpponent(facebookId: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 view.response(p0.message)
@@ -176,7 +193,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists())
                 {
-                    view.fetchOpponentData(p0,inviter)
+                    view.fetchOpponentData(p0,true) // parameter kedua ga perlu
                 }
             }
 
