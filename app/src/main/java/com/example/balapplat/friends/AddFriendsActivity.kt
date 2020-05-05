@@ -24,15 +24,13 @@ import org.jetbrains.anko.support.v4.onRefresh
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
-    MainView {
+class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
 
     private lateinit var auth: FirebaseAuth
     private var items: MutableList<User> = mutableListOf()
     private var uids: MutableList<String> = mutableListOf()
     private var statusItems: MutableList<Boolean> = mutableListOf()
     private lateinit var database: DatabaseReference
-    lateinit var presenter: Presenter
     lateinit var data: Inviter
 
     private lateinit var adapter: AddFriendRecyclerViewAdapter
@@ -43,8 +41,6 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
 
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this, database)
-        presenter.receiveInvitation()
 
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvAddFriendsTitle.typeface = typeface
@@ -139,29 +135,7 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         }
     }
 
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        data = dataSnapshot.getValue(Inviter::class.java)!!
 
-        alert(data!!.name + " invite you to play"){
-            title = "Invitation"
-            yesButton {
-                presenter.replyInvitation(true)
-            }
-            noButton {
-                presenter.replyInvitation(false)
-            }
-        }.show()
-    }
-
-    override fun response(message: String) {
-        if (message === "acceptedGame"){
-            toast("acceptedGame")
-
-            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                "inviterName" to data.name))
-        }
-
-    }
 
     override fun networkConnectivityChanged(event: Event) {
         when (event) {
@@ -175,8 +149,4 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         }
     }
 
-    override fun onPause() {
-        presenter.dismissListener()
-        super.onPause()
-    }
 }

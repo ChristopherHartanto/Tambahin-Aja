@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import com.example.balapplat.R
+import com.example.balapplat.rank.Rank
 import com.example.balapplat.utils.showSnackBar
 import com.facebook.*
 import com.facebook.login.LoginResult
@@ -211,7 +212,8 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
             "name" to auth.currentUser!!.displayName.toString(),
             "facebookId" to Profile.getCurrentProfile().id,
             "registerDate" to currentDate,
-            "dailyPuzzle" to currentDate
+            "dailyPuzzle" to "FreeFirstTime",
+            "currentRank" to Rank.Toddler
         )
 
         database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {

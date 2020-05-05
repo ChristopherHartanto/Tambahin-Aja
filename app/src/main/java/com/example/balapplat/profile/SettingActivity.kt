@@ -12,6 +12,7 @@ class SettingActivity : AppCompatActivity() {
     private lateinit var adapter: SettingRecyclerViewAdapter
     val settingItems : MutableList<Setting> = mutableListOf()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)

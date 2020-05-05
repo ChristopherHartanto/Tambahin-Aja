@@ -1,6 +1,7 @@
 package com.example.balapplat.main
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.graphics.Typeface
 import android.os.Build
@@ -24,6 +25,7 @@ import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.play.StatusPlayer
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.profile.ProfileFragment
+import com.example.balapplat.rank.Balance
 import com.example.balapplat.utils.UtilsConstants
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
@@ -46,6 +48,7 @@ import org.jetbrains.anko.support.v4.ctx
 
 class MainActivity : AppCompatActivity(), MainView {
 
+    private lateinit var sharedPreference: SharedPreferences
     private lateinit var database: DatabaseReference
     lateinit var presenter: Presenter
     private lateinit var auth: FirebaseAuth
@@ -121,10 +124,16 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
 
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        data = dataSnapshot.getValue(Inviter::class.java)!!
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if(response == "fetchCredit"){
+            val editor = sharedPreference.edit()
+            editor.putInt("credit", dataSnapshot.getValue(Balance::class.java)?.credit!!)
+            editor.apply()
+        }else{
+            data = dataSnapshot.getValue(Inviter::class.java)!!
+            popUpMessage(1)
+        }
 
-        popUpMessage(1)
     }
 
     override fun response(message: String) {
@@ -224,18 +233,31 @@ class MainActivity : AppCompatActivity(), MainView {
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this, database)
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
 
         NetworkEvents.observe(this, Observer {
             if (it is Event.ConnectivityEvent) handleConnectivityChange(it.state)
         })
 
-        if(AccessToken.getCurrentAccessToken() != null)
+        if(AccessToken.getCurrentAccessToken() != null){
             presenter.receiveInvitation()
+        }
+
+        val editor = sharedPreference.edit()
+        editor.putBoolean("continueRank",true)
+        editor.apply()
 
         handleConnectivityChange(NetworkStateHolder)
         super.onStart()
     }
 
+    override fun onResume() {
+        if(AccessToken.getCurrentAccessToken() != null){
+            presenter.fetchCredit()
+
+        }
+        super.onResume()
+    }
     override fun onPause() {
         presenter.dismissListener()
         super.onPause()

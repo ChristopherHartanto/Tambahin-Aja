@@ -14,31 +14,31 @@ import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.backgroundResource
 
-class CreditRecyclerViewAdapter(private val context: Context, private val creditShopItems: List<CreditShop>)
-    : RecyclerView.Adapter<CreditRecyclerViewAdapter.ViewHolder>() {
+class CreditHistoryRecyclerViewAdapter(private val context: Context, private val creditHistoryItems: List<CreditHistory>)
+    : RecyclerView.Adapter<CreditHistoryRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_credit, parent, false))
+            ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_credit_history, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(position,creditShopItems[position],context)
+        holder.bindItem(creditHistoryItems[position],context)
     }
 
-    override fun getItemCount(): Int = creditShopItems.size
+    override fun getItemCount(): Int = creditHistoryItems.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
-        private val desc = view.findViewById<TextView>(R.id.tvCreditDesc)
-        private val title = view.findViewById<TextView>(R.id.tvCreditTitle)
+        private val info = view.findViewById<TextView>(R.id.tvCreditHistoryInfo)
+        private val date = view.findViewById<TextView>(R.id.tvCreditHistoryDate)
 
-        fun bindItem(position: Int,creditShop: CreditShop, context: Context) {
+        fun bindItem(creditHistory: CreditHistory, context: Context) {
 
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
-            desc.typeface = typeface
-            title.typeface = typeface
+            info.typeface = typeface
+            date.typeface = typeface
 
-            desc.text = creditShop.price.toString()
-            title.text = creditShop.title
+            info.text = creditHistory.info
+            date.text = creditHistory.date
         }
 
     }

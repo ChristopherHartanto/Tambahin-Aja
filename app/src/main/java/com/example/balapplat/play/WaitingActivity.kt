@@ -119,8 +119,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
 
     }
 
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
     }
 
     override fun response(message: String) {

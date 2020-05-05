@@ -6,14 +6,27 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".home.CreditActivity"
+    android:id="@+id/activity_credit"
     android:background="@color/colorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right">
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/task_list"
+            android:layout_margin="20sp"
+            android:id="@+id/ivCreditHistory"/>
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="Credit"
-        android:layout_marginVertical="30sp"
+        android:layout_marginBottom="30sp"
         android:textColor="@color/colorWhite"
         android:textSize="30sp"
         android:id="@+id/tvCreditTitle"/>

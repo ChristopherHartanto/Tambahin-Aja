@@ -1,6 +1,7 @@
 package com.example.balapplat.rank
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -23,8 +24,10 @@ import com.example.balapplat.home.MarketActivity
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.GameType
 import com.example.balapplat.play.StatusPlayer
+import com.example.balapplat.presenter.RankPresenter
 import com.facebook.Profile
 import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.RankView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -50,15 +53,21 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 
-class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView {
+class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
+    private lateinit var sharedPreference: SharedPreferences
     private lateinit var adapter: RankRecyclerViewAdapter
     private lateinit var taskAdapter: TaskRecyclerViewAdapter
     private lateinit var rankDetailAdapter: RankDetailRecyclerViewAdapter
     private lateinit var database: DatabaseReference
-    lateinit var presenter: Presenter
+    lateinit var rankPresenter: RankPresenter
     private lateinit var auth: FirebaseAuth
     lateinit var data: Inviter
+    var energy = 0
+    var energyLimit = 100
+    var point = 0
+    var position = 0
+    lateinit var editor: SharedPreferences.Editor
     private lateinit var popupWindow : PopupWindow
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private val items : MutableList<ChooseGame> = mutableListOf()
@@ -70,7 +79,6 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         setContentView(R.layout.activity_rank)
 
         supportActionBar?.hide()
-
 
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvRank.typeface = typeface
@@ -95,70 +103,27 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         }
 
         adapter = RankRecyclerViewAdapter(this,items,availableGameList){
+            position = it
             if (!availableGameList[it]){
                 if (items[it].priceGame!! < tvPoint.text.toString().toInt())
-                    popUpMessage(1,"Do You Want to Buy?",it)
+                    popUpMessage(1,"Do You Want to Buy?")
                 else
-                    popUpMessage(2,"Not Enough Money",it)
+                    popUpMessage(2,"Not Enough Money")
             }else{
-                finish()
-                when (it) {
-                    0 -> {
-                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                                "type" to GameType.Normal))
-                    }
-                    1 -> {
-                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                                "type" to GameType.OddEven))
-                    }
-                    2 -> {
-                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                                "type" to GameType.Rush))
-                    }
-                    3 -> {
-                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                                "type" to GameType.AlphaNum))
-                    }
-                    4 ->{
-                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                                "type" to GameType.Mix))
-                    }
-                    5 ->{
-                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                                "type" to GameType.DoubleAttack))
-                    }
+                if (items[it].energy!! > energy)
+                    popUpMessage(2,"Not Enough Energy")
+                else{
+                    position = it
+                    val energyRemaining = energy - items[it].energy!!
+                    rankPresenter.updateEnergy(energyRemaining.toLong())
                 }
+
             }
 
         }
 
         rvRank.layoutManager = LinearLayoutManager(this)
         rvRank.adapter = adapter
-    }
-
-
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        data = dataSnapshot.getValue(Inviter::class.java)!!
-
-        alert(data!!.name + " invite you to play"){
-            title = "Invitation"
-            yesButton {
-                presenter.replyInvitation(true)
-            }
-            noButton {
-                presenter.replyInvitation(false)
-            }
-        }.show()
-    }
-
-    override fun response(message: String) {
-        if (message === "acceptedGame"){
-            toast("acceptedGame")
-
-            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                "inviterName" to data.name))
-        }
-
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -171,85 +136,6 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
                 }
             }
         }
-    }
-
-    fun fetchBalance(){
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                if (dataSnapshot.exists()){
-                    tvEnergy.text = "${dataSnapshot.getValue(Balance::class.java)!!.energy}/${dataSnapshot.getValue(Balance::class.java)!!.energyLimit}"
-                    tvPoint.text = "${dataSnapshot.getValue(Balance::class.java)!!.point}"
-                }
-
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-
-            }
-        }
-        database.child("users").child(auth.currentUser!!.uid).child("balance").addListenerForSingleValueEvent(postListener)
-    }
-
-    fun fetchGameAvailable(){
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                if (dataSnapshot.exists()){
-                    availableGameList.clear()
-                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
-                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
-                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
-                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.alphaNum!!)
-                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.mix!!)
-                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.doubleAttack!!)
-
-                    adapter.notifyDataSetChanged()
-                }
-
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-
-            }
-        }
-        database.child("users").child(auth.currentUser!!.uid).child("availableGame").addListenerForSingleValueEvent(postListener)
-    }
-
-    fun buyGame(position: Int){
-        var gameName = ""
-        val point = tvPoint.text.toString().toLong() - items[position].priceGame!!
-        when(position){
-            1 -> gameName = "oddEven"
-            2 -> gameName = "rush"
-            3 -> gameName = "alphaNum"
-            4 -> gameName = "mix"
-            5 -> gameName = "doubleAttack"
-        }
-        database.child("users").child(auth.currentUser!!.uid).child("availableGame").child(gameName).setValue(true).addOnFailureListener {
-            popUpMessage(2, it.message.toString(),0)
-        }
-        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").setValue(point).addOnFailureListener {
-            popUpMessage(2, it.message.toString(),0)
-        }.addOnSuccessListener {
-            popUpMessage(2,"Success Buy this Game",0)
-            fetchBalance()
-            fetchGameAvailable()
-        }
-    }
-
-    fun fetchScore(){
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                loadBestScore(dataSnapshot)
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-
-            }
-        }
-        database.child("leaderboards").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
     }
 
     fun loadBestScore(dataSnapshot: DataSnapshot){
@@ -383,7 +269,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
         )
     }
 
-    private fun popUpMessage(type: Int,message: String, position: Int){
+    private fun popUpMessage(type: Int,message: String){
         val inflater: LayoutInflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_message,null)
@@ -418,7 +304,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
             tvMessageInfo.text = message
 
             btnClose.onClick {
-                buyGame(position)
+                val remainingPoint = point - items[position].priceGame!!
+                rankPresenter.buyGame(position,remainingPoint)
                 btnClose.startAnimation(clickAnimation)
                 activity_rank.alpha = 1F
                 popupWindow.dismiss()
@@ -461,20 +348,86 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener, MainView 
     }
 
     override fun onStart() {
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this, database)
-        presenter.receiveInvitation()
+        rankPresenter = RankPresenter(this,database)
         auth = FirebaseAuth.getInstance()
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
-        fetchScore()
-        fetchBalance()
-        fetchGameAvailable()
+
+        rankPresenter.fetchBalance()
+        rankPresenter.fetchGameAvailable()
+        rankPresenter.fetchScore()
+        rankPresenter.fetchRank()
+
         super.onStart()
     }
 
     override fun onDestroy() {
-        presenter.dismissListener()
         super.onDestroy()
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == "fetchBalance"){
+            editor = sharedPreference.edit()
+            editor.putInt("point",dataSnapshot.getValue(Balance::class.java)!!.point!!)
+            editor.apply()
+            energy = dataSnapshot.getValue(Balance::class.java)!!.energy!!
+            energyLimit = dataSnapshot.getValue(Balance::class.java)!!.energyLimit!!
+            point = dataSnapshot.getValue(Balance::class.java)!!.point!!
+            tvEnergy.text = "${energy}/${energyLimit}"
+            tvPoint.text = "${point}"
+        }else if(response == "fetchGameAvailable"){
+            availableGameList.clear()
+            availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
+            availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
+            availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
+            availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.alphaNum!!)
+            availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.mix!!)
+            availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.doubleAttack!!)
+
+            adapter.notifyDataSetChanged()
+        }else if(response == "fetchScore")
+            loadBestScore(dataSnapshot)
+        else if (response == "fetchRank"){
+            editor = sharedPreference.edit()
+            editor.putString("currentRank", dataSnapshot.value.toString())
+        }
+
+    }
+
+    override fun response(message: String, response: String) {
+        if (response === "buyGame")
+            popUpMessage(2, message)
+        else if(response === "updateEnergy"){
+            when (position) {
+                0 -> {
+                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                            "type" to GameType.Normal))
+                }
+                1 -> {
+                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                            "type" to GameType.OddEven))
+                }
+                2 -> {
+                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                            "type" to GameType.Rush))
+                }
+                3 -> {
+                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                            "type" to GameType.AlphaNum))
+                }
+                4 ->{
+                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                            "type" to GameType.Mix))
+                }
+                5 ->{
+                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                            "type" to GameType.DoubleAttack))
+                }
+            }
+        }else if(response == "error"){
+            popUpMessage(2,message)
+        }
     }
 }
 
@@ -510,3 +463,11 @@ data class AvailableGame(
     var mix: Boolean? = false,
     var doubleAttack: Boolean? = false
 )
+
+enum class Rank {
+    Toddler,
+    Beginner,
+    Senior,
+    Master,
+    GrandMaster
+}

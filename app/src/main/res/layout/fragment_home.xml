@@ -18,25 +18,31 @@
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fbutton:cardCornerRadius="30dp"
+            fbutton:cardCornerRadius="20dp"
+            android:layout_margin="10dp"
+            android:elevation="5dp"
             android:id="@+id/cvCredit">
-        <TextView
-                android:layout_width="100dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-            android:text="1500"
-                android:textColor="@color/fbutton_color_sun_flower"
-            android:textStyle="bold"
-                android:textSize="23sp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="37dp"
-            android:id="@+id/tvCredit"/>
+                android:orientation="horizontal"
+                android:padding="10dp">
 
-            <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:src="@drawable/credit"
-                android:layout_marginHorizontal="15dp"
-                android:layout_marginVertical="12dp"/>
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/credit"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1500"
+                    android:textColor="@color/fbutton_color_sun_flower"
+                    android:textStyle="bold"
+                    android:textSize="23sp"
+                    android:layout_gravity="center"
+                    android:id="@+id/tvCredit"/>
+            </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatImageView

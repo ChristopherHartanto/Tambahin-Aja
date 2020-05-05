@@ -24,14 +24,11 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 
-class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
-    MainView {
-
+class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var mAdView : AdView
     lateinit var data: Inviter
-    lateinit var presenter: Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +37,6 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this, database)
-        presenter.receiveInvitation()
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvFriendsTitle.typeface = typeface
 
@@ -102,29 +97,6 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
 
     }
 
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        data = dataSnapshot.getValue(Inviter::class.java)!!
-
-        alert(data!!.name + " invite you to play"){
-            title = "Invitation"
-            yesButton {
-                presenter.replyInvitation(true)
-            }
-            noButton {
-                presenter.replyInvitation(false)
-            }
-        }.show()
-    }
-
-    override fun response(message: String) {
-        if (message === "acceptedGame"){
-            toast("acceptedGame")
-
-            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                "inviterName" to data.name))
-        }
-
-    }
 
     override fun networkConnectivityChanged(event: Event) {
         when (event) {
@@ -138,8 +110,4 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         }
     }
 
-    override fun onPause() {
-        presenter.dismissListener()
-        super.onPause()
-    }
 }

@@ -2,19 +2,29 @@ package com.example.balapplat.play
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
+import android.graphics.Typeface
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import androidx.transition.TransitionManager
 import com.example.balapplat.main.MainActivity
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.presenter.MatchPresenter
+import com.example.balapplat.rank.Rank
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
@@ -25,19 +35,24 @@ import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_normal_game.*
+import kotlinx.android.synthetic.main.activity_normal_game.tvPoint
+import kotlinx.android.synthetic.main.activity_rank.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.ctx
 import java.util.*
 
-class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
-    MainView, MatchView {
+class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, MatchView {
 
+    private lateinit var sharedPreference: SharedPreferences
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
     lateinit var matchPresenter: MatchPresenter
     private lateinit var countDownTimer : CountDownTimer
     lateinit var data: Inviter
-    lateinit var presenter: Presenter
+    lateinit var editor: SharedPreferences.Editor
+    var creditReward = 0
+    var pointReward = 0
     var creatorFacebookId = ""
     var creatorName = ""
     var joinOnlineFacebookId = ""
@@ -48,13 +63,16 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
     var inviterName = ""
     var count = 4
     var point = 0
-    var timer = 30
+    var timer = 45
+    var defaultTimer = 45
     var answer = 999
     var highScore = 0
     var opponentPoint = 0
     var type = GameType.Normal
     var mix = false
     var player = StatusPlayer.Single
+    private lateinit var popupWindow : PopupWindow
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
     private var numberArr : MutableList<Int> = mutableListOf()
 
@@ -64,10 +82,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
         supportActionBar?.hide()
 
+        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         database = FirebaseDatabase.getInstance().reference
         matchPresenter = MatchPresenter(this,database)
         auth = FirebaseAuth.getInstance()
-        presenter = Presenter(this, database)
 
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvPlayerName.typeface = typeface
@@ -130,7 +148,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
 
         generate()
         control(false)
-        
+        defaultTimer =  timer
     }
 
     @SuppressLint("SetTextI18n")
@@ -405,42 +423,54 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
                     when (player) {
                         StatusPlayer.Inviter -> {
                             matchPresenter.addToHistory(auth,point,opponentPoint, joinFriendFacebookId,
-                                    joinFriendName)
+                                    joinFriendName,"friend")
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
                                     "scoreOpponent" to opponentPoint, "opponentName" to joinFriendName, "opponentFacebookId" to joinFriendFacebookId, "gameResult" to text))
+                            finish()
                         }
                         StatusPlayer.JoinFriend -> {
                             matchPresenter.addToHistory(auth,point,opponentPoint, inviterFacebookId,
-                                    inviterName
+                                    inviterName,"friend"
                             )
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
                                     "scoreOpponent" to opponentPoint, "opponentName" to inviterName, "opponentFacebookId" to inviterFacebookId, "gameResult" to text))
+                            finish()
                         }
                         StatusPlayer.Creator -> {
                             matchPresenter.addToHistory(auth,point,opponentPoint, joinOnlineFacebookId,
-                                    joinOnlineName
+                                    joinOnlineName,"online"
                             )
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
                                     "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineName, "gameResult" to text))
+                            finish()
                         }
                         StatusPlayer.JoinOnline -> {
                             matchPresenter.addToHistory(auth,point,opponentPoint, creatorFacebookId,
-                                    creatorName
+                                    creatorName,"online"
                             )
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
                                     "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineFacebookId, "gameResult" to text))
+                            finish()
                         }
                         StatusPlayer.Rank ->{
-                            startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to 0, "rewardPoint" to 0))
+                            val reply = sharedPreference.getBoolean("continueRank",false)
+                            if (reply)
+                                popUpMessage(1,"Do You Want to Continue?")
+                            else{
+                                calculateReward()
+                                startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
+                                finish()
+                            }
                         }
                         StatusPlayer.Single->{
                             startActivity(intentFor<PostGameActivity>("status" to StatusPlayer.Single,"score" to point))
+                            finish()
                         }
                     }
-                }else
+                }else{
                     startActivity(intentFor<PostGameActivity>("status" to StatusPlayer.Single,"score" to point))
-
-                finish()
+                    finish()
+                }
 
             }
         }
@@ -551,13 +581,108 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         tvPlayerName.text = "" + Profile.getCurrentProfile().name
     }
 
+    private fun popUpMessage(type: Int,message: String){
+        val inflater: LayoutInflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        presenter.replyInvitation(false)
+        val view = inflater.inflate(R.layout.pop_up_message,null)
+
+        // Initialize a new instance of popup window
+        popupWindow = PopupWindow(
+                view, // Custom view to show in popup window
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+        )
+
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        val layoutMessageInvitation = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
+        val layoutMessageBasic = view.findViewById<LinearLayout>(R.id.layout_message_basic)
+        val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
+        val tvMessageInfo = view.findViewById<TextView>(R.id.tvMessageInfo)
+        val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
+        val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
+        val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
+
+        tvMessageTitle.text = "Game Over"
+
+        if (type == 1){
+            layoutMessageInvitation.visibility = View.GONE
+            layoutMessageBasic.visibility = View.VISIBLE
+            layoutMessageReward.visibility = View.GONE
+
+            btnReject.text = "Continue"
+            btnClose.text = "No"
+            tvMessageInfo.text = message
+
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_normal_game.alpha = 1F
+                popupWindow.dismiss()
+                calculateReward()
+                startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
+                finish()
+            }
+
+            btnReject.onClick {
+                btnReject.startAnimation(clickAnimation)
+                timer = defaultTimer
+                control(true)
+                activity_normal_game.alpha = 1F
+                popupWindow.dismiss()
+                editor = sharedPreference.edit()
+                editor.putBoolean("continueRank",false)
+                editor.apply()
+            }
+
+        }
+        else if(type == 2){
+            layoutMessageInvitation.visibility = View.GONE
+            layoutMessageBasic.visibility = View.VISIBLE
+            layoutMessageReward.visibility = View.GONE
+
+            btnReject.visibility = View.GONE
+            tvMessageInfo.text = message
+
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_rank.alpha = 1F
+                popupWindow.dismiss()
+            }
+        }
+
+        tvMessageTitle.typeface = typeface
+
+        activity_normal_game.alpha = 0.1F
+
+        TransitionManager.beginDelayedTransition(activity_normal_game)
+        popupWindow.showAtLocation(
+                activity_normal_game, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+        )
+
     }
 
     override fun response(message: String) {
         toast(""+ message)
+    }
+
+    fun calculateReward(){
+        val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
+
+        when(currentRank){
+            Rank.Toddler.toString()->{
+                pointReward = point * 3 / 100
+                creditReward = point * 5 / 100
+            }
+        }
+        matchPresenter.updateCredit(creditReward.toLong(),auth)
+        matchPresenter.updatePoint(pointReward.toLong(),auth)
     }
 
     override fun onDestroy() {
@@ -598,10 +723,6 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener,
         control(true)
 
         super.onResume()
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 
     override fun fetchOpponentData(dataSnapshot: DataSnapshot, inviter: Boolean) {

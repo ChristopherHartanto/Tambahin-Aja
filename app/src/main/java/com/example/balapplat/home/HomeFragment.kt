@@ -68,11 +68,11 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     var playedPuzzleToday = false
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
-
     private var currentDate = ""
     private var numberArr : MutableList<Int> = mutableListOf()
 
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -82,12 +82,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-
-
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-
+        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         val sdf = SimpleDateFormat("dd/M/yyyy")
         currentDate = sdf.format(Date())
 
@@ -105,6 +103,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         btnOnline.typeface = typeface
         btnLeaderboard.typeface = typeface
 
+        val credit = sharedPreference.getInt("credit",0)
+        tvCredit.text = "${credit}"
 
         btnCustomPlay.onClick {
             popUpCustomGame()
@@ -161,7 +161,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     }
 
     private fun checkPlayedPuzzle() {
-        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         val lastPlayed = sharedPreference.getString("playedTime","")
 
         playedPuzzleToday = false
@@ -285,20 +284,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
             popupWindow.elevation = 10.0F
         }
 
-
-        // If API level 23 or higher then execute the code
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-//            // Create a new slide animation for popup window enter transition
-//            val slideIn = Slide()
-//            slideIn.slideEdge = Gravity.TOP
-//            popupWindow.enterTransition = slideIn
-//
-//            // Slide animation for popup window exit transition
-//            val slideOut = Slide()
-//            slideOut.slideEdge = Gravity.RIGHT
-//            popupWindow.exitTransition = slideOut
-//
-//        }
 
         val main_activity = main_view.findViewById<RelativeLayout>(R.id.activity_main)
         val dailyPuzzleTitle = view.findViewById<TextView>(R.id.tvDailyPuzzleTitle)

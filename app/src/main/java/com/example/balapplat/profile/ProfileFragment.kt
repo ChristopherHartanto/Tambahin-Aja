@@ -22,7 +22,9 @@ import com.example.balapplat.home.CustomGameRecyclerViewAdapter
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.presenter.ProfilePresenter
 import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
 import com.facebook.Profile
 import com.google.android.gms.ads.AdRequest
@@ -43,14 +45,18 @@ import org.jetbrains.anko.support.v4.startActivity
 import org.jetbrains.anko.support.v4.toast
 import java.util.regex.Pattern
 
-class ProfileFragment : Fragment(), NetworkConnectivityListener {
+class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var historyAdapter: HistoryRecyclerViewAdapter
     private lateinit var database: DatabaseReference
     private lateinit var mAdView : AdView
+    private lateinit var profilePresenter: ProfilePresenter
     private lateinit var popupWindow : PopupWindow
     private lateinit var user: User
+    var name = ""
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
+    private var historyItems: MutableList<History> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,12 +70,14 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         auth = FirebaseAuth.getInstance()
 
         database = FirebaseDatabase.getInstance().reference
-
+        profilePresenter = ProfilePresenter(this,database)
         if(AccessToken.getCurrentAccessToken() == null)
             auth.signOut()
 
+        historyAdapter = HistoryRecyclerViewAdapter(ctx,historyItems, User(name,Profile.getCurrentProfile().id,"",""))
         getStats()
         fetchUserProfile()
+        profilePresenter.fetchHistory()
 
         mAdView = view!!.findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()
@@ -96,8 +104,8 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
             tvWin.typeface = typeface
 
         if (auth.currentUser != null){
-            tvProfileName.text = auth.currentUser!!.displayName.toString()
-            //getHighScore()
+
+            profilePresenter.fetchName()
 
             Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
 
@@ -216,7 +224,8 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
             else if(!isValidMobile(etEditProfileHandphone.text.toString()))
                 toast("Input Valid No Handphone")
             else {
-                saveProfile(etEditProfileName.text.toString(),etEditProfileEmail.text.toString(),etEditProfileHandphone.text.toString())
+                profilePresenter.saveProfile(etEditProfileName.text.toString(),etEditProfileEmail.text.toString(),etEditProfileHandphone.text.toString())
+                tvProfileName.text = etEditProfileName.text.toString()
                 btnClose.startAnimation(clickAnimation)
                 fragment_profile.alpha = 1F
                 main_activity.alpha = 1F
@@ -246,22 +255,32 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener {
         return false;
     }
 
-    fun saveProfile(name: String, email: String, noHandphone: String){
-        val values  = hashMapOf(
-                "name" to name,
-                "email" to email,
-                "noHandphone" to noHandphone
-        )
-        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-            toast("Save")
-        }.addOnFailureListener {
-            toast("${it.message}")
-        }
 
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == "fetchHistory") {
+            for (data in dataSnapshot.children) {
+                val item = data.getValue(History::class.java)
+                historyItems.add(item!!)
+            }
+            historyAdapter.notifyDataSetChanged()
+        }else if(response == "fetchName"){
+            tvProfileName.text = dataSnapshot.value.toString()
+        }
+    }
+
+    override fun response(message: String) {
     }
 
 
 }
+
+data class History(
+        var opponentName: String? = "",
+        var opponentFacebookId: String? = "",
+        var opponentPoint: Long? = 0,
+        var playerPoint: Long? = 0,
+        var status: String? = ""
+)
 
 data class Stats(
     var win: Int? = 0,

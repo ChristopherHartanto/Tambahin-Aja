@@ -26,15 +26,13 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.ctx
 
-class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
-    MainView {
+class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     private var items: MutableList<HighScore> = mutableListOf()
     private var profileItems: MutableList<User> = mutableListOf()
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     lateinit var data: Inviter
-    lateinit var presenter: Presenter
 
     private lateinit var adapter: LeaderBoardRecyclerViewAdapter
 
@@ -46,7 +44,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
-        presenter = Presenter(this, database)
 
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvLeaderboardInfo.typeface = typeface
@@ -124,30 +121,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
         adapter.notifyDataSetChanged()
     }
 
-    override fun loadData(dataSnapshot: DataSnapshot) {
-        data = dataSnapshot.getValue(Inviter::class.java)!!
-
-        alert(data!!.name + " invite you to play"){
-            title = "Invitation"
-            yesButton {
-                presenter.replyInvitation(true)
-            }
-            noButton {
-                presenter.replyInvitation(false)
-            }
-        }.show()
-    }
-
-    override fun response(message: String) {
-        if (message === "acceptedGame"){
-            toast("acceptedGame")
-
-            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                "inviterName" to data.name))
-        }
-
-    }
-
     override fun networkConnectivityChanged(event: Event) {
         when (event) {
             is Event.ConnectivityEvent -> {
@@ -169,14 +142,9 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener,
         items.clear()
         profileItems.clear()
         retrieve()
-        presenter.receiveInvitation()
         super.onStart()
     }
 
-    override fun onPause() {
-        presenter.dismissListener()
-        super.onPause()
-    }
 
 }
 

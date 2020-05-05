@@ -28,7 +28,7 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
                     if (p0.getValue(Inviter::class.java)!!.status == false)
-                        view.loadData(p0)
+                        view.loadData(p0,"receiveInvitation")
 
                     database.removeEventListener(this)
                 }
@@ -56,6 +56,24 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
         }
     }
 
+    fun checkDailyPuzzle(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    view.loadData(p0,"dailyPuzzle")
+                }
+                database.removeEventListener(this)
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("dailyPuzzle").addListenerForSingleValueEvent(postListener)
+
+    }
+
     fun fetchCredit(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
@@ -64,7 +82,7 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
 
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
-                        view.loadData(p0)
+                        view.loadData(p0,"fetchCredit")
                 }
                 database.removeEventListener(this)
             }
