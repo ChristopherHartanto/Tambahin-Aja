@@ -64,18 +64,21 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
                     StatusPlayer.Inviter -> {
                         val joinFriendFacebookId = intent.extras!!.getString("joinFriendFacebookId")
                         val joinFriendName = intent.extras!!.getString("joinFriendName")
-                        startActivity(intentFor<NormalGameActivity>("joinFriendFacebookId" to joinFriendFacebookId, "joinName" to joinFriendName,"status" to status, "type" to type))
+                        val timer = intent.extras!!.getInt("timer")
+                        startActivity(intentFor<NormalGameActivity>("joinFriendFacebookId" to joinFriendFacebookId, "joinName" to joinFriendName,"status" to status, "type" to type, "timer" to timer))
                     }
                     StatusPlayer.JoinFriend -> {
                         val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")
                         val inviterName = intent.extras!!.getString("inviterName")
-                        startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName,"status" to status, "type" to type))
+                        val timer = intent.extras!!.getInt("timer")
+                        startActivity(intentFor<NormalGameActivity>("inviterFacebookId" to inviterFacebookId, "inviterName" to inviterName,"status" to status, "type" to type, "timer" to timer))
                     }
                     StatusPlayer.Rank ->{
                         startActivity(intentFor<NormalGameActivity>("status" to status, "type" to type))
                     }
                     StatusPlayer.Single->{
-                        startActivity(intentFor<NormalGameActivity>("status" to status, "type" to type))
+                        val timer = intent.extras!!.getInt("timer")
+                        startActivity(intentFor<NormalGameActivity>("status" to status, "type" to type, "timer" to timer))
                     }
                 }
             }

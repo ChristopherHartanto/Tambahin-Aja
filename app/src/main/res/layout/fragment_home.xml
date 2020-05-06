@@ -18,15 +18,17 @@
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fbutton:cardCornerRadius="20dp"
+            fbutton:cardCornerRadius="10dp"
             android:layout_margin="10dp"
             android:elevation="5dp"
+            android:minWidth="100dp"
             android:id="@+id/cvCredit">
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="horizontal"
-                android:padding="10dp">
+                android:gravity="center_vertical"
+                android:padding="5dp">
 
                 <ImageView
                     android:layout_width="35dp"
@@ -34,11 +36,12 @@
                     android:src="@drawable/credit"/>
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1500"
+                    android:layout_height="match_parent"
+                    android:text="0"
                     android:textColor="@color/fbutton_color_sun_flower"
                     android:textStyle="bold"
                     android:textSize="23sp"
+                    android:layout_marginLeft="5dp"
                     android:layout_gravity="center"
                     android:id="@+id/tvCredit"/>
             </LinearLayout>

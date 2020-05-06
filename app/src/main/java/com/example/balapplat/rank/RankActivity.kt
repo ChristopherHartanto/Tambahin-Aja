@@ -245,12 +245,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         btnRankDetail.typeface = typeface
 
         rankTitle.text = "Beginner"
-        rankDetailItems.clear()
-        rankDetailItems.add("Get 10 Extra Credit when Solve Puzzle")
-        rankDetailItems.add("Energy Limit 110")
-        rankDetailItems.add("Extra 2 Point in Rank Mode")
 
-        rankDetailAdapter = RankDetailRecyclerViewAdapter(this, rankDetailItems)
         rvRankDetail.layoutManager = LinearLayoutManager(this)
         rvRankDetail.adapter = rankDetailAdapter
 
@@ -325,8 +320,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
             btnReject.visibility = View.GONE
             tvMessageInfo.text = message
-
+            rankPresenter.fetchGameAvailable()
             btnClose.onClick {
+
                 btnClose.startAnimation(clickAnimation)
                 activity_rank.alpha = 1F
                 popupWindow.dismiss()
@@ -352,6 +348,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         database = FirebaseDatabase.getInstance().reference
         rankPresenter = RankPresenter(this,database)
         auth = FirebaseAuth.getInstance()
+        rankDetailAdapter = RankDetailRecyclerViewAdapter(this, rankDetailItems)
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
 
         rankPresenter.fetchBalance()
@@ -391,6 +388,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         else if (response == "fetchRank"){
             editor = sharedPreference.edit()
             editor.putString("currentRank", dataSnapshot.value.toString())
+            editor.apply()
+            tvRank.text = dataSnapshot.value.toString()
+            loadRankInfo(dataSnapshot.value.toString())
         }
 
     }
@@ -428,6 +428,45 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }else if(response == "error"){
             popUpMessage(2,message)
         }
+    }
+
+    fun loadRankInfo(currentRank: String){
+        when(enumValueOf<Rank>(currentRank)){
+            Rank.Toddler -> {
+                rankDetailItems.clear()
+                rankDetailItems.add("Energy Limit 100")
+                rankDetailItems.add("Extra 1% Credit Reward")
+            }
+            Rank.Beginner -> {
+                rankDetailItems.clear()
+                rankDetailItems.add("Get 5 Extra Credit when Solve Puzzle")
+                rankDetailItems.add("Energy Limit 105")
+                rankDetailItems.add("Extra 2% Credit Reward")
+            }
+            Rank.Senior -> {
+                rankDetailItems.clear()
+                rankDetailItems.add("Get 8 Extra Credit when Solve Puzzle")
+                rankDetailItems.add("Energy Limit 110")
+                rankDetailItems.add("Extra 4% Credit Reward")
+                rankDetailItems.add("Extra 10% Point when Answered Correct")
+            }
+            Rank.Master -> {
+                rankDetailItems.clear()
+                rankDetailItems.add("Get 10 Extra Credit when Solve Puzzle")
+                rankDetailItems.add("Energy Limit 115")
+                rankDetailItems.add("Extra 5% Credit Reward")
+                rankDetailItems.add("Extra 12% Point when Answered Correct")
+            }
+            Rank.GrandMaster -> {
+                rankDetailItems.clear()
+                rankDetailItems.add("Get 12 Extra Credit when Solve Puzzle")
+                rankDetailItems.add("Energy Limit 120")
+                rankDetailItems.add("Extra 8% Credit Reward")
+                rankDetailItems.add("Extra 15% Point when Answered Correct")
+                rankDetailItems.add("Energy Revive 5% Faster")
+            }
+        }
+        rankDetailAdapter.notifyDataSetChanged()
     }
 }
 

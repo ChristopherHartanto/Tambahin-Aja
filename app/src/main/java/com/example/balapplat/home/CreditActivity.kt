@@ -131,7 +131,9 @@ class CreditActivity : AppCompatActivity(), MainView {
         else if(response == "fetchCreditHistory"){
             for (data in dataSnapshot.children){
                 val item = data.getValue(CreditHistory::class.java)
-                creditHistoryItems.add(item!!)
+                creditHistoryItems.add(CreditHistory(data.getValue(CreditHistory::class.java)!!.info,
+                        data.getValue(CreditHistory::class.java)!!.credit,
+                        data.key))
             }
             creditHistoryAdapter.notifyDataSetChanged()
         }else if(response == "fetchCreditShop"){

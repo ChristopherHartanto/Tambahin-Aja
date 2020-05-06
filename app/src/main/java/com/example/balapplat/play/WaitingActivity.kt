@@ -34,6 +34,8 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
     lateinit var presenter: Presenter
     lateinit var waitingPresenter: WaitingPresenter
     var registerWaitingList = false
+    var timer = 0
+    var type = GameType.Normal
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +55,9 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
        if (intent.extras != null){
            if (intent.extras!!.getString("joinFriendFacebookId") != null){ // jika main bareng teman
                inviter = true
-               intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.makeInvitation(it) }
+               timer = intent.extras!!.getInt("timer")
+               type = intent.extras!!.getSerializable("type") as GameType //  cek ini
+               intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.makeInvitation(it,type,timer) }
                Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("joinFriendFacebookId")!!)).fit().into(ivOpponentImageWaiting)
                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
 
@@ -124,13 +128,13 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
 
     override fun response(message: String) {
         when {
-            message === "accepted" -> intent.extras!!.getString("facebookId")?.let { waitingPresenter.createGame(it,false) }
+            message === "accepted" -> intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.createGame(it,false) }
             message === "createGame" -> {
                 toast("create game")
                 finish()
                 startActivity(intentFor<CountdownActivity>("joinFriendFacebookId" to intent.extras!!.getString("joinFriendFacebookId"),
                         "joinFriendName" to intent.extras!!.getString("joinFriendName"),
-                        "status" to StatusPlayer.Inviter, "type" to GameType.Normal))
+                        "status" to StatusPlayer.Inviter, "type" to type, "timer" to timer))
             }
             message === "invitationSent" -> {
                 toast("invitation sent")

@@ -93,7 +93,8 @@ class RankPresenter(private val view: RankView, private val database: DatabaseRe
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
-                view.loadData(dataSnapshot,"fetchRank")
+                if (dataSnapshot.exists())
+                    view.loadData(dataSnapshot,"fetchRank")
             }
 
             override fun onCancelled(databaseError: DatabaseError) {

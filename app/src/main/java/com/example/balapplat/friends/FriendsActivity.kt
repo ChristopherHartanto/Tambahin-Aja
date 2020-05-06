@@ -24,7 +24,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 
-class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
+class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener, FriendsAddListener   {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var mAdView : AdView
@@ -108,6 +108,10 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
                 }
             }
         }
+    }
+
+    override fun removeFragment() {
+        finish()
     }
 
 }

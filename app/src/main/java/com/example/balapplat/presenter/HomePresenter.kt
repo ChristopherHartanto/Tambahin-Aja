@@ -6,8 +6,10 @@ import com.example.balapplat.rank.Balance
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.*
 
-class ProfilePresenter(private val view: MainView, private val database: DatabaseReference) {
+class HomePresenter(private val view: MainView, private val database: DatabaseReference) {
 
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
     var postListener = object : ValueEventListener {
@@ -19,7 +21,7 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
 
     }
 
-    fun fetchName(){
+    fun checkDailyPuzzle(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -27,43 +29,36 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
 
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
-                    view.loadData(p0,"fetchName")
+                    view.loadData(p0,"dailyPuzzle")
                 }
                 database.removeEventListener(this)
             }
 
         }
-        database.child("users").child(auth.currentUser!!.uid).child("name").addListenerForSingleValueEvent(postListener)
+        database.child("users").child(auth.currentUser!!.uid).child("dailyPuzzle").addListenerForSingleValueEvent(postListener)
 
     }
-    fun fetchHistory(){
+
+    fun fetchAvailableGame(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
-                if(p0.exists()){
-                    view.loadData(p0,"fetchHistory")
-                }
+                view.loadData(p0,"availableGame")
                 database.removeEventListener(this)
             }
 
         }
-        database.child("users").child(auth.currentUser!!.uid).child("history").orderByKey().addListenerForSingleValueEvent(postListener)
-
+        database.child("users").child(auth.currentUser!!.uid).child("availableGame").addListenerForSingleValueEvent(postListener)
     }
 
-    fun saveProfile(name: String, email: String, noHandphone: String){
-        database.child("users").child(auth.currentUser!!.uid).child("name").setValue(name).addOnFailureListener {
-            view.response(it.message.toString())
-        }
-        database.child("users").child(auth.currentUser!!.uid).child("email").setValue(email).addOnFailureListener {
-            view.response(it.message.toString())
-        }
-        database.child("users").child(auth.currentUser!!.uid).child("noHandphone").setValue(noHandphone).addOnFailureListener {
-            view.response(it.message.toString())
-        }
+    fun updatePuzzle(){
+        val sdf = SimpleDateFormat("dd MMM yyyy")
+        val currentDate = sdf.format(Date())
+
+        database.child("users").child(auth.currentUser!!.uid).child("dailyPuzzle").setValue(currentDate)
 
     }
 

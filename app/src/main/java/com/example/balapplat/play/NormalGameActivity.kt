@@ -106,7 +106,6 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
         inviterFacebookId = intent.extras!!.getString("inviterFacebookId").toString()
         inviterName = intent.extras!!.getString("inviterName").toString()
 
-
         player = intent.extras!!.getSerializable("status") as StatusPlayer
         type = intent.extras!!.getSerializable("type") as GameType
 
@@ -125,23 +124,36 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
         when(player){
             StatusPlayer.Creator->{
                 matchPresenter.fetchOpponent(joinOnlineFacebookId)
+
             }
             StatusPlayer.JoinOnline->{
                 matchPresenter.fetchOpponent(Profile.getCurrentProfile().id)
             }
             StatusPlayer.JoinFriend->{
+                defaultTimer = intent.extras!!.getInt("timer")
+                timer = defaultTimer
                 matchPresenter.fetchOpponent(Profile.getCurrentProfile().id)
             }
             StatusPlayer.Inviter->{
+                defaultTimer = intent.extras!!.getInt("timer")
+                timer = defaultTimer
                 matchPresenter.fetchOpponent(joinFriendFacebookId)
             }
             StatusPlayer.Rank->{
                 matchPresenter.getHighScore(auth,type)
             }
+            StatusPlayer.Single -> {
+                defaultTimer = intent.extras!!.getInt("timer")
+                timer = defaultTimer
+            }
         }
 
-        if (type == GameType.Rush)
-            timer = 5
+        if (type == GameType.Rush){
+            if (player == StatusPlayer.Rank || player == StatusPlayer.Creator || player == StatusPlayer.JoinOnline){
+                defaultTimer = 5
+                timer = defaultTimer
+            }
+        }
 
         if (type == GameType.Mix)
             mix = true
@@ -307,8 +319,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 point += 10
                 generate()
             }else{
-                if(point > 6)
-                    point -= 6
+                if(point > 9)
+                    point -= 9
                 else
                     point = 0
             }
@@ -333,7 +345,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                     point = 0
             }
             countDownTimer.cancel()
-            timer = 5
+            timer = defaultTimer
             control(true)
         }
         else if(type == GameType.AlphaNum){

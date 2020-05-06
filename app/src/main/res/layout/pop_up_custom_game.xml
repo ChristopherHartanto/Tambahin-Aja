@@ -67,23 +67,23 @@
                 android:tickMark="@color/colorWhite"
                 android:tickMarkTint="@color/fbutton_color_sun_flower"/>
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="10dp"
-                android:src="@drawable/ic_launcher_background"
-                android:id="@+id/ivCustomGame"
-                android:visibility="gone"/>
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_margin="5dp"
                 android:textColor="@color/colorWhite"
-                android:textSize="24dp"
-                android:id="@+id/tvCustomGame"/>
+                android:textSize="24sp"
+                android:id="@+id/tvCustomGameName"/>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:src="@drawable/ic_launcher_background"
+                android:id="@+id/ivCustomGame"
+                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
@@ -97,7 +97,7 @@
                 android:gravity="center"
                 android:layout_margin="5dp"
                 android:textColor="@color/colorWhite"
-                android:textSize="14dp"
+                android:textSize="12sp"
                 android:id="@+id/tvClickToChooseGame"/>
 
             <info.hoang8f.widget.FButton

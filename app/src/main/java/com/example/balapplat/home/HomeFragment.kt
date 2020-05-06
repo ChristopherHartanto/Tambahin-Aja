@@ -27,14 +27,20 @@ import com.example.balapplat.friends.FriendsActivity
 import com.example.balapplat.leaderboard.LeaderBoardActivity
 import com.example.balapplat.main.LoginActivity
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.play.GameType
+import com.example.balapplat.play.StatusPlayer
 import com.example.balapplat.play.WaitingActivity
+import com.example.balapplat.presenter.HomePresenter
+import com.example.balapplat.rank.AvailableGame
 import com.example.balapplat.rank.RankActivity
 import com.example.balapplat.rank.RankRecyclerViewAdapter
 import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
 import com.google.android.material.bottomnavigation.BottomNavigationMenu
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.quantumhiggs.network.Event
@@ -43,6 +49,7 @@ import kotlinx.android.synthetic.main.activity_normal_game.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_home.fragment_home
 import kotlinx.android.synthetic.main.fragment_tournament.*
+import kotlinx.android.synthetic.main.pop_up_custom_game.*
 import org.jetbrains.anko.clearTask
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -57,8 +64,9 @@ import org.jetbrains.anko.support.v4.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HomeFragment : Fragment(), NetworkConnectivityListener {
+class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
+    private lateinit var homePresenter: HomePresenter
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var sharedPreference: SharedPreferences
@@ -70,7 +78,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     private lateinit var popupWindow : PopupWindow
     private var currentDate = ""
     private var numberArr : MutableList<Int> = mutableListOf()
-
+    private val availableGameList : MutableList<Boolean> = mutableListOf()
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreateView(
@@ -85,14 +93,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
+        homePresenter = HomePresenter(this,database)
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
-        val sdf = SimpleDateFormat("dd/M/yyyy")
+        val sdf = SimpleDateFormat("dd MMM yyyy")
         currentDate = sdf.format(Date())
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.fade_in)
         btnRank.startAnimation(animationBounce)
 
-        checkPlayedPuzzle()
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
 
         tvCredit.typeface = typeface
@@ -105,14 +113,34 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
 
         val credit = sharedPreference.getInt("credit",0)
         tvCredit.text = "${credit}"
+        if (auth.currentUser != null)
+            homePresenter.checkDailyPuzzle()
 
         btnCustomPlay.onClick {
+            if (auth.currentUser != null)
+                homePresenter.fetchAvailableGame()
+            else{
+                availableGameList.clear()
+                availableGameList.add(true)
+                availableGameList.add(false)
+                availableGameList.add(false)
+                availableGameList.add(false)
+                availableGameList.add(false)
+                availableGameList.add(false)
+
+                customGameAdapter.notifyDataSetChanged()
+            }
             popUpCustomGame()
         }
 
         btnRank.onClick {
-            btnRank.startAnimation(clickAnimation)
-            startActivity<RankActivity>()
+            if(auth.currentUser == null)
+                startActivity(intentFor<LoginActivity>().clearTask())
+            else{
+                btnRank.startAnimation(clickAnimation)
+                startActivity<RankActivity>()
+            }
+
         }
 
         btnPlayFriend.onClick {
@@ -135,10 +163,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         }
 
         ivDailyPuzzle.onClick {
-            checkPlayedPuzzle()
-            if (playedPuzzleToday)
-                toast("You Already Played Today")
-            else
                 popUp()
         }
 
@@ -160,11 +184,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         super.onStart()
     }
 
-    private fun checkPlayedPuzzle() {
-        val lastPlayed = sharedPreference.getString("playedTime","")
-
-        playedPuzzleToday = false
-        tvPuzzleInfo.visibility = View.VISIBLE
+    private fun checkPlayedPuzzle(date: String) {
 
         val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
         animationBounce.repeatCount = Animation.INFINITE
@@ -172,20 +192,22 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
 
         tvPuzzleInfo.startAnimation(animationBounce)
 
-//        if (lastPlayed.equals(currentDate)){
-//            playedPuzzleToday = true
-//            tvPuzzleInfo.visibility = View.VISIBLE
-//
-//            val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-//            animationBounce.repeatCount = Animation.INFINITE
-//
-//            tvPuzzleInfo.startAnimation(animationBounce)
-//
-//        }else
-//            tvPuzzleInfo.visibility = View.GONE
+        if (date != currentDate){
+            playedPuzzleToday = true
+            ivDailyPuzzle.visibility = View.VISIBLE
+            tvPuzzleInfo.visibility = View.VISIBLE
+
+            val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+            animationBounce.repeatCount = Animation.INFINITE
+
+            tvPuzzleInfo.startAnimation(animationBounce)
+
+        }else{
+            tvPuzzleInfo.visibility = View.GONE
+            ivDailyPuzzle.visibility = View.GONE
+        }
 
     }
-//
 
 
     fun getFacebookProfilePicture(userID: String): String {
@@ -252,17 +274,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
 
         if (value == puzzleAnswer.toString()){
             toast("True")
-            editor.remove("puzzleAnswer")
-            editor.remove("puzzleQuestion")
         }else
             toast("false")
 
-        editor.putString("playedTime",currentDate)
-        editor.apply()
-
-        checkPlayedPuzzle()
-        popupWindow.dismiss()
-        fragment_home.alpha = 1F
     }
 
     private fun popUp(){
@@ -326,6 +340,13 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
                 toast("Please Select Your Answer")
             else
                 checkAnswer(tvAnswerPuzzle.text.toString())
+
+            ivDailyPuzzle.visibility = View.GONE
+            tvPuzzleInfo.visibility = View.GONE
+            homePresenter.updatePuzzle()
+            popupWindow.dismiss()
+            fragment_home.alpha = 1F
+
         }
 
         btnClose.onClick {
@@ -403,9 +424,11 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
             popupWindow.elevation = 10.0F
         }
         var position = -1
+        var timer = 0
         val main_activity = main_view.findViewById<RelativeLayout>(R.id.activity_main)
         val rvCustomGame = view.findViewById<RecyclerView>(R.id.rvCustomGame)
         val ivCustomGame = view.findViewById<ImageView>(R.id.ivCustomGame)
+        val tvCustomGameName = view.findViewById<TextView>(R.id.tvCustomGameName)
         val tvChooseGame = view.findViewById<TextView>(R.id.tvClickToChooseGame)
         val tvCustomGameTitle = view.findViewById<TextView>(R.id.tvCustomGameTitle)
         val tvCustomGameTime = view.findViewById<TextView>(R.id.tvCustomGameTime)
@@ -415,20 +438,25 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         val layoutCustomGame = view.findViewById<LinearLayout>(R.id.layout_custom_game)
 
         val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
-        tvChooseGame.typeface = typeface
+        tvCustomGameName.typeface = typeface
         tvCustomGameTitle.typeface = typeface
         tvCustomGameTime.typeface = typeface
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             sbTime.min = 30
         }
+
         sbTime.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
-                if(progress < 30)
+                if(progress < 30) {
+                    timer = progress
                     tvCustomGameTime.text = "Time : 30"
-                else
+                }
+                else {
+                    timer = progress
                     tvCustomGameTime.text = "Time : $progress"
+                }
 
             }
 
@@ -436,19 +464,65 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                if (seekBar != null) {
+                    timer = seekBar.progress
+                }
             }
 
         })
 
+        customGameAdapter = CustomGameRecyclerViewAdapter(ctx,availableGameList){
+            if (!availableGameList[it]){
+                toast("Not Available")
+            }else{
+                position = it
+                when(position){
+                    0 -> {
+                        tvCustomGameName.text = "Normal Game"
+                        ivCustomGame.setImageResource(R.drawable.normal_game)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            sbTime.min = 30
+                            sbTime.max = 90
+                        }
+                    }
+                    1 -> {
+                        tvCustomGameName.text = "Odd Even"
+                        ivCustomGame.setImageResource(R.drawable.odd_even_game)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            sbTime.min = 30
+                            sbTime.max = 90
+                        }
+                    }
+                    2 -> {
+                        tvCustomGameName.text = "Rush"
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            sbTime.min = 3
+                            sbTime.max = 6
+                        }
+                        ivCustomGame.setImageResource(R.drawable.rush_game)
+                    }
+                    3 -> {
+                        tvCustomGameName.text = "Alpha Num"
+                        ivCustomGame.setImageResource(R.drawable.alpha_num_game)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            sbTime.min = 30
+                            sbTime.max = 90
+                        }
+                    }
+                }
+                rvCustomGame.visibility = View.GONE
+                tvCustomGameName.visibility = View.VISIBLE
+                ivCustomGame.visibility = View.VISIBLE
+                tvChooseGame.visibility = View.VISIBLE
+                tvChooseGame.text = "Click to Choose Other Games"
+            }
 
-        customGameAdapter = CustomGameRecyclerViewAdapter(ctx){
-            position = it
-            rvCustomGame.visibility = View.GONE
-            ivCustomGame.visibility = View.VISIBLE
         }
         rvCustomGame.layoutManager = LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL,false)
 
         ivCustomGame.onClick {
+            tvCustomGameName.visibility = View.GONE
+            tvChooseGame.visibility = View.GONE
             ivCustomGame.visibility = View.GONE
             rvCustomGame.visibility = View.VISIBLE
             position = -1
@@ -468,8 +542,32 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
                 fragment_home.alpha = 1F
                 main_activity.alpha = 1F
                 popupWindow.dismiss()
-                startActivity(intentFor<CountdownActivity>("mode" to "single",
-                        "type" to "normal","rank" to false))
+                when (position) {
+                    0 -> {
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Single,
+                                "type" to GameType.Normal, "timer" to timer))
+                    }
+                    1 -> {
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Single,
+                                "type" to GameType.OddEven, "timer" to timer))
+                    }
+                    2 -> {
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Single,
+                                "type" to GameType.Rush, "timer" to timer))
+                    }
+                    3 -> {
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Single,
+                                "type" to GameType.AlphaNum, "timer" to timer))
+                    }
+                    4 ->{
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Single,
+                                "type" to GameType.Mix, "timer" to timer))
+                    }
+                    5 ->{
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Single,
+                                "type" to GameType.DoubleAttack, "timer" to timer))
+                    }
+                }
             }
 
         }
@@ -477,12 +575,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
         rvCustomGame.adapter = customGameAdapter
         fragment_home.alpha = 0.1F
         main_activity.alpha = 0.1F
-//        layoutCustomGame.onClick {
-//            fragment_home.alpha = 1F
-//            main_activity.alpha = 1F
-//            popupWindow.dismiss()
-//        }
-        // Finally, show the popup window on app
+
         TransitionManager.beginDelayedTransition(fragment_home)
         popupWindow.showAtLocation(
                 fragment_home, // Location to display popup window
@@ -491,19 +584,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
                 0 // Y offset
         )
 
-    }
-
-    override fun onResume() {
-
-        if (auth.currentUser != null){
-            toast("on resume call")
-            GlobalScope.launch {
-                delay(100)
-                database.child("users").child(auth.currentUser!!.uid).child("active").setValue(true)
-            }
-        }
-
-        super.onResume()
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -516,5 +596,38 @@ class HomeFragment : Fragment(), NetworkConnectivityListener {
                 }
             }
         }
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == "dailyPuzzle"){
+            val date = dataSnapshot.value
+            checkPlayedPuzzle(date.toString())
+        }else if(response == "availableGame"){
+            if (dataSnapshot.exists()){
+                availableGameList.clear()
+                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
+                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
+                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
+                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.alphaNum!!)
+                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.mix!!)
+                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.doubleAttack!!)
+            }
+            else{
+                availableGameList.clear()
+                availableGameList.add(true)
+                availableGameList.add(false)
+                availableGameList.add(false)
+                availableGameList.add(false)
+                availableGameList.add(false)
+                availableGameList.add(false)
+            }
+            customGameAdapter.notifyDataSetChanged()
+
+        }
+
+    }
+
+    override fun response(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -29,18 +29,18 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
-        private val active = view.findViewById<TextView>(R.id.tvActive)
+        private val online = view.findViewById<TextView>(R.id.tvOnline)
         private val name = view.findViewById<TextView>(R.id.tvFriendName)
         private val image = view.findViewById<ImageView>(R.id.ivFriendProfile)
 
         fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int, context: Context) {
-//            if (items.active == false)
-//                active.backgroundResource = R.color.colorGrey
-//            else
-//                active.backgroundColorResource = R.color.colorPrimary
+
+            if (items.online == null)
+                online.text = "Online"
 
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             name.typeface = typeface
+            online.typeface = typeface
 
             name.text = items.name
             items.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(items.facebookId!!)).fit().into(image) }

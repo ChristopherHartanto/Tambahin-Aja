@@ -138,11 +138,17 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     }
 
     override fun onStart() {
-
         items.clear()
         profileItems.clear()
         retrieve()
         super.onStart()
+    }
+
+    override fun onPause() {
+        items.clear()
+        profileItems.clear()
+        adapter.notifyDataSetChanged()
+        super.onPause()
     }
 
 

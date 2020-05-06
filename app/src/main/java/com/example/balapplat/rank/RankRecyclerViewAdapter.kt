@@ -30,7 +30,12 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
         holder.bindItem(availableGameList[position],items[position], listener, position, context)
     }
 
-    override fun getItemCount(): Int = availableGameList.size
+    override fun getItemCount(): Int {
+        return if (availableGameList.size == items.size)
+            availableGameList.size
+        else
+            0
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 

@@ -142,7 +142,9 @@ class MainActivity : AppCompatActivity(), MainView {
 
             startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
                 "inviterName" to data.name,
-                    "status" to StatusPlayer.JoinFriend))
+                    "status" to StatusPlayer.JoinFriend,
+                    "type" to data.type,
+                    "timer" to data.timer))
         }
 
     }
@@ -254,7 +256,6 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun onResume() {
         if(AccessToken.getCurrentAccessToken() != null){
             presenter.fetchCredit()
-
         }
         super.onResume()
     }

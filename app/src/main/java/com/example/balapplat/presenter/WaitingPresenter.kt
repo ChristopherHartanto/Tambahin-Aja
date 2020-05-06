@@ -2,6 +2,7 @@ package com.example.balapplat.presenter
 
 import android.util.Log
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.play.GameType
 import com.example.balapplat.play.OpponentOnline
 import com.example.balapplat.play.Status
 import com.example.balapplat.view.MainView
@@ -60,11 +61,11 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
                     }
                     registerToWaitingList()
-                    database.child("waitingList").removeEventListener(this)
                 }
                 else
                     registerToWaitingList()
 
+                database.child("waitingList").removeEventListener(this)
             }
 
         }
@@ -111,12 +112,21 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
         database.child("waitingList").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
     }
 
-    fun makeInvitation(facebookId : String){
-
+    fun makeInvitation(facebookId : String, gameType: GameType, timer: Int){
+//        val type  = when(gameType){
+//            GameType.Normal -> "normal"
+//            GameType.OddEven -> "oddEven"
+//            GameType.Rush -> "rush"
+//            GameType.AlphaNum -> "alpaNum"
+//            GameType.DoubleAttack -> "doubleAttack"
+//            GameType.Mix -> "mix"
+//        }
         val values: HashMap<String, Any?> = hashMapOf(
             "name" to Profile.getCurrentProfile().name,
             "facebookId" to Profile.getCurrentProfile().id,
-            "status" to false
+            "status" to false,
+            "type" to gameType,
+            "timer" to timer
         )
 
         database.child("invitation").child(facebookId).setValue(values).addOnSuccessListener {

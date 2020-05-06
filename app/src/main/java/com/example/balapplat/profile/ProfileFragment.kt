@@ -140,7 +140,9 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
                 if (dataSnapshot.exists()){
-                    user = User(dataSnapshot.getValue(User::class.java)!!.name,"", dataSnapshot.getValue(User::class.java)?.email, dataSnapshot.getValue(User::class.java)?.noHandphone)
+                    user = User(dataSnapshot.getValue(User::class.java)!!.name,
+                            "", dataSnapshot.getValue(User::class.java)?.email,
+                            dataSnapshot.getValue(User::class.java)?.noHandphone,null)
                 }
 
             }

@@ -60,11 +60,11 @@ class PostGameActivity : AppCompatActivity() {
 
             tvPlayerName.text = Profile.getCurrentProfile().name
             Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerImage)
-            tvPlayerPoint.text = intent.extras!!.getInt("playerPoint",0).toString()
+            tvPlayerPoint.text = intent.extras!!.getInt("scorePlayer",0).toString()
 
             tvOpponentName.text = intent.extras!!.getString("opponentName","Unknown")
             Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("opponentFacebookId",""))).fit().into(ivOpponentImage)
-            tvOpponentPoint.text = intent.extras!!.getInt("opponentPoint",0).toString()
+            tvOpponentPoint.text = intent.extras!!.getInt("scoreOpponent",0).toString()
 
             tvPostGameTitle.text = "You " +intent.extras!!.getString("gameResult","Result")
         }
@@ -79,8 +79,6 @@ class PostGameActivity : AppCompatActivity() {
         val adView = AdView(this)
         adView.adSize = AdSize.SMART_BANNER
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
-
-        layoutMultipleGame.visibility = View.GONE
 
         tvBackMenu.onClick {
             finish()

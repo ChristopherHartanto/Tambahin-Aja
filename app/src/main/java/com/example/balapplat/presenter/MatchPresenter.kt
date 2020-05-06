@@ -160,12 +160,12 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     }
 
     fun updateCredit(credit:Long,auth: FirebaseAuth){
-        val sdf = SimpleDateFormat("dd MMM yyyy")
+        val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
         val currentDate = sdf.format(Date())
         val values: HashMap<String, Any>
 
         values  = hashMapOf(
-                "info" to "You Got ${credit} from Rank",
+                "info" to "You Got ${credit} credits from Rank",
                 "credit" to credit
         )
 
@@ -175,7 +175,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     @SuppressLint("SimpleDateFormat")
     fun addToHistory(auth: FirebaseAuth, playerPoint: Int, opponentPoint: Int, opponentFacebookId: String, opponentName: String, type: String){
-        val sdf = SimpleDateFormat("dd MMM yyyy")
+        val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
         val currentDate = sdf.format(Date())
 
         val status = when {
@@ -196,7 +196,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             "opponentPoint" to opponentPoint,
             "type" to type
         )
-        database.child(auth.currentUser!!.uid).child("history").child("" +currentDate).setValue(values)
+        database.child("users").child(auth.currentUser!!.uid).child("history").child("" +currentDate).setValue(values)
     }
 
     fun removeOnPlay(){

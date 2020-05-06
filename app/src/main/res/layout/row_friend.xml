@@ -14,23 +14,6 @@
         android:alpha="0.9"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="12dp"
-                android:id="@+id/tvActive"
-                android:background="@color/colorPrimary"
-                android:gravity="center"
-                android:textSize="20sp"
-                android:layout_margin="5dp"/>
-        </LinearLayout>
-
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="60dp"
@@ -48,6 +31,15 @@
             android:text="Unknown"/>
 
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/tvOnline"
+            android:textColor="@color/colorPrimary"
+            android:gravity="right |center_vertical"
+            android:textSize="20sp"
+            android:layout_margin="5dp"/>
     </LinearLayout>
+
 
 </androidx.cardview.widget.CardView>
