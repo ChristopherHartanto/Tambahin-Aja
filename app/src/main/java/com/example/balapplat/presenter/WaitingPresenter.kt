@@ -46,8 +46,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
                             val values: HashMap<String, Any> = hashMapOf(
                                 "name" to Profile.getCurrentProfile().name,
-                                "facebookId" to Profile.getCurrentProfile().id,
-                                "status" to true
+                                "facebookId" to Profile.getCurrentProfile().id
                             )
                             database.child("waitingList").child(data.key!!).setValue(values).addOnFailureListener {
                                 it.message?.let { it1 -> view.response(it1) }
@@ -150,14 +149,14 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                     Log.i("cek1",""+p0)
                     if(p0.getValue(Status::class.java)!!.status!!){
                         view.response("accepted")
-
+                        database.removeEventListener(this)
                     }
 
                 }
-                else
+                else{
                     view.response("rejected")
-
-                database.removeEventListener(this)
+                    database.removeEventListener(this)
+                }
             }
 
         }
@@ -168,8 +167,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
         val values: HashMap<String, Any> = hashMapOf(
             "player1" to 0,
-            "player2" to 0,
-            "pause" to false
+            "player2" to 0
         )
         database.child("onPlay").child(facebookId).setValue(values).addOnSuccessListener {
             if (!playOnline)

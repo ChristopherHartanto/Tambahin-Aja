@@ -55,7 +55,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:19.1.0'
     implementation 'info.hoang8f:fbutton:1.0.5'
     implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
-
+    implementation 'com.android.billingclient:billing:2.2.0'
+    implementation 'com.android.billingclient:billing-ktx:2.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
     implementation project(path: ':network')

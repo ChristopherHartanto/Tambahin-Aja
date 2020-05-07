@@ -75,12 +75,15 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         profilePresenter = ProfilePresenter(this,database)
         if(AccessToken.getCurrentAccessToken() == null)
             auth.signOut()
+        else{
+            profilePresenter.fetchUserProfile()
+            profilePresenter.fetchStats()
+        }
 
         historyAdapter = HistoryRecyclerViewAdapter(ctx,historyItems, User(name,Profile.getCurrentProfile().id,"",""))
         rvHistory.layoutManager = LinearLayoutManager(ctx)
         rvHistory.adapter = historyAdapter
-        profilePresenter.fetchUserProfile()
-        profilePresenter.fetchStats()
+
 
         mAdView = view!!.findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()

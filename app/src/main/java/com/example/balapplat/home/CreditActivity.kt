@@ -1,5 +1,6 @@
 package com.example.balapplat.home
 
+import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -14,8 +15,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
+import com.example.balapplat.friends.Message
 import com.example.balapplat.presenter.CreditPresenter
-import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.rank.Balance
 import com.example.balapplat.view.MainView
 import com.google.android.gms.ads.AdRequest
@@ -25,11 +26,10 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_credit.tvCredit
-import kotlinx.android.synthetic.main.activity_market.*
-import kotlinx.android.synthetic.main.fragment_home.*
-import org.jetbrains.anko.act
+import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class CreditActivity : AppCompatActivity(), MainView {
@@ -43,6 +43,8 @@ class CreditActivity : AppCompatActivity(), MainView {
     private var creditShopItems : MutableList<CreditShop> = mutableListOf()
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
+    private var credit = 0
+    private var index = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +57,16 @@ class CreditActivity : AppCompatActivity(), MainView {
         tvCreditTitle.typeface = typeface
         presenter = CreditPresenter(this,database)
 
-        adapter = CreditRecyclerViewAdapter(this,creditShopItems)
+        adapter = CreditRecyclerViewAdapter(this,creditShopItems){
+            index = it
+            if (credit.toLong() < creditShopItems[it].price!!){
+                popUpMessage(Message.ReadOnly,"Not Enough Credit")
+            }else if(creditShopItems[it].quantity!!.toInt() == 0){
+                popUpMessage(Message.ReadOnly, "Already Sold Out")
+            }else{
+                popUpMessage(Message.Reply,"Do You Want to Buy?")
+            }
+        }
 
         mAdView = this.findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()
@@ -126,9 +137,10 @@ class CreditActivity : AppCompatActivity(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == "fetchCredit")
-            tvCredit.text = dataSnapshot.getValue(Balance::class.java)?.credit.toString()
-        else if(response == "fetchCreditHistory"){
+        if (response == "fetchCredit"){
+            credit = dataSnapshot.getValue(Balance::class.java)?.credit.toString().toInt()
+            tvCredit.text = "${credit}"
+        }else if(response == "fetchCreditHistory"){
             for (data in dataSnapshot.children){
                 val item = data.getValue(CreditHistory::class.java)
                 creditHistoryItems.add(CreditHistory(data.getValue(CreditHistory::class.java)!!.info,
@@ -146,6 +158,85 @@ class CreditActivity : AppCompatActivity(), MainView {
     }
 
     override fun response(message: String) {
+        if (message == "exchangeCredit"){
+            presenter.updateQuantity(index+1)
+            val remainingCredit = credit - creditShopItems[index].price!!
+            presenter.updateCredit(remainingCredit)
+            presenter.fetchCredit()
+            presenter.fetchCreditShop()
+            popUpMessage(Message.ReadOnly,"Success Exchange Credit")
+        }
+    }
+
+    private fun popUpMessage(type: Message, message: String){
+        val inflater: LayoutInflater = ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        val view = inflater.inflate(R.layout.pop_up_message,null)
+
+        // Initialize a new instance of popup window
+        popupWindow = PopupWindow(
+                view, // Custom view to show in popup window
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+        )
+
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        val basicLayout = view.findViewById<LinearLayout>(R.id.layout_message_basic)
+        val invitationLayout = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
+        val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
+        val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
+        val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
+        val tvMessageInfo = view.findViewById<TextView>(R.id.tvMessageInfo)
+
+        invitationLayout.visibility = View.GONE
+        basicLayout.visibility = View.VISIBLE
+        tvMessageTitle.text = "Exchange"
+        tvMessageInfo.typeface = typeface
+
+        if (type == Message.Reply){
+            tvMessageInfo.text = message
+            btnReject.text = "No"
+            btnClose.text = "yes"
+            btnClose.onClick {
+                presenter.exchangeCredit(creditShopItems[index].price!!.toInt() + 1)
+                btnClose.startAnimation(clickAnimation)
+                activity_credit.alpha = 1F
+                popupWindow.dismiss()
+            }
+
+            btnReject.onClick {
+                btnReject.startAnimation(clickAnimation)
+                activity_credit.alpha = 1F
+                popupWindow.dismiss()
+            }
+        }
+        else if(type == Message.ReadOnly){
+            tvMessageInfo.text = message
+            btnReject.visibility = View.GONE
+
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_credit.alpha = 1F
+                popupWindow.dismiss()
+            }
+        }
+
+        tvMessageTitle.typeface = typeface
+
+        activity_credit.alpha = 0.1F
+
+        androidx.transition.TransitionManager.beginDelayedTransition(activity_credit)
+        popupWindow.showAtLocation(
+                activity_credit, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+        )
 
     }
 }

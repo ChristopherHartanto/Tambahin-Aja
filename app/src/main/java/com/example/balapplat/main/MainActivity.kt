@@ -147,6 +147,8 @@ class MainActivity : AppCompatActivity(), MainView {
                     "status" to StatusPlayer.JoinFriend,
                     "type" to data.type,
                     "timer" to data.timer))
+        }else if(message === "dismissInvitation"){
+            popUpMessage(com.example.balapplat.friends.Message.ReadOnly,"You Have been Rejected")
         }
 
     }

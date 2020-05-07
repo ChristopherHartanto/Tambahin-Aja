@@ -64,7 +64,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         tournamentPresenter = TournamentPresenter(this,database)
         val linearLayoutManager = LinearLayoutManager(ctx)
-        linearLayoutManager.reverseLayout = true
+        //linearLayoutManager.reverseLayout = true
         rvStanding.layoutManager = linearLayoutManager
 
         rvStanding.adapter = adapter

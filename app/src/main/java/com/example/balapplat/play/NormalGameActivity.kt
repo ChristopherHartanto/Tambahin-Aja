@@ -19,15 +19,12 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.transition.TransitionManager
-import com.example.balapplat.main.MainActivity
-import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.presenter.MatchPresenter
 import com.example.balapplat.rank.Rank
 import com.example.balapplat.tournament.TournamentData
 import com.example.balapplat.utils.showSnackBar
-import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
@@ -40,7 +37,6 @@ import kotlinx.android.synthetic.main.activity_normal_game.tvPoint
 import kotlinx.android.synthetic.main.activity_rank.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
 import java.util.*
 
 class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, MatchView {
@@ -390,13 +386,16 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
             tvPlayerPoint.text = ""+point
             tvPlayerPoint.startAnimation(animationBounce)
         }
-
-
     }
 
     private fun control(status : Boolean){
         countDownTimer = object: CountDownTimer(timer.toLong()*1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
+                if (timer <= 3)
+                    tvTimer.textColor = R.color.colorRed
+                else
+                    tvTimer.textColor = R.color.colorPrimaryDark
+
                 timer--
                 tvTimer.text = "" + timer
 
@@ -471,6 +470,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                                 popUpMessage(1,"Do You Want to Continue?")
                             else{
                                 calculateReward()
+                                val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
+                                updateRank(currentRank!!)
                                 matchPresenter.getTournamentType()
                                 startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
                                 finish()
@@ -637,6 +638,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 activity_normal_game.alpha = 1F
                 popupWindow.dismiss()
                 calculateReward()
+                val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
+                updateRank(currentRank!!)
                 startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
                 finish()
             }
@@ -783,6 +786,46 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
     override fun loadData(dataSnapshot: DataSnapshot, message: String) {
         if(message == "fetchTournamentType"){
             dataSnapshot.getValue(TournamentData::class.java)!!.type?.let { addPointToTournament(it) }
+        }
+    }
+
+    fun updateRank(currentRank: String){
+        when(enumValueOf<Rank>(currentRank)){
+            Rank.Toddler -> {
+                if (type == GameType.Normal){
+                    editor = sharedPreference.edit()
+                    editor.putInt("toddler1",1)
+                    editor.putInt("toddler2",point)
+                    editor.apply()
+                }
+            }
+            Rank.Beginner -> {
+                if (type == GameType.Normal){
+                    val progress2 = sharedPreference.getInt("beginner2",0)
+                    if (point > progress2){
+                        editor = sharedPreference.edit()
+                        editor.putInt("beginner2",point)
+                        editor.apply()
+                    }
+
+                }else if(type == GameType.OddEven){
+                    val progress1 = sharedPreference.getInt("beginner1",0)
+                    if (point > progress1){
+                        editor = sharedPreference.edit()
+                        editor.putInt("beginner1",point)
+                        editor.apply()
+                    }
+                }
+            }
+            Rank.Senior -> {
+
+            }
+            Rank.Master -> {
+
+            }
+            Rank.GrandMaster -> {
+
+            }
         }
     }
 }

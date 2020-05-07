@@ -49,7 +49,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         tvLeaderboardTitle.typeface = typeface
 
         val linearLayoutManager = LinearLayoutManager(this)
-       // linearLayoutManager.reverseLayout = true
+        linearLayoutManager.reverseLayout = true
+        linearLayoutManager.stackFromEnd = true
         rvLeaderBoard.layoutManager = linearLayoutManager
         rvLeaderBoard.adapter = adapter
 

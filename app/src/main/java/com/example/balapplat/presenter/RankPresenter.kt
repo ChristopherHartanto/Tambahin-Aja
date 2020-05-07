@@ -3,6 +3,7 @@ package com.example.balapplat.presenter
 import com.example.balapplat.view.MainView
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.rank.Balance
+import com.example.balapplat.rank.Rank
 import com.example.balapplat.view.RankView
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
@@ -111,6 +112,12 @@ class RankPresenter(private val view: RankView, private val database: DatabaseRe
         }.addOnSuccessListener {
             view.response("","updateEnergy")
             fetchBalance()
+        }
+    }
+
+    fun updateRank(nextRank: String){
+        database.child("users").child(auth.currentUser!!.uid).child("currentRank").setValue(nextRank).addOnSuccessListener {
+            view.response("Level Up to ${nextRank}","levelUp")
         }
     }
 

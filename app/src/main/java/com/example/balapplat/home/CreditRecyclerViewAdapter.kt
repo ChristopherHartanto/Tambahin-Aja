@@ -13,15 +13,19 @@ import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.backgroundResource
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class CreditRecyclerViewAdapter(private val context: Context, private val creditShopItems: List<CreditShop>)
+class CreditRecyclerViewAdapter(
+        private val context: Context,
+        private val creditShopItems: List<CreditShop>,
+        private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<CreditRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_credit, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(position,creditShopItems[position],context)
+        holder.bindItem(listener,position,creditShopItems[position],context)
     }
 
     override fun getItemCount(): Int = creditShopItems.size
@@ -31,7 +35,7 @@ class CreditRecyclerViewAdapter(private val context: Context, private val credit
         private val desc = view.findViewById<TextView>(R.id.tvCreditDesc)
         private val title = view.findViewById<TextView>(R.id.tvCreditTitle)
 
-        fun bindItem(position: Int,creditShop: CreditShop, context: Context) {
+        fun bindItem(listener: (position: Int) -> Unit,position: Int,creditShop: CreditShop, context: Context) {
 
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             desc.typeface = typeface
@@ -39,6 +43,10 @@ class CreditRecyclerViewAdapter(private val context: Context, private val credit
 
             desc.text = creditShop.price.toString()
             title.text = creditShop.title
+
+            itemView.onClick {
+                listener(position)
+            }
         }
 
     }

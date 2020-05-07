@@ -143,6 +143,9 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
             message === "registerToWaitingList" -> {
                 registerWaitingList = true
             }
+            message === "rejected" ->{
+                finish()
+            }
             else // error message
             -> toast(""+message)
         }

@@ -238,15 +238,32 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     fun updateCredit(credit:Long,auth: FirebaseAuth){
         val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
         val currentDate = sdf.format(Date())
-        val values: HashMap<String, Any>
 
-        values  = hashMapOf(
-                "info" to "You Got ${credit} credits from Rank",
-                "credit" to credit
-        )
 
-        database.child("users").child(auth.currentUser!!.uid).child("creditHistory").child(currentDate).setValue(values)
-        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").setValue(credit)
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                view.response(p0.message)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists())
+                {
+                    val values: HashMap<String, Any>
+                    val totalCredit = p0.value.toString().toInt() + credit
+                    values  = hashMapOf(
+                            "info" to "You Got ${credit} credits from Rank",
+                            "credit" to credit
+                    )
+
+                    database.child("users").child(auth.currentUser!!.uid)
+                            .child("balance").child("credit").setValue(totalCredit)
+                    database.child("users").child(auth.currentUser!!.uid).child("creditHistory")
+                            .child(currentDate).setValue(credit)
+                }
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").addValueEventListener(postListener)
+
     }
 
     @SuppressLint("SimpleDateFormat")

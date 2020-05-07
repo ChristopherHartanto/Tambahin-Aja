@@ -8,20 +8,25 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.android.billingclient.api.SkuDetails
 import com.example.balapplat.R
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.backgroundResource
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class ShopRecyclerViewAdapter(private val context: Context)
+class ShopRecyclerViewAdapter(
+        private val context: Context,
+        private val itemClicked: (SkuDetails) -> Unit
+)
     : RecyclerView.Adapter<ShopRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_market, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(position,context)
+        holder.bindItem(position,itemClicked,context)
     }
 
     override fun getItemCount(): Int = 6
@@ -32,7 +37,7 @@ class ShopRecyclerViewAdapter(private val context: Context)
         private val desc = view.findViewById<TextView>(R.id.tvShopItemDesc)
         private val image = view.findViewById<ImageView>(R.id.ivShopItem)
 
-        fun bindItem(position: Int, context: Context) {
+        fun bindItem(position: Int, itemClicked: (SkuDetails) -> Unit, context: Context) {
             val counter = position + 1
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             desc.typeface = typeface
@@ -70,6 +75,7 @@ class ShopRecyclerViewAdapter(private val context: Context)
                     buy.text = "Rp 49.900"
                 }
             }
+
         }
 
     }

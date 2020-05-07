@@ -39,14 +39,30 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
     }
 
     fun replyInvitation(status: Boolean){
-        if (status)
-            database.child("invitation").child(Profile.getCurrentProfile().id).child("status").setValue(true).addOnSuccessListener {
-                view.response("acceptedGame")
+        if (status){
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if(p0.exists()){
+                        if (status)
+                            database.child("invitation").child(Profile.getCurrentProfile().id).child("status").setValue(true).addOnSuccessListener {
+                                view.response("acceptedGame")
+                            }
+                    }else{
+                        view.response("dismissInvitation")
+                    }
+                }
+
             }
-        else
+            database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
+        }else
             database.child("invitation").child(Profile.getCurrentProfile().id).removeValue().addOnSuccessListener {
                 view.response("rejectedGame")
             }
+
     }
     fun receiveReward(){
         postListener = object : ValueEventListener {
@@ -69,12 +85,6 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
         database.child("users").child(auth.currentUser!!.uid).child("reward").removeValue()
     }
 
-    fun userActive(status : Boolean) {
-
-        if (auth.currentUser != null){
-            database.child("users").child(auth.currentUser!!.uid).child("active").setValue(status)
-        }
-    }
 
     fun checkDailyPuzzle(){
         postListener = object : ValueEventListener {

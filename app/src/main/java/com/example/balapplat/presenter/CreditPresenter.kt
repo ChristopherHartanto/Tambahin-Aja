@@ -1,11 +1,14 @@
 package com.example.balapplat.presenter
 
+import com.example.balapplat.home.CreditShop
 import com.example.balapplat.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CreditPresenter(private val view: MainView, private val database: DatabaseReference) {
 
@@ -17,6 +20,41 @@ class CreditPresenter(private val view: MainView, private val database: Database
         override fun onDataChange(p0: DataSnapshot) {
         }
 
+    }
+
+    fun exchangeCredit(credit: Int){
+        val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
+        val currentDate = sdf.format(Date())
+
+        val values: HashMap<String, Any>
+        values  = hashMapOf(
+                "credit" to credit,
+                "date" to currentDate
+        )
+        database.child("exchange").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+            view.response("exchangeCredit")
+        }
+    }
+
+    fun updateQuantity(key: Int){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    val quantity = p0.getValue(CreditShop::class.java)!!.quantity!!.toInt() - 1
+                    database.child("credit").child(key.toString()).setValue(quantity)
+                }
+            }
+
+        }
+        database.child("credit").child(key.toString()).addListenerForSingleValueEvent(postListener)
+    }
+
+    fun updateCredit(credit: Long){
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").setValue(credit)
     }
 
     fun fetchCredit(){

@@ -204,8 +204,22 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
         rvTask.layoutManager = LinearLayoutManager(this)
         rvTask.adapter = taskAdapter
-        loadTask()
+        loadTask(btnTask)
+
         btnTask.onClick {
+            if (btnTask.text == "Level Up"){
+                var nextRank = ""
+                when (enumValueOf<Rank>(currentRank)) {
+                    Rank.Toddler -> nextRank = Rank.Beginner.toString()
+                    Rank.Beginner -> nextRank = Rank.Senior.toString()
+                    Rank.Senior -> nextRank = Rank.Master.toString()
+                    Rank.Master -> nextRank = Rank.GrandMaster.toString()
+                }
+                currentRank = nextRank
+                rankPresenter.fetchRank()
+                rankPresenter.updateRank(nextRank)
+                btnTask.text == "Okay"
+            }
             activity_rank.alpha = 1F
             popupWindow.dismiss()
         }
@@ -305,6 +319,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             btnClose.onClick {
                 val remainingPoint = point - items[position].priceGame!!
                 rankPresenter.buyGame(position,remainingPoint)
+                rankPresenter.fetchGameAvailable()
                 btnClose.startAnimation(clickAnimation)
                 activity_rank.alpha = 1F
                 popupWindow.dismiss()
@@ -438,6 +453,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             }
         }else if(response == "error"){
             popUpMessage(2,message)
+        }else if(response == "levelUp"){
+            popUpMessage(2,message)
         }
     }
 
@@ -480,37 +497,85 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         rankDetailAdapter.notifyDataSetChanged()
     }
 
-    fun loadTask(){
+    fun loadTask(button: Button){
         when(enumValueOf<Rank>(currentRank)){
-            Rank.Beginner ->{
-                taskList.add("Play Normal Mode 1 Time")
-                taskList.add("Reach 100 Point in Normal Mode")
-                taskProgressList.add("0/1")
-                taskProgressList.add("0/100")
-            }
-            Rank.Senior -> {
-                taskList.add("Play Normal Mode 1 Time")
-                taskList.add("Reach 100 Point in Normal Mode")
-                taskProgressList.add("0/1")
-                taskProgressList.add("0/100")
-            }
-            Rank.Master -> {
-                taskList.add("Play Normal Mode 1 Time")
-                taskList.add("Reach 100 Point in Normal Mode")
-                taskProgressList.add("0/1")
-                taskProgressList.add("0/100")
-            }
-            Rank.GrandMaster -> {
-                taskList.add("Play Normal Mode 1 Time")
-                taskList.add("Reach 100 Point in Normal Mode")
-                taskProgressList.add("0/1")
-                taskProgressList.add("0/100")
-            }
             Rank.Toddler -> {
                 taskList.add("Play Normal Mode 1 Time")
                 taskList.add("Reach 100 Point in Normal Mode")
-                taskProgressList.add("0/1")
-                taskProgressList.add("0/100")
+
+                val progress1 = sharedPreference.getInt("toddler1",0)
+                val progress2 = sharedPreference.getInt("toddler2",0)
+                if (progress1 >= 1)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress1}/1")
+                if (progress2 >= 100)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress2}/100")
+                if (progress1 >= 1 && progress2 >= 100)
+                    button.text = "Level Up"
+
+            }
+            Rank.Beginner ->{
+                taskList.add("Reach 200 Point in Odd Even")
+                taskList.add("Reach 250 Point in Normal Mode")
+                taskList.add("Play with Friends 1 times")
+                taskList.add("Play Daily Quest 3 Times")
+
+                val progress1 = sharedPreference.getInt("beginner1",0)
+                val progress2 = sharedPreference.getInt("beginner2",0)
+                val progress3 = sharedPreference.getInt("beginner3",0)
+                val progress4 = sharedPreference.getInt("beginner4",0)
+                taskProgressList.add("${progress1}/200")
+                taskProgressList.add("${progress2}/250")
+                taskProgressList.add("${progress3}/1")
+                taskProgressList.add("${progress4}/3")
+            }
+            Rank.Senior -> {
+                taskList.add("Reach 200 Point in Odd Even")
+                taskList.add("Reach 250 Point in Normal Mode")
+                taskList.add("Play with Friends 1 times")
+                taskList.add("Play Daily Quest 3 Times")
+
+                val progress1 = sharedPreference.getInt("beginner1",0)
+                val progress2 = sharedPreference.getInt("beginner2",0)
+                val progress3 = sharedPreference.getInt("beginner3",0)
+                val progress4 = sharedPreference.getInt("beginner4",0)
+                taskProgressList.add("${progress1}/200")
+                taskProgressList.add("${progress2}/250")
+                taskProgressList.add("${progress3}/1")
+                taskProgressList.add("${progress4}/3")
+            }
+            Rank.Master -> {
+                taskList.add("Reach 200 Point in Odd Even")
+                taskList.add("Reach 250 Point in Normal Mode")
+                taskList.add("Play with Friends 1 times")
+                taskList.add("Play Daily Quest 3 Times")
+
+                val progress1 = sharedPreference.getInt("beginner1",0)
+                val progress2 = sharedPreference.getInt("beginner2",0)
+                val progress3 = sharedPreference.getInt("beginner3",0)
+                val progress4 = sharedPreference.getInt("beginner4",0)
+                taskProgressList.add("${progress1}/200")
+                taskProgressList.add("${progress2}/250")
+                taskProgressList.add("${progress3}/1")
+                taskProgressList.add("${progress4}/3")
+            }
+            Rank.GrandMaster -> {
+                taskList.add("Reach 200 Point in Odd Even")
+                taskList.add("Reach 250 Point in Normal Mode")
+                taskList.add("Play with Friends 1 times")
+                taskList.add("Play Daily Quest 3 Times")
+
+                val progress1 = sharedPreference.getInt("beginner1",0)
+                val progress2 = sharedPreference.getInt("beginner2",0)
+                val progress3 = sharedPreference.getInt("beginner3",0)
+                val progress4 = sharedPreference.getInt("beginner4",0)
+                taskProgressList.add("${progress1}/200")
+                taskProgressList.add("${progress2}/250")
+                taskProgressList.add("${progress3}/1")
+                taskProgressList.add("${progress4}/3")
             }
         }
         taskAdapter.notifyDataSetChanged()

@@ -56,8 +56,9 @@
             android:id="@+id/ivDailyPuzzle"
             android:elevation="5dp"
             android:padding="15dp"
-        android:background="@drawable/button_bg_round"
-            android:layout_margin="20dp"/>
+            android:background="@drawable/button_bg_round"
+            android:layout_margin="20dp"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="20dp"
@@ -68,6 +69,7 @@
             android:text="!"
             android:id="@+id/tvPuzzleInfo"
             android:src="@drawable/lightning"
+            android:visibility="gone"
             android:textColor="#ff0000"/>
     </FrameLayout>
 

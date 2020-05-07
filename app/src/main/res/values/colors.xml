@@ -9,6 +9,7 @@
     <color name="colorBrown">#a18374</color>
     <color name="colorTransparent">#0000</color>
     <color name="colorSecondaryText">#000000</color>
+    <color name="colorRed">#FF0000</color>
 
     <color name="fbutton_color_turquoise">#1abc9c</color>
     <color name="fbutton_color_green_sea">#16a085</color>
