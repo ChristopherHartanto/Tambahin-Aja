@@ -82,7 +82,7 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
         adapter = FriendsRecyclerViewAdapter(ctx,ProfileItems){
             index = it
             if (ProfileItems[it].online == null){
-                popUpMessage(Message.ReadOnly,ProfileItems[it].name + "   is Offline")
+                popUpMessage(Message.ReadOnly,ProfileItems[it].name + " is Offline")
 
             }else{
                 popUpMessage(Message.Reply,"Play with " + ProfileItems[it].name + " ?")

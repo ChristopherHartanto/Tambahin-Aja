@@ -29,7 +29,6 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
                 if(p0.exists()){
                     view.loadData(p0,"fetchName")
                 }
-                database.removeEventListener(this)
             }
 
         }
@@ -46,11 +45,27 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
                 if(p0.exists()){
                     view.loadData(p0,"fetchHistory")
                 }
-                database.removeEventListener(this)
             }
 
         }
         database.child("users").child(auth.currentUser!!.uid).child("history").orderByKey().addListenerForSingleValueEvent(postListener)
+
+    }
+
+    fun fetchStats(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    view.loadData(p0,"fetchStats")
+                }
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("stats").addListenerForSingleValueEvent(postListener)
 
     }
 
@@ -65,6 +80,23 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
             view.response(it.message.toString())
         }
 
+    }
+
+    fun fetchUserProfile(){
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if (dataSnapshot.exists()){
+                    view.loadData(dataSnapshot,"fetchUserProfile")
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).addValueEventListener(postListener)
     }
 
     fun dismissListener(){

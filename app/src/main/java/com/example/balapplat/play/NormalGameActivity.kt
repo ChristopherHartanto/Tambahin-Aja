@@ -25,6 +25,7 @@ import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.presenter.MatchPresenter
 import com.example.balapplat.rank.Rank
+import com.example.balapplat.tournament.TournamentData
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
@@ -82,7 +83,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
 
         supportActionBar?.hide()
 
-        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         database = FirebaseDatabase.getInstance().reference
         matchPresenter = MatchPresenter(this,database)
         auth = FirebaseAuth.getInstance()
@@ -470,6 +471,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                                 popUpMessage(1,"Do You Want to Continue?")
                             else{
                                 calculateReward()
+                                matchPresenter.getTournamentType()
                                 startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
                                 finish()
                             }
@@ -641,6 +643,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
 
             btnReject.onClick {
                 btnReject.startAnimation(clickAnimation)
+                matchPresenter.getTournamentType()
                 timer = defaultTimer
                 control(true)
                 activity_normal_game.alpha = 1F
@@ -730,6 +733,15 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
 
     }
 
+    fun addPointToTournament(tournamentType: String){
+        val joinTournament = sharedPreference.getBoolean("joinTournament",false)
+        if (joinTournament){
+            if (tournamentType == type.toString()){
+                matchPresenter.updateTournament(auth)
+            }
+        }
+    }
+
     override fun onResume() {
        // database.child("onPlay").child(facebookId).child("pause").setValue(false)
         control(true)
@@ -766,6 +778,12 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
 
     override fun loadHighScore(score: Long) {
        highScore = score.toInt()
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, message: String) {
+        if(message == "fetchTournamentType"){
+            dataSnapshot.getValue(TournamentData::class.java)!!.type?.let { addPointToTournament(it) }
+        }
     }
 }
 

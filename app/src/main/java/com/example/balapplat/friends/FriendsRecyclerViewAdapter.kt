@@ -35,7 +35,7 @@ class FriendsRecyclerViewAdapter(private val context: Context, private val items
 
         fun bindItem(items: User,listener: (position: Int) -> Unit, position: Int, context: Context) {
 
-            if (items.online == null)
+            if (items.online != null)
                 online.text = "Online"
 
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)

@@ -48,6 +48,26 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
                 view.response("rejectedGame")
             }
     }
+    fun receiveReward(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    view.loadData(p0,"reward")
+                }
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("reward").addValueEventListener(postListener)
+
+    }
+
+    fun removePopUpReward(){
+        database.child("users").child(auth.currentUser!!.uid).child("reward").removeValue()
+    }
 
     fun userActive(status : Boolean) {
 
@@ -66,7 +86,6 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
                 if(p0.exists()){
                     view.loadData(p0,"dailyPuzzle")
                 }
-                database.removeEventListener(this)
             }
 
         }
@@ -84,13 +103,14 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
                 if(p0.exists()){
                         view.loadData(p0,"fetchCredit")
                 }
-                database.removeEventListener(this)
             }
 
         }
         database.child("users").child(auth.currentUser!!.uid).child("balance").addListenerForSingleValueEvent(postListener)
 
     }
+
+
 
     fun dismissListener(){
         database.removeEventListener(postListener)

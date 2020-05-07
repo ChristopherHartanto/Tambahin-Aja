@@ -1,6 +1,7 @@
-package com.example.balapplat
+package com.example.balapplat.tournament
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.graphics.Typeface
 import android.os.Build
@@ -15,31 +16,37 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
+import com.example.balapplat.R
 import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
-import com.example.balapplat.leaderboard.Leaderboard
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
+import com.example.balapplat.presenter.TournamentPresenter
 import com.example.balapplat.utils.showSnackBar
+import com.example.balapplat.view.MainView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
-import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.fragment_tournament.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.toast
 
 
-class Tournament : Fragment(), NetworkConnectivityListener {
+class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
+    private lateinit var sharedPreference: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
+    private lateinit var auth: FirebaseAuth
     private var items: MutableList<HighScore> = mutableListOf()
-    private var profileItems: MutableList<User> = mutableListOf()
+    private var tournamentParticipants: MutableList<TournamentParticipant> = mutableListOf()
     private lateinit var database: DatabaseReference
     private lateinit var popupWindow : PopupWindow
+    private lateinit var tournamentPresenter: TournamentPresenter
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
-    private lateinit var adapter: LeaderBoardRecyclerViewAdapter
+    private lateinit var dataTournament: TournamentData
+    private lateinit var adapter: TournamentRecyclerViewAdapter
+    private var tournamentEndDate = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,66 +57,21 @@ class Tournament : Fragment(), NetworkConnectivityListener {
         return inflater.inflate(R.layout.fragment_tournament, container, false)
     }
 
-    fun retrieve(){
-        items.clear()
-        profileItems.clear()
-        GlobalScope.launch {
-            val postListener = object : ValueEventListener {
-                override fun onCancelled(p0: DatabaseError) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-                    //toast("" + p0.children)
-                    fetchData(p0)
-                }
-
-            }
-            database.child("leaderboards").orderByChild("total").addListenerForSingleValueEvent(postListener)
-
-        }
-    }
-
-    fun fetchData(dataSnapshot: DataSnapshot){
-
-        for (ds in dataSnapshot.children) {
-            val score = ds.getValue(Leaderboard::class.java)!!.total
-            val id = ds.key
-
-
-
-            id?.let { retrieveUser(it,score) }
-        }
-    }
-
-    fun retrieveUser(id : String,score: Int?){
-        GlobalScope.launch {
-            val postListener = object : ValueEventListener {
-                override fun onCancelled(p0: DatabaseError) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-                    items.add(HighScore(score))
-                    //toast("" + p0.children)
-                    fetchDataUser(p0)
-                }
-
-            }
-            database.child("users").child(id).addListenerForSingleValueEvent(postListener)
-
-        }
-    }
-
     override fun onStart() {
+        auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-        adapter = LeaderBoardRecyclerViewAdapter(ctx,items,profileItems)
+        adapter = TournamentRecyclerViewAdapter(ctx,tournamentParticipants)
+        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
+        tournamentPresenter = TournamentPresenter(this,database)
+        val linearLayoutManager = LinearLayoutManager(ctx)
+        linearLayoutManager.reverseLayout = true
+        rvStanding.layoutManager = linearLayoutManager
 
-        rvStanding.layoutManager = LinearLayoutManager(ctx)
         rvStanding.adapter = adapter
 
-        items.clear()
-        profileItems.clear()
+        tournamentParticipants.clear()
+        tournamentPresenter.fetchTournament()
+        tournamentPresenter.fetchTournamentParticipants()
 
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvTournamentTitle.typeface = typeface
@@ -117,42 +79,20 @@ class Tournament : Fragment(), NetworkConnectivityListener {
 
         btnInfo.onClick {
             btnInfo.startAnimation(clickAnimation)
-            popUpEditProfile()
+            popUpTournamentDetail()
         }
 
-        fetchTournament()
+        btnJoinTournament.onClick {
+            tournamentPresenter.joinTournament(auth,tournamentEndDate)
+        }
+
+        tournamentPresenter.fetchTournament()
         super.onStart()
     }
 
-    fun fetchDataUser(dataSnapshot: DataSnapshot){
-
-        val item = dataSnapshot.getValue(User::class.java)!!
-
-        profileItems.add(item)
-        adapter.notifyDataSetChanged()
-    }
-
-    fun fetchTournament(){
-        GlobalScope.launch {
-            val postListener = object : ValueEventListener {
-                override fun onCancelled(p0: DatabaseError) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-                    if (p0.exists()){
-                        loadData(p0,true)
-                    }else
-                        loadData(p0,false)
-                }
-
-            }
-            database.child("tournament").addListenerForSingleValueEvent(postListener)
-
-        }
-    }
 
     fun loadData(dataSnapshot: DataSnapshot, status: Boolean){
+
 //        val data = dataSnapshot.getValue(TournamentData::class.java)
 //
 //        if (data != null && status) {
@@ -176,8 +116,8 @@ class Tournament : Fragment(), NetworkConnectivityListener {
 //        else{
 //            tvTournamentTitle.text = "No Tournament Right Now"
 //            tvTournamentDesc.text = ""
-//            tvTournamentTimeLeft.text = ""
-//        }
+////            tvTournamentTimeLeft.text = ""
+////        }
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -192,7 +132,7 @@ class Tournament : Fragment(), NetworkConnectivityListener {
         }
     }
 
-    private fun popUpEditProfile(){
+    private fun popUpTournamentDetail(){
         val inflater:LayoutInflater = activity!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_tournament_info,null)
@@ -236,6 +176,11 @@ class Tournament : Fragment(), NetworkConnectivityListener {
             popupWindow.dismiss()
         }
 
+        tvTournamentTitle.text = dataTournament.title
+        tvTournamentDetail.text = dataTournament.description
+        tvTournamentFirstReward.text = dataTournament.reward1.toString()
+        tvTournamentSecondReward.text = dataTournament.reward2.toString()
+        tvTournamentThirdReward.text = dataTournament.reward3.toString()
 
         fragment_tournament.alpha = 0.1F
 
@@ -248,13 +193,61 @@ class Tournament : Fragment(), NetworkConnectivityListener {
         )
 
     }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == "fetchTournament"){
+            if (dataSnapshot.exists()){
+                for ((index,data) in dataSnapshot.children.withIndex())
+                if (index == 0) {
+                    dataTournament = data.getValue(TournamentData::class.java)!!
+                    tvTournamentTitle.text = dataTournament.title
+                    tournamentEndDate = data.key.toString()
+                    tvTournamentTimeLeft.text = "End Date: ${tournamentEndDate}"
+                }
+
+            }else{
+                btnJoinTournament.visibility = View.GONE
+            }
+        }else if(response == "fetchTournamentParticipants"){
+            if (dataSnapshot.exists()){
+                tournamentParticipants.clear()
+                for (data in dataSnapshot.children){
+                    tournamentParticipants.add(data.getValue(TournamentParticipant::class.java)!!)
+                }
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+    }
+
+    override fun response(message: String) {
+        if (message == "joinTournament"){
+            toast("Join Success")
+            editor = sharedPreference.edit()
+            editor.putBoolean("joinTournament",true)
+            editor.apply()
+            tournamentPresenter.fetchTournamentParticipants()
+        }
+
+    }
+
+    override fun onPause() {
+        tournamentPresenter.dismissListener()
+        super.onPause()
+    }
 }
 
 data class TournamentData(
-    var Reward1: Long? = 0,
-    var Reward2: Long? = 0,
-    var Reward3: Long? = 0,
+    var reward1: Long? = 0,
+    var reward2: Long? = 0,
+    var reward3: Long? = 0,
     var description: String? = "",
-    var deadLine: String? = "",
-    var title: String? = ""
+    var title: String? = "",
+    var type: String? = ""
+)
+
+data class TournamentParticipant(
+        var name: String? = "",
+        var facebookId: String? = "",
+        var point: Long? = 0
 )

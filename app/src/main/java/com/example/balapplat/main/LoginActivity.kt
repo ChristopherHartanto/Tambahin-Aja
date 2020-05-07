@@ -52,6 +52,10 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         popup_window_button.typeface = typeface
         popup_window_title.typeface = typeface
+        if (auth.currentUser != null){
+            popup_window_button.visibility = View.GONE
+            popup_window_title.text = "Log Out"
+        }
 
         database = FirebaseDatabase.getInstance().reference
         if (Build.VERSION.SDK_INT in 19..20) {
@@ -220,8 +224,18 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
             toast(""+ it.message)
         }
 
+        values  = hashMapOf(
+                "description" to "You Got 200 Credit",
+                "type" to "Credit",
+                "quantity" to 200
+        )
+
+        database.child("users").child(auth.currentUser!!.uid).child("reward").setValue(values).addOnFailureListener {
+            toast(""+ it.message)
+        }
+
         values = hashMapOf(
-            "credit" to 0,
+            "credit" to 200,
             "energy" to 100,
             "energyLimit" to 100,
             "point" to 200
@@ -251,7 +265,7 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
             "tournamentJoined" to 0
         )
 
-        database.child(auth.currentUser!!.uid).child("stats").setValue(values).addOnFailureListener {
+        database.child("users").child(auth.currentUser!!.uid).child("stats").setValue(values).addOnFailureListener {
             toast(""+ it.message)
         }
     }

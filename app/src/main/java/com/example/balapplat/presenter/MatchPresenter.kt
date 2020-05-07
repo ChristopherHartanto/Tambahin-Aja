@@ -6,6 +6,7 @@ import com.example.balapplat.R
 import com.example.balapplat.leaderboard.Leaderboard
 import com.example.balapplat.play.GameType
 import com.example.balapplat.play.Play
+import com.example.balapplat.tournament.TournamentData
 import com.example.balapplat.view.MainView
 import com.example.balapplat.view.MatchView
 import com.facebook.Profile
@@ -141,9 +142,9 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
         }
         if (winStatus)
-            database.child(auth.currentUser!!.uid).child("stats").child("win").addListenerForSingleValueEvent(postListener)
+            database.child("users").child(auth.currentUser!!.uid).child("stats").child("win").addListenerForSingleValueEvent(postListener)
         else
-            database.child(auth.currentUser!!.uid).child("stats").child("lose").addListenerForSingleValueEvent(postListener)
+            database.child("users").child(auth.currentUser!!.uid).child("stats").child("lose").addListenerForSingleValueEvent(postListener)
 
     }
 
@@ -157,6 +158,81 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     fun updatePoint(point: Long,auth: FirebaseAuth){
         database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").setValue(point)
+    }
+
+    fun getTournamentType(){
+        postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
+                if (dataSnapshot.exists()){
+                    for ((index,data) in dataSnapshot.children.withIndex()){
+                        if(index == 0){
+                            loadTournamentType(data.key.toString())
+                            return
+                        }
+                    }
+
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("tournament").addListenerForSingleValueEvent(postListener)
+    }
+
+    fun loadTournamentType(tournamentEndDate: String){
+        postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
+                if (dataSnapshot.exists()){
+                    view.loadData(dataSnapshot,"fetchTournamentType")
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("tournament").child(tournamentEndDate).addListenerForSingleValueEvent(postListener)
+    }
+
+
+    fun updateTournament(auth: FirebaseAuth){
+        postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
+                if (dataSnapshot.exists()){
+                    for ((index,data) in dataSnapshot.children.withIndex()){
+                        if(index == 0){
+                            updateTournamentPoint(auth,dataSnapshot.key.toString())
+                            return
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("tournament").addListenerForSingleValueEvent(postListener)
+
+    }
+
+    fun updateTournamentPoint(auth: FirebaseAuth,tournamentEndDate: String){
+        postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()){
+                    database.child("tournament").child(tournamentEndDate).child("participants")
+                            .child(auth.currentUser!!.uid).child("point").setValue(dataSnapshot.value.toString().toInt() + 1)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("tournament").child(tournamentEndDate).child("participants")
+                .child(auth.currentUser!!.uid).child("point").addListenerForSingleValueEvent(postListener)
     }
 
     fun updateCredit(credit:Long,auth: FirebaseAuth){
@@ -182,7 +258,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             playerPoint > opponentPoint -> {
                 "win"
             }
-            playerPoint == opponentPoint -> {
+            playerPoint < opponentPoint -> {
                 "lose"
             }
             else -> "draw"

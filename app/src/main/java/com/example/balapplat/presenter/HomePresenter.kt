@@ -54,6 +54,8 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
         database.child("users").child(auth.currentUser!!.uid).child("availableGame").addListenerForSingleValueEvent(postListener)
     }
 
+
+
     fun updatePuzzle(){
         val sdf = SimpleDateFormat("dd MMM yyyy")
         val currentDate = sdf.format(Date())

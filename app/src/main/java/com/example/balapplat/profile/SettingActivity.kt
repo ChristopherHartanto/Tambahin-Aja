@@ -5,7 +5,10 @@ import android.os.Bundle
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.balapplat.R
+import com.example.balapplat.main.LoginActivity
 import kotlinx.android.synthetic.main.activity_setting.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 
 class SettingActivity : AppCompatActivity() {
 
@@ -31,6 +34,11 @@ class SettingActivity : AppCompatActivity() {
         adapter = SettingRecyclerViewAdapter(this,settingItems)
         rvSetting.layoutManager = LinearLayoutManager(this)
         rvSetting.adapter = adapter
+
+        btnLogOut.onClick {
+            startActivity<LoginActivity>()
+            finish()
+        }
     }
 }
 

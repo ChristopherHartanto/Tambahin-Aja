@@ -3,10 +3,12 @@ package com.example.balapplat.main
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.content.res.Resources
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Message
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +21,7 @@ import androidx.lifecycle.Observer
 import androidx.transition.TransitionManager
 import com.example.balapplat.home.HomeFragment
 import com.example.balapplat.R
-import com.example.balapplat.Tournament
+import com.example.balapplat.tournament.Tournament
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
 import com.example.balapplat.play.StatusPlayer
@@ -30,7 +32,6 @@ import com.example.balapplat.utils.UtilsConstants
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
-import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
@@ -40,11 +41,8 @@ import com.quantumhiggs.network.NetworkStateHolder
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.fragment_profile.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
 
 class MainActivity : AppCompatActivity(), MainView {
 
@@ -53,6 +51,7 @@ class MainActivity : AppCompatActivity(), MainView {
     lateinit var presenter: Presenter
     private lateinit var auth: FirebaseAuth
     var data : Inviter = Inviter()
+    private lateinit var reward: Reward
     private var prevState = true
     private var doubleBackToExitPressedOnce = false
     private lateinit var popupWindow : PopupWindow
@@ -107,7 +106,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 .beginTransaction()
                 .replace(
                     R.id.main_container,
-                    Tournament(), Tournament::class.java.simpleName)
+                        Tournament(), Tournament::class.java.simpleName)
                 .commit()
         }
     }
@@ -129,9 +128,12 @@ class MainActivity : AppCompatActivity(), MainView {
             val editor = sharedPreference.edit()
             editor.putInt("credit", dataSnapshot.getValue(Balance::class.java)?.credit!!)
             editor.apply()
+        }else if(response == "reward"){
+            reward = dataSnapshot.getValue(Reward::class.java)!!
+            popUpMessage(com.example.balapplat.friends.Message.ReadOnly,reward.description.toString())
         }else{
             data = dataSnapshot.getValue(Inviter::class.java)!!
-            popUpMessage(1)
+            popUpMessage(com.example.balapplat.friends.Message.Reply,"${data.name} invited you to play")
         }
 
     }
@@ -161,7 +163,7 @@ class MainActivity : AppCompatActivity(), MainView {
         prevState = networkState.isConnected
     }
 
-    private fun popUpMessage(type: Int){
+    private fun popUpMessage(type: com.example.balapplat.friends.Message, message: String){
         val inflater: LayoutInflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_message,null)
@@ -188,7 +190,7 @@ class MainActivity : AppCompatActivity(), MainView {
         val ivInviter = view.findViewById<CircleImageView>(R.id.ivInviter)
         val tvMessageInviter = view.findViewById<TextView>(R.id.tvMessageInviter)
 
-        if (type == 1){
+        if (type == com.example.balapplat.friends.Message.Reply){
             layoutMessageInvitation.visibility = View.VISIBLE
             layoutMessageBasic.visibility = View.GONE
             layoutMessageReward.visibility = View.GONE
@@ -208,8 +210,29 @@ class MainActivity : AppCompatActivity(), MainView {
             }
 
             Picasso.get().load(getFacebookProfilePicture(data.facebookId!!)).fit().into(ivInviter)
-            tvMessageInviter.text = "${data.name} invited you to play"
+            tvMessageInviter.text = message
+        }else if (type == com.example.balapplat.friends.Message.ReadOnly){
+            val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
+            val ivMessageReward = view.findViewById<ImageView>(R.id.ivMessageReward)
+            val tvMessageReward = view.findViewById<TextView>(R.id.tvMessageReward)
 
+            layoutMessageReward.visibility = View.VISIBLE
+            layoutMessageInvitation.visibility = View.GONE
+            btnReject.visibility = View.GONE
+
+            tvMessageTitle.text = "Reward"
+            tvMessageReward.text = message
+            if (reward.type == "credit")
+                ivMessageReward.setImageResource(R.drawable.credit)
+            else if (reward.type == "point")
+                ivMessageReward.setImageResource(R.drawable.money_bag)
+
+            btnClose.onClick {
+                presenter.removePopUpReward()
+                btnClose.startAnimation(clickAnimation)
+                activity_main.alpha = 1F
+                popupWindow.dismiss()
+            }
         }
 
         tvMessageTitle.typeface = typeface
@@ -243,6 +266,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
         if(AccessToken.getCurrentAccessToken() != null){
             presenter.receiveInvitation()
+            presenter.receiveReward()
         }
 
         val editor = sharedPreference.edit()
@@ -276,5 +300,9 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 }
 
-
+data class Reward(
+        var description: String? = "",
+        var type: String? = "",
+        var quantity: Long? = 0
+)
 

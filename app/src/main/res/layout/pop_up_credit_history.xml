@@ -8,10 +8,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/colorPrimary"
-        android:layout_margin="20dp"
+        android:layout_marginHorizontal="20sp"
+        android:layout_marginVertical="50dp"
         android:padding="5dp">
 
         <TextView
@@ -30,13 +31,20 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="20dp"/>
 
-        <info.hoang8f.widget.FButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textColor="@color/colorWhite"
-            android:text="Okay"
-            android:id="@+id/btnCreditHistory"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom |center_horizontal">
+
+            <info.hoang8f.widget.FButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorWhite"
+                android:text="Okay"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/btnCreditHistory"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

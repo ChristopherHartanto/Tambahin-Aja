@@ -14,30 +14,31 @@ import com.example.balapplat.model.User
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.backgroundResource
 
-class TaskRecyclerViewAdapter(private val context: Context)
+class TaskRecyclerViewAdapter(private val context: Context, private val taskList: List<String>,
+                              private val taskProgressList: List<String>)
     : RecyclerView.Adapter<TaskRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_task, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(position,context)
+        holder.bindItem(taskList[position],taskProgressList[position],position,context)
     }
 
-    override fun getItemCount(): Int = 4
+    override fun getItemCount(): Int = taskList.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
         private val desc = view.findViewById<TextView>(R.id.tvTaskDesc)
         private val progress = view.findViewById<TextView>(R.id.tvTaskProgress)
 
-        fun bindItem(position: Int, context: Context) {
+        fun bindItem(task: String, taskprogress: String,position: Int, context: Context) {
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             desc.typeface = typeface
             progress.typeface = typeface
 
-            desc.text = "Get Total Point 500"
-            progress.text = "150/500"
+            desc.text = task
+            progress.text = taskprogress
         }
 
     }

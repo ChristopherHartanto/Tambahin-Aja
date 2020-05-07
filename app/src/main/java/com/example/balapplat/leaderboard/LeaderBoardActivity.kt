@@ -33,7 +33,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     lateinit var data: Inviter
-
     private lateinit var adapter: LeaderBoardRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +48,9 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         tvLeaderboardInfo.typeface = typeface
         tvLeaderboardTitle.typeface = typeface
 
-        rvLeaderBoard.layoutManager = LinearLayoutManager(this)
+        val linearLayoutManager = LinearLayoutManager(this)
+       // linearLayoutManager.reverseLayout = true
+        rvLeaderBoard.layoutManager = linearLayoutManager
         rvLeaderBoard.adapter = adapter
 
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivLeaderboard)
@@ -116,8 +117,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     fun fetchDataUser(dataSnapshot: DataSnapshot){
 
         val item = dataSnapshot.getValue(User::class.java)!!
-
         profileItems.add(item)
+
         adapter.notifyDataSetChanged()
     }
 
@@ -138,9 +139,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     }
 
     override fun onStart() {
-        items.clear()
-        profileItems.clear()
         retrieve()
+        adapter.notifyDataSetChanged()
         super.onStart()
     }
 

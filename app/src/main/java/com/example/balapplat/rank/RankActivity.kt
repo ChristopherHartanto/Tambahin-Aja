@@ -67,10 +67,13 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     var energyLimit = 100
     var point = 0
     var position = 0
+    var currentRank = "Toddler"
     lateinit var editor: SharedPreferences.Editor
     private lateinit var popupWindow : PopupWindow
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private val items : MutableList<ChooseGame> = mutableListOf()
+    private val taskList : MutableList<String> = mutableListOf()
+    private val taskProgressList : MutableList<String> = mutableListOf()
     private val availableGameList : MutableList<Boolean> = mutableListOf()
     private val rankDetailItems : MutableList<String> = mutableListOf()
 
@@ -101,6 +104,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             finish()
             startActivity<MarketActivity>()
         }
+
+        taskAdapter = TaskRecyclerViewAdapter(this,taskList,taskProgressList)
 
         adapter = RankRecyclerViewAdapter(this,items,availableGameList){
             position = it
@@ -197,10 +202,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         taskNextRank.typeface = typeface
         btnTask.typeface = typeface
 
-        taskAdapter = TaskRecyclerViewAdapter(this)
         rvTask.layoutManager = LinearLayoutManager(this)
         rvTask.adapter = taskAdapter
-
+        loadTask()
         btnTask.onClick {
             activity_rank.alpha = 1F
             popupWindow.dismiss()
@@ -244,7 +248,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         rankTitle.typeface = typeface
         btnRankDetail.typeface = typeface
 
-        rankTitle.text = "Beginner"
+        rankTitle.text = currentRank
 
         rvRankDetail.layoutManager = LinearLayoutManager(this)
         rvRankDetail.adapter = rankDetailAdapter
@@ -389,8 +393,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             editor = sharedPreference.edit()
             editor.putString("currentRank", dataSnapshot.value.toString())
             editor.apply()
-            tvRank.text = dataSnapshot.value.toString()
-            loadRankInfo(dataSnapshot.value.toString())
+            currentRank = dataSnapshot.value.toString()
+            tvRank.text = currentRank
+            loadRankInfo(currentRank)
         }
 
     }
@@ -403,26 +408,32 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 0 -> {
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.Normal))
+                    finish()
                 }
                 1 -> {
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.OddEven))
+                    finish()
                 }
                 2 -> {
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.Rush))
+                    finish()
                 }
                 3 -> {
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.AlphaNum))
+                    finish()
                 }
                 4 ->{
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.Mix))
+                    finish()
                 }
                 5 ->{
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.DoubleAttack))
+                    finish()
                 }
             }
         }else if(response == "error"){
@@ -468,6 +479,43 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
         rankDetailAdapter.notifyDataSetChanged()
     }
+
+    fun loadTask(){
+        when(enumValueOf<Rank>(currentRank)){
+            Rank.Beginner ->{
+                taskList.add("Play Normal Mode 1 Time")
+                taskList.add("Reach 100 Point in Normal Mode")
+                taskProgressList.add("0/1")
+                taskProgressList.add("0/100")
+            }
+            Rank.Senior -> {
+                taskList.add("Play Normal Mode 1 Time")
+                taskList.add("Reach 100 Point in Normal Mode")
+                taskProgressList.add("0/1")
+                taskProgressList.add("0/100")
+            }
+            Rank.Master -> {
+                taskList.add("Play Normal Mode 1 Time")
+                taskList.add("Reach 100 Point in Normal Mode")
+                taskProgressList.add("0/1")
+                taskProgressList.add("0/100")
+            }
+            Rank.GrandMaster -> {
+                taskList.add("Play Normal Mode 1 Time")
+                taskList.add("Reach 100 Point in Normal Mode")
+                taskProgressList.add("0/1")
+                taskProgressList.add("0/100")
+            }
+            Rank.Toddler -> {
+                taskList.add("Play Normal Mode 1 Time")
+                taskList.add("Reach 100 Point in Normal Mode")
+                taskProgressList.add("0/1")
+                taskProgressList.add("0/100")
+            }
+        }
+        taskAdapter.notifyDataSetChanged()
+    }
+
 }
 
 data class LeaderBoard(

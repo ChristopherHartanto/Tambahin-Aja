@@ -39,6 +39,7 @@ import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
 import com.google.android.material.bottomnavigation.BottomNavigationMenu
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
@@ -66,11 +67,13 @@ import java.util.*
 
 class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
+    private lateinit var mFirebaseAnalytics: FirebaseAnalytics
     private lateinit var homePresenter: HomePresenter
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var customGameAdapter: CustomGameRecyclerViewAdapter
+    private var bundle: Bundle = Bundle()
     var puzzleType = 1
     var puzzleAnswer = 0
     var playedPuzzleToday = false
@@ -93,7 +96,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(ctx)
         homePresenter = HomePresenter(this,database)
+        bundle = Bundle()
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         val sdf = SimpleDateFormat("dd MMM yyyy")
         currentDate = sdf.format(Date())
@@ -134,6 +139,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnRank.onClick {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "rank");
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+
             if(auth.currentUser == null)
                 startActivity(intentFor<LoginActivity>().clearTask())
             else{
@@ -144,6 +153,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnPlayFriend.onClick {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "play friend");
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+
             if(auth.currentUser == null)
                 startActivity(intentFor<LoginActivity>().clearTask())
             else
@@ -151,6 +164,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnOnline.onClick {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "online");
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+
             if(auth.currentUser == null)
                 startActivity(intentFor<LoginActivity>().clearTask())
             else
@@ -159,6 +176,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnLeaderboard.onClick {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "leaderBoard");
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+
             startActivity(intentFor<LeaderBoardActivity>().clearTask())
         }
 
@@ -167,11 +188,19 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         ivShop.onClick {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "shop");
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+
             ivShop.startAnimation(clickAnimation)
             startActivity<MarketActivity>()
         }
 
         cvCredit.onClick {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "credit");
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+
             cvCredit.startAnimation(clickAnimation)
             startActivity<CreditActivity>()
         }
@@ -186,12 +215,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
     private fun checkPlayedPuzzle(date: String) {
 
-        val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-        animationBounce.repeatCount = Animation.INFINITE
-        animationBounce.repeatMode = Animation.REVERSE
-
-        tvPuzzleInfo.startAnimation(animationBounce)
-
         if (date != currentDate){
             playedPuzzleToday = true
             ivDailyPuzzle.visibility = View.VISIBLE
@@ -199,6 +222,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
             val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
             animationBounce.repeatCount = Animation.INFINITE
+            animationBounce.repeatMode = Animation.REVERSE
 
             tvPuzzleInfo.startAnimation(animationBounce)
 

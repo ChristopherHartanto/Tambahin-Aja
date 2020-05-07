@@ -36,8 +36,10 @@ import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_rank.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlinx.android.synthetic.main.fragment_profile.ivProfile
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
@@ -68,16 +70,17 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
-
         database = FirebaseDatabase.getInstance().reference
+
         profilePresenter = ProfilePresenter(this,database)
         if(AccessToken.getCurrentAccessToken() == null)
             auth.signOut()
 
         historyAdapter = HistoryRecyclerViewAdapter(ctx,historyItems, User(name,Profile.getCurrentProfile().id,"",""))
-        getStats()
-        fetchUserProfile()
-        profilePresenter.fetchHistory()
+        rvHistory.layoutManager = LinearLayoutManager(ctx)
+        rvHistory.adapter = historyAdapter
+        profilePresenter.fetchUserProfile()
+        profilePresenter.fetchStats()
 
         mAdView = view!!.findViewById(R.id.adView)
         val adRequest = AdRequest.Builder().build()
@@ -117,42 +120,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         }
     }
 
-    fun getStats(){
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                if (dataSnapshot.exists()){
-                    tvWin.text = dataSnapshot.getValue(Stats::class.java)?.win.toString()
-                    tvWinTournament.text = dataSnapshot.getValue(Stats::class.java)?.tournamentWin.toString()
-                }
 
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-
-            }
-        }
-        database.child(auth.currentUser!!.uid).child("stats").addValueEventListener(postListener)
-    }
-
-    fun fetchUserProfile(){
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
-                if (dataSnapshot.exists()){
-                    user = User(dataSnapshot.getValue(User::class.java)!!.name,
-                            "", dataSnapshot.getValue(User::class.java)?.email,
-                            dataSnapshot.getValue(User::class.java)?.noHandphone,null)
-                }
-
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-
-            }
-        }
-        database.child("users").child(auth.currentUser!!.uid).addValueEventListener(postListener)
-    }
 
     fun getFacebookProfilePicture(userID: String): String {
         return "https://graph.facebook.com/$userID/picture?type=large"
@@ -260,6 +228,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == "fetchHistory") {
+            toast("" +dataSnapshot)
             for (data in dataSnapshot.children) {
                 val item = data.getValue(History::class.java)
                 historyItems.add(item!!)
@@ -267,10 +236,26 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
             historyAdapter.notifyDataSetChanged()
         }else if(response == "fetchName"){
             tvProfileName.text = dataSnapshot.value.toString()
+        }else if(response == "fetchStats"){
+            val data = dataSnapshot.getValue(Stats::class.java)
+            if (data != null) {
+                tvPoint.text = data.win.toString()
+                tvWinTournament.text = data.tournamentWin.toString()
+            }
+        }else if(response == "fetchUserProfile"){
+            user = User(dataSnapshot.getValue(User::class.java)!!.name,
+                    "", dataSnapshot.getValue(User::class.java)?.email,
+                    dataSnapshot.getValue(User::class.java)?.noHandphone,null)
+            profilePresenter.fetchHistory()
         }
     }
 
     override fun response(message: String) {
+    }
+
+    override fun onPause() {
+        profilePresenter.dismissListener()
+        super.onPause()
     }
 
 
