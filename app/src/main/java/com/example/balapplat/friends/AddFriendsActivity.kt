@@ -3,6 +3,7 @@ package com.example.balapplat.friends
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -55,32 +56,25 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
             addFriend(uids[it])
         }
         auth = FirebaseAuth.getInstance()
-        retrieve("")
+//        retrieve("")
         rvAddFriends.layoutManager = LinearLayoutManager(this)
         rvAddFriends.adapter = adapter
 
-        srAddFriend.onRefresh {
-            retrieve("")
+//        srAddFriend.onRefresh {
+//            retrieve("")
+//        }
+
+        btnSearch.setOnClickListener {
+            retrieve(etSearch.text.toString())
         }
+        etSearch.setOnClickListener {
+            etSearch.text.clear()
+        }
+    }
 
-            etSearch?.addTextChangedListener(object : TextWatcher{
-                override fun afterTextChanged(s: Editable?) {
-
-                }
-
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-
-                }
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    retrieve(s.toString())
-                }
-            })
+    private fun refreshRvAddFriend(){
+        rvAddFriends.adapter?.notifyDataSetChanged()
+        srAddFriend.isRefreshing = false
     }
 
     fun retrieve(filter : String){
@@ -113,11 +107,9 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
                     if (item.name?.toLowerCase()?.contains(filter.toLowerCase())!!)
                         checkStatusFriend(ds.key,item)
                 }
-
             }
         }
-        rvAddFriends.adapter?.notifyDataSetChanged()
-        srAddFriend.isRefreshing = false
+        refreshRvAddFriend()
         toast("uid : " + uids)
     }
     fun checkStatusFriend(friendUid: String?, item:User){
@@ -135,15 +127,13 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
 
                     items.add(item)
                     uids.add(friendUid!!)
-
-
+                    refreshRvAddFriend()
                 }
 
             }
             database.child("friends").child(auth.currentUser!!.uid).child(friendUid!!).addListenerForSingleValueEvent(postListener)
 
         }
-
 
     }
 
@@ -154,7 +144,7 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
 
         database.child("friends").child(auth.currentUser!!.uid).child(friendUid).child("date").setValue(currentDate).addOnSuccessListener {
             toast("add friend")
-            retrieve("")
+            retrieve(etSearch.text.toString())
 
         }.addOnFailureListener {
             toast(""+ it.message)
