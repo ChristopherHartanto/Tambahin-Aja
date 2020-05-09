@@ -1,9 +1,20 @@
 package com.example.balapplat.friends
 
+import android.content.Context
+import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.transition.TransitionManager
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,32 +22,36 @@ import com.example.balapplat.R
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.model.User
 import com.example.balapplat.play.CountdownActivity
-import com.example.balapplat.presenter.Presenter
+import com.example.balapplat.utils.getFacebookProfilePicture
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
+import com.squareup.picasso.Picasso
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
-    MainView {
+class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
 
     private lateinit var auth: FirebaseAuth
     private var items: MutableList<User> = mutableListOf()
     private var uids: MutableList<String> = mutableListOf()
     private var statusItems: MutableList<Boolean> = mutableListOf()
     private lateinit var database: DatabaseReference
-    lateinit var presenter: Presenter
+    private lateinit var popupWindow: PopupWindow
     lateinit var data: Inviter
+    private var index = 0
+    private val clickAnimation = AlphaAnimation(1.2F, 0.6F)
 
     private lateinit var adapter: AddFriendRecyclerViewAdapter
 
@@ -46,14 +61,13 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
 
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
-        presenter = Presenter(this, database)
-        presenter.receiveInvitation()
 
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvAddFriendsTitle.typeface = typeface
 
-        adapter = AddFriendRecyclerViewAdapter(this,items,statusItems){
-            addFriend(uids[it])
+        adapter = AddFriendRecyclerViewAdapter(this, items, statusItems) {
+            index = it
+            popUpMessage(Message.Reply, "Add Friend with ${items[it].name}")
         }
         auth = FirebaseAuth.getInstance()
 //        retrieve("")
@@ -72,12 +86,12 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         }
     }
 
-    private fun refreshRvAddFriend(){
+    private fun refreshRvAddFriend() {
         rvAddFriends.adapter?.notifyDataSetChanged()
         srAddFriend.isRefreshing = false
     }
 
-    fun retrieve(filter : String){
+    fun retrieve(filter: String) {
         items.clear()
         uids.clear()
         statusItems.clear()
@@ -99,20 +113,21 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
         }
     }
 
-    fun fetchData(dataSnapshot: DataSnapshot, filter : String){
-        if (!filter.isEmpty()){
+    fun fetchData(dataSnapshot: DataSnapshot, filter: String) {
+        if (!filter.isEmpty()) {
             for (ds in dataSnapshot.children) {
-                if (!ds.key.equals(auth.currentUser!!.uid)){
+                if (!ds.key.equals(auth.currentUser!!.uid)) {
                     val item = ds.getValue(User::class.java)!!
                     if (item.name?.toLowerCase()?.contains(filter.toLowerCase())!!)
-                        checkStatusFriend(ds.key,item)
+                        checkStatusFriend(ds.key, item)
                 }
             }
         }
         refreshRvAddFriend()
         toast("uid : " + uids)
     }
-    fun checkStatusFriend(friendUid: String?, item:User){
+
+    fun checkStatusFriend(friendUid: String?, item: User) {
         GlobalScope.launch {
             val postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -131,48 +146,99 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
                 }
 
             }
-            database.child("friends").child(auth.currentUser!!.uid).child(friendUid!!).addListenerForSingleValueEvent(postListener)
+            database.child("friends").child(auth.currentUser!!.uid).child(friendUid!!)
+                .addListenerForSingleValueEvent(postListener)
 
         }
 
     }
 
-    fun addFriend(friendUid: String){
+    fun addFriend(friendUid: String) {
 
         val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
         val currentDate = sdf.format(Date())
 
-        database.child("friends").child(auth.currentUser!!.uid).child(friendUid).child("date").setValue(currentDate).addOnSuccessListener {
+        database.child("friends").child(auth.currentUser!!.uid).child(friendUid).child("date")
+            .setValue(currentDate).addOnSuccessListener {
             toast("add friend")
             retrieve(etSearch.text.toString())
-
+            popUpMessage(Message.ReadOnly, "Success")
         }.addOnFailureListener {
-            toast(""+ it.message)
+            toast("" + it.message)
         }
     }
 
-    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        data = dataSnapshot.getValue(Inviter::class.java)!!
+    private fun popUpMessage(type: Message, message: String) {
+        val inflater: LayoutInflater =
+            ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val view = inflater.inflate(R.layout.pop_up_message, null)
+        popupWindow = PopupWindow(
+            view,
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
 
-        alert(data!!.name + " invite you to play"){
-            title = "Invitation"
-            yesButton {
-                presenter.replyInvitation(true)
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+        val typeface: Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
+        val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
+        val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
+        val ivInviter = view.findViewById<CircleImageView>(R.id.ivInviter)
+        val tvMessageInviter = view.findViewById<TextView>(R.id.tvMessageInviter)
+
+        tvMessageTitle.text = "Add Friend"
+        tvMessageInviter.typeface = typeface
+        tvMessageInviter.typeface = typeface
+
+        if (type == Message.Reply) {
+            Picasso.get().load(getFacebookProfilePicture(items[index].facebookId.toString())).fit()
+                .into(ivInviter)
+            tvMessageInviter.text = message
+            btnReject.text = "No"
+            btnClose.text = "yes"
+            btnClose.onClick {
+                if (!statusItems[index]) {
+                    addFriend(uids[index])
+                    btnClose.startAnimation(clickAnimation)
+                    activity_add_friends.alpha = 1F
+                    popupWindow.dismiss()
+                } else {
+                    btnClose.startAnimation(clickAnimation)
+                    activity_add_friends.alpha = 1F
+                    popupWindow.dismiss()
+                    popUpMessage(Message.ReadOnly, "You Already Made Friend")
+                }
             }
-            noButton {
-                presenter.replyInvitation(false)
+            btnReject.onClick {
+                btnReject.startAnimation(clickAnimation)
+                activity_add_friends.alpha = 1F
+                popupWindow.dismiss()
             }
-        }.show()
-    }
+        } else if (type == Message.ReadOnly) {
+            ivInviter.visibility = View.GONE
+            tvMessageInviter.text = message
+            btnReject.visibility = View.GONE
 
-    override fun response(message: String) {
-        if (message === "acceptedGame"){
-            toast("acceptedGame")
-
-            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
-                "inviterName" to data.name))
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_add_friends.alpha = 1F
+                popupWindow.dismiss()
+            }
         }
 
+        tvMessageTitle.typeface = typeface
+        activity_add_friends.alpha = 0.1F
+        TransitionManager.beginDelayedTransition(activity_add_friends)
+        popupWindow.showAtLocation(
+            activity_add_friends, // Location to display popup windoW
+            Gravity.CENTER, // Exact position of layout to display popup
+            0, // X offset
+            0 // Y offset
+        )
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -185,10 +251,5 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener,
                 }
             }
         }
-    }
-
-    override fun onPause() {
-        presenter.dismissListener()
-        super.onPause()
     }
 }
