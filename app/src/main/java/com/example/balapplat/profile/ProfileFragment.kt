@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.example.balapplat.home.CustomGameRecyclerViewAdapter
+import com.example.balapplat.main.LoginActivity
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.example.balapplat.play.CountdownActivity
@@ -27,6 +28,7 @@ import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
 import com.facebook.Profile
+import com.facebook.login.Login
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -73,8 +75,10 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         database = FirebaseDatabase.getInstance().reference
 
         profilePresenter = ProfilePresenter(this,database)
-        if(AccessToken.getCurrentAccessToken() == null)
+        if(AccessToken.getCurrentAccessToken() == null || auth.currentUser == null || Profile.getCurrentProfile() == null){
             auth.signOut()
+            startActivity<LoginActivity>()
+        }
         else{
             profilePresenter.fetchUserProfile()
             profilePresenter.fetchStats()
@@ -231,7 +235,6 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == "fetchHistory") {
-            toast("" +dataSnapshot)
             for (data in dataSnapshot.children) {
                 val item = data.getValue(History::class.java)
                 historyItems.add(item!!)
@@ -242,7 +245,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         }else if(response == "fetchStats"){
             val data = dataSnapshot.getValue(Stats::class.java)
             if (data != null) {
-                tvPoint.text = data.win.toString()
+                tvWin.text = data.win.toString()
                 tvWinTournament.text = data.tournamentWin.toString()
             }
         }else if(response == "fetchUserProfile"){

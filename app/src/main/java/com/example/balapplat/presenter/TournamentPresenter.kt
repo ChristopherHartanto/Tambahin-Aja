@@ -13,7 +13,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.HashMap
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TournamentPresenter(private val view: MainView, private val database: DatabaseReference) {
     var postListener = object : ValueEventListener {
@@ -23,6 +24,24 @@ class TournamentPresenter(private val view: MainView, private val database: Data
         override fun onDataChange(p0: DataSnapshot) {
         }
 
+    }
+
+    fun checkPoint(auth: FirebaseAuth,price: Long){
+        postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
+                if (dataSnapshot.exists()){
+                    if (dataSnapshot.value.toString().toLong() < price)
+                        view.response("notEnoughPoint")
+                    else
+                        view.response("continueJoinTournament")
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").addListenerForSingleValueEvent(postListener)
     }
     fun fetchTournament(){
         GlobalScope.launch {
@@ -36,12 +55,13 @@ class TournamentPresenter(private val view: MainView, private val database: Data
                 }
 
             }
-            database.child("tournament").addListenerForSingleValueEvent(postListener)
+            database.child("tournament").addValueEventListener(postListener)
+            database.keepSynced(true)
 
         }
     }
 
-    fun fetchTournamentParticipants(){
+    fun fetchTournamentParticipants(date: String){
 
         GlobalScope.launch {
 
@@ -55,7 +75,7 @@ class TournamentPresenter(private val view: MainView, private val database: Data
                 }
 
             }
-            database.child("tournament").child("participants").orderByChild("point").addValueEventListener(postListener)
+            database.child("tournament").child(date).child("participants").orderByChild("point").addValueEventListener(postListener)
 
         }
     }
@@ -92,6 +112,25 @@ class TournamentPresenter(private val view: MainView, private val database: Data
         database.child("users").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
     }
 
+    fun updatePoint(auth: FirebaseAuth,price: Long){
+        postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
+                if (dataSnapshot.exists()){
+                    database.child("users").child(auth.currentUser!!.uid).child("balance").child("point")
+                            .setValue(dataSnapshot.value.toString().toLong() - price).addOnFailureListener {
+                        view.response(it.message.toString())
+                    }
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                view.response(databaseError.message)
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").addListenerForSingleValueEvent(postListener)
+
+    }
+
     fun updateTournamentStats(auth: FirebaseAuth){
 
         GlobalScope.launch {
@@ -110,7 +149,7 @@ class TournamentPresenter(private val view: MainView, private val database: Data
                 }
 
             }
-            database.child("users").child(auth.currentUser!!.uid).child("stats").child("tournamentJoined").addValueEventListener(postListener)
+            database.child("users").child(auth.currentUser!!.uid).child("stats").child("tournamentJoined").addListenerForSingleValueEvent(postListener)
 
         }
     }

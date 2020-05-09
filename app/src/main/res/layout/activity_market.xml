@@ -54,6 +54,13 @@
             android:layout_gravity="center"
             android:layout_margin="5dp"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0:00"
+            android:textSize="18sp"
+            android:id="@+id/tvEnergyTimer"/>
+
     </LinearLayout>
 
     <com.google.android.gms.ads.AdView

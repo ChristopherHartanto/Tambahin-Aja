@@ -22,7 +22,7 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_leaderboard, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(scoreItems[position],profileItems[position], position, context)
+        holder.bindItem(scoreItems[position],profileItems[position], position, scoreItems.size, context)
     }
 
     override fun getItemCount(): Int = scoreItems.size
@@ -34,16 +34,20 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
         private val score = view.findViewById<TextView>(R.id.tvScoreLeader)
         private val image = view.findViewById<ImageView>(R.id.ivLeader)
 
-        fun bindItem(highScore: HighScore, profileItems: User, position: Int, context: Context) {
-            val counter = position + 1
+        fun bindItem(highScore: HighScore, profileItems: User, position: Int, size: Int, context: Context) {
+            val counter = size - position
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             name.typeface = typeface
+            count.typeface = typeface
             score.typeface = typeface
-            when (position) {
-                0 -> count.backgroundResource = R.drawable.first_medal
-                1 -> count.backgroundResource = R.drawable.second_medal
-                2 -> count.backgroundResource = R.drawable.third_medal
-                else -> count.text = "" + counter + ". "
+            when (counter) {
+                1-> count.backgroundResource = R.drawable.first_medal
+                2 -> count.backgroundResource = R.drawable.second_medal
+                3 -> count.backgroundResource = R.drawable.third_medal
+                else -> {
+                    count.backgroundResource = R.color.colorTransparent
+                    count.text = "" + counter + ". "
+                }
             }
 
             name.text = profileItems.name

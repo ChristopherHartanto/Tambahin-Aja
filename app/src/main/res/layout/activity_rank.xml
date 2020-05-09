@@ -54,8 +54,8 @@
             android:orientation="horizontal">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:src="@mipmap/ic_launcher_round"
                 android:id="@+id/ivProfile"
                 android:layout_margin="10dp"/>
@@ -64,25 +64,38 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
+                android:weightSum="2"
                 android:id="@+id/layout_rank_detail">
 
                 <TextView
                     android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1000"
+                    android:layout_height="wrap_content"
+                    android:text="No Data"
                     android:id="@+id/tvTotalScore"
                     android:gravity="bottom | center"
-                    android:textSize="26sp"
+                    android:textSize="24sp"
                     android:layout_weight="1"/>
 
-            <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Master"
-                    android:id="@+id/tvRank"
-                    android:gravity="top | center"
-                    android:textSize="26dp"
-                    android:layout_weight="1"/>
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Unknown"
+                        android:id="@+id/tvRank"
+                        android:gravity="top | center"
+                        android:textSize="21sp"
+                        android:layout_weight="1"/>
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15sp"
+                        android:src="@drawable/info"
+                        android:layout_marginLeft="5dp"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -91,14 +104,35 @@
                 android:layout_height="match_parent"
                 android:gravity="right">
 
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/task_list"
-                    android:padding="5dp"
-                    android:layout_marginHorizontal="15dp"
-                    android:layout_gravity="center_vertical"
-                    android:id="@+id/ivTask"/>
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="right"
+                        android:textSize="25dp"
+                        android:textStyle="bold"
+                        android:text="!"
+                        android:id="@+id/tvTaskInfo"
+                        android:visibility="gone"
+                        android:textColor="#ff0000"/>
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/task_list"
+                        android:padding="5dp"
+                        android:layout_marginHorizontal="15dp"
+                        android:layout_gravity="center_vertical"
+                        android:id="@+id/ivTask"/>
+                </FrameLayout>
+
 
             </LinearLayout>
 

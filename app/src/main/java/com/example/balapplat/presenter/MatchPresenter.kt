@@ -165,7 +165,13 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
                 if (dataSnapshot.exists()){
                     for ((index,data) in dataSnapshot.children.withIndex()){
-                        if(index == 0){
+                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        val currentDate = Date().time
+                        val tournamentDate = sdf.parse(data.key.toString()).time
+                        val diff: Long = tournamentDate - currentDate
+
+                        if(diff > 0){
+                            view.loadData(dataSnapshot,"getTournamentEndDate")
                             loadTournamentType(data.key.toString())
                             return
                         }
@@ -197,13 +203,18 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     }
 
 
-    fun updateTournament(auth: FirebaseAuth){
+    fun updateTournament(auth: FirebaseAuth, point: Long){
         postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
                 if (dataSnapshot.exists()){
                     for ((index,data) in dataSnapshot.children.withIndex()){
-                        if(index == 0){
-                            updateTournamentPoint(auth,dataSnapshot.key.toString())
+                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        val currentDate = Date().time
+                        val tournamentDate = sdf.parse(data.key.toString()).time
+                        val diff: Long = tournamentDate - currentDate
+
+                        if(diff > 0){
+                            updateTournamentPoint(auth,data.key.toString(), point)
                             return
                         }
                     }
@@ -218,12 +229,12 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     }
 
-    fun updateTournamentPoint(auth: FirebaseAuth,tournamentEndDate: String){
+    fun updateTournamentPoint(auth: FirebaseAuth,tournamentEndDate: String, point: Long){
         postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()){
                     database.child("tournament").child(tournamentEndDate).child("participants")
-                            .child(auth.currentUser!!.uid).child("point").setValue(dataSnapshot.value.toString().toInt() + 1)
+                            .child(auth.currentUser!!.uid).child("point").setValue(dataSnapshot.value.toString().toLong() + point)
                 }
             }
 
@@ -258,11 +269,11 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
                     database.child("users").child(auth.currentUser!!.uid)
                             .child("balance").child("credit").setValue(totalCredit)
                     database.child("users").child(auth.currentUser!!.uid).child("creditHistory")
-                            .child(currentDate).setValue(credit)
+                            .child(currentDate).setValue(values)
                 }
             }
         }
-        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").addValueEventListener(postListener)
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").addListenerForSingleValueEvent(postListener)
 
     }
 

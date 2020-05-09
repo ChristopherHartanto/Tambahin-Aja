@@ -6,6 +6,7 @@ import com.example.balapplat.rank.Balance
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,6 +55,36 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
         database.child("users").child(auth.currentUser!!.uid).child("availableGame").addListenerForSingleValueEvent(postListener)
     }
 
+    fun fetchCredit(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0,"fetchCredit")
+                database.removeEventListener(this)
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").addListenerForSingleValueEvent(postListener)
+    }
+
+    fun rewardPuzzlePopUp(){
+        val values  = hashMapOf(
+                "description" to "You Got 50 Credit",
+                "type" to "Credit",
+                "quantity" to 50
+        )
+
+        database.child("users").child(auth.currentUser!!.uid).child("reward").setValue(values)
+    }
+
+    fun updateCredit(credit: Long){
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").setValue(credit).addOnSuccessListener {
+            view.response("updateCredit")
+        }
+    }
 
 
     fun updatePuzzle(){

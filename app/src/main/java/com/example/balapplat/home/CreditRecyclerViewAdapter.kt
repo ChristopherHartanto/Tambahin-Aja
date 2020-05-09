@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
@@ -34,6 +35,7 @@ class CreditRecyclerViewAdapter(
 
         private val desc = view.findViewById<TextView>(R.id.tvCreditDesc)
         private val title = view.findViewById<TextView>(R.id.tvCreditTitle)
+        private val buy = view.findViewById<Button>(R.id.btnBuyCredit)
 
         fun bindItem(listener: (position: Int) -> Unit,position: Int,creditShop: CreditShop, context: Context) {
 
@@ -45,6 +47,9 @@ class CreditRecyclerViewAdapter(
             title.text = creditShop.title
 
             itemView.onClick {
+                listener(position)
+            }
+            buy.onClick {
                 listener(position)
             }
         }

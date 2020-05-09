@@ -106,19 +106,22 @@ class RankPresenter(private val view: RankView, private val database: DatabaseRe
 
     }
 
-    fun updateEnergy(energyRemaining: Long){
+    fun updateEnergy(energyRemaining: Long, response: Boolean){
         database.child("users").child(auth.currentUser!!.uid).child("balance").child("energy").setValue(energyRemaining).addOnFailureListener {
             view.response(it.message!!,"error")
         }.addOnSuccessListener {
-            view.response("","updateEnergy")
-            fetchBalance()
+            if (response){
+                view.response("","updateEnergy")
+                fetchBalance()
+            }
         }
     }
 
-    fun updateRank(nextRank: String){
+    fun updateRank(nextRank: String,energyLimit: Long){
         database.child("users").child(auth.currentUser!!.uid).child("currentRank").setValue(nextRank).addOnSuccessListener {
             view.response("Level Up to ${nextRank}","levelUp")
         }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("energyLimit").setValue(energyLimit)
     }
 
     fun dismissListener(){

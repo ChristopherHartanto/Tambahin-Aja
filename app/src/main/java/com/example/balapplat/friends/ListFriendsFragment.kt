@@ -76,7 +76,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
 //
 //        val stamp = Timestamp(System.currentTimeMillis())
 //        val date = Date(stamp.getTime())
-
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         adapter = FriendsRecyclerViewAdapter(ctx,ProfileItems){
@@ -283,8 +282,9 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
                         ctx.startActivity(intentFor<WaitingActivity>("joinFriendFacebookId" to ProfileItems[index].facebookId,
                                 "joinFriendName" to ProfileItems[index].name, "type" to GameType.DoubleAttack, "timer" to position))
                     }
-
                 }
+
+                callback.removeFragment()
             }
 
         }

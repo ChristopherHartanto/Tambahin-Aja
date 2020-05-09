@@ -5,10 +5,15 @@ import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.Message
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -42,8 +47,11 @@ import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_market.*
 import kotlinx.android.synthetic.main.activity_rank.*
 import kotlinx.android.synthetic.main.activity_rank.ivProfile
+import kotlinx.android.synthetic.main.activity_rank.tvEnergy
+import kotlinx.android.synthetic.main.activity_rank.tvPoint
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.pop_up_task.*
@@ -52,6 +60,8 @@ import kotlinx.android.synthetic.main.row_rank.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import java.text.SimpleDateFormat
+import java.util.*
 
 class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
@@ -59,6 +69,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     private lateinit var adapter: RankRecyclerViewAdapter
     private lateinit var taskAdapter: TaskRecyclerViewAdapter
     private lateinit var rankDetailAdapter: RankDetailRecyclerViewAdapter
+    private lateinit var countDownTimer : CountDownTimer
     private lateinit var database: DatabaseReference
     lateinit var rankPresenter: RankPresenter
     private lateinit var auth: FirebaseAuth
@@ -66,8 +77,13 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     var energy = 0
     var energyLimit = 100
     var point = 0
+    private var remainTime = 0
+    private var counted = 0
     var position = 0
     var currentRank = "Toddler"
+    var levelUp = false
+    private var diff: Long = 0
+    private var checkUpdateEnergy = false
     lateinit var editor: SharedPreferences.Editor
     private lateinit var popupWindow : PopupWindow
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
@@ -108,23 +124,26 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         taskAdapter = TaskRecyclerViewAdapter(this,taskList,taskProgressList)
 
         adapter = RankRecyclerViewAdapter(this,items,availableGameList){
-            position = it
-            if (!availableGameList[it]){
-                if (items[it].priceGame!! < tvPoint.text.toString().toInt())
-                    popUpMessage(1,"Do You Want to Buy?")
-                else
-                    popUpMessage(2,"Not Enough Money")
-            }else{
-                if (items[it].energy!! > energy)
-                    popUpMessage(2,"Not Enough Energy")
-                else{
-                    position = it
-                    val energyRemaining = energy - items[it].energy!!
-                    rankPresenter.updateEnergy(energyRemaining.toLong())
+            if (auth.currentUser == null)
+                popUpMessage(2,"You Must Sign In First")
+            else{
+                position = it
+                if (!availableGameList[it]){
+                    if (items[it].priceGame!! < tvPoint.text.toString().toInt())
+                        popUpMessage(1,"Do You Want to Buy?")
+                    else
+                        popUpMessage(2,"Not Enough Money")
+                }else{
+                    if (items[it].energy!! > energy)
+                        popUpMessage(2,"Not Enough Energy")
+                    else{
+                        position = it
+                        val energyRemaining = energy - items[it].energy!!
+                        rankPresenter.updateEnergy(energyRemaining.toLong(),true)
+                    }
+
                 }
-
             }
-
         }
 
         rvRank.layoutManager = LinearLayoutManager(this)
@@ -204,20 +223,47 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
         rvTask.layoutManager = LinearLayoutManager(this)
         rvTask.adapter = taskAdapter
-        loadTask(btnTask)
+        loadTask()
+
+        if (levelUp)
+            btnTask.text ="Level Up"
+
+        when(enumValueOf<Rank>(currentRank)){
+            Rank.Toddler -> taskNextRank.text = "Next Rank : Beginner"
+            Rank.Beginner -> taskNextRank.text = "Next Rank : Senior"
+            Rank.Senior -> taskNextRank.text = "Next Rank : Master"
+            Rank.Master -> taskNextRank.text = "Next Rank : GrandMaster"
+            Rank.GrandMaster -> taskNextRank.text = "Next Rank : Soon"
+        }
 
         btnTask.onClick {
-            if (btnTask.text == "Level Up"){
+            if (btnTask.text == "Level Up" && levelUp){
+                levelUp = !levelUp
+                tvTaskInfo.text = ""
+
                 var nextRank = ""
+                var nextEnergyLimit = 0
                 when (enumValueOf<Rank>(currentRank)) {
-                    Rank.Toddler -> nextRank = Rank.Beginner.toString()
-                    Rank.Beginner -> nextRank = Rank.Senior.toString()
-                    Rank.Senior -> nextRank = Rank.Master.toString()
-                    Rank.Master -> nextRank = Rank.GrandMaster.toString()
+                    Rank.Toddler -> {
+                        nextRank = Rank.Beginner.toString()
+                        energyLimit = 105
+                    }
+                    Rank.Beginner -> {
+                        nextRank = Rank.Senior.toString()
+                        energyLimit = 110
+                    }
+                    Rank.Senior -> {
+                        nextRank = Rank.Master.toString()
+                        energyLimit = 115
+                    }
+                    Rank.Master -> {
+                        nextRank = Rank.GrandMaster.toString()
+                        energyLimit = 120
+                    }
                 }
                 currentRank = nextRank
                 rankPresenter.fetchRank()
-                rankPresenter.updateRank(nextRank)
+                rankPresenter.updateRank(nextRank,energyLimit.toLong())
                 btnTask.text == "Okay"
             }
             activity_rank.alpha = 1F
@@ -339,7 +385,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
             btnReject.visibility = View.GONE
             tvMessageInfo.text = message
-            rankPresenter.fetchGameAvailable()
+            if (auth.currentUser != null)
+                rankPresenter.fetchGameAvailable()
+
             btnClose.onClick {
 
                 btnClose.startAnimation(clickAnimation)
@@ -370,16 +418,34 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         rankDetailAdapter = RankDetailRecyclerViewAdapter(this, rankDetailItems)
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
 
-        rankPresenter.fetchBalance()
-        rankPresenter.fetchGameAvailable()
-        rankPresenter.fetchScore()
-        rankPresenter.fetchRank()
+        if (auth.currentUser != null){
+            rankPresenter.fetchBalance()
+            rankPresenter.fetchGameAvailable()
+            rankPresenter.fetchScore()
+            rankPresenter.fetchRank()
+        }
+
+        countDownTimer = object : CountDownTimer(1000,1000){
+            override fun onFinish() {
+
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+            }
+
+        }
 
         super.onStart()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        editor = sharedPreference.edit()
+        editor.putLong("lastCountEnergy",Date().time)
+        editor.putLong("countedEnergy",counted.toLong())
+        editor.apply()
+        countDownTimer.cancel()
+
+        super.onPause()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -390,6 +456,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             energy = dataSnapshot.getValue(Balance::class.java)!!.energy!!
             energyLimit = dataSnapshot.getValue(Balance::class.java)!!.energyLimit!!
             point = dataSnapshot.getValue(Balance::class.java)!!.point!!
+            setUpEnergyTimer()
             tvEnergy.text = "${energy}/${energyLimit}"
             tvPoint.text = "${point}"
         }else if(response == "fetchGameAvailable"){
@@ -409,6 +476,15 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             editor.putString("currentRank", dataSnapshot.value.toString())
             editor.apply()
             currentRank = dataSnapshot.value.toString()
+            loadTask()
+            if (levelUp){
+                tvTaskInfo.text = "!"
+                val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+                animationBounce.repeatCount = Animation.INFINITE
+                animationBounce.repeatMode = Animation.REVERSE
+
+                tvTaskInfo.startAnimation(animationBounce)
+            }
             tvRank.text = currentRank
             loadRankInfo(currentRank)
         }
@@ -497,7 +573,71 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         rankDetailAdapter.notifyDataSetChanged()
     }
 
-    fun loadTask(button: Button){
+    fun setUpEnergyTimer(){
+        if (energy != energyLimit) {
+            val remainingEnergyToFull = (energyLimit - energy) * 120 // 10 detik
+            val currentDate = Date().time
+
+            val lastCountEnergy = sharedPreference.getLong("lastCountEnergy", currentDate)
+            counted = sharedPreference.getLong("countedEnergy", 0).toInt()
+
+            diff = currentDate - lastCountEnergy
+            remainTime = (remainingEnergyToFull - (diff / 1000) - counted).toInt()
+
+            energyTimer()
+        }
+    }
+
+    fun energyTimer(){
+        if (remainTime > 0 && !checkUpdateEnergy){
+            checkUpdateEnergy = true
+            var energyGet = diff / 1000 / 120
+            if (energyGet > energyLimit)
+                energyGet = energyLimit.toLong()
+            Log.d("energy get", energyGet.toString())
+            rankPresenter.updateEnergy(energy.toLong() + energyGet,false)
+            rankPresenter.fetchBalance()
+        }
+        if (remainTime > 0){
+
+            var timerSec = remainTime % 120 // 100 detik
+            var timerMin = 0
+
+            if(timerSec == 0){
+                rankPresenter.updateEnergy(energy.toLong(),false)
+                remainTime--
+                energyTimer()
+            }else{
+                if (timerSec > 60){
+                    timerMin = timerSec / 60
+                    timerSec %= 60
+                }
+                countDownTimer = object : CountDownTimer((timerSec.toLong()+1) * 1000,1000){
+                    override fun onFinish() {
+                        remainTime--
+                        tvEnergy.text = "${energy}/${energyLimit}"
+                        energyTimer()
+                        energy++
+                        rankPresenter.updateEnergy(energy.toLong(),false)
+                        rankPresenter.fetchBalance()
+                    }
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        counted += 1
+                        remainTime--
+                    }
+
+                }
+                countDownTimer.start()
+            }
+        }
+
+
+    }
+
+    fun loadTask(){
+        taskList.clear()
+        taskProgressList.clear()
         when(enumValueOf<Rank>(currentRank)){
             Rank.Toddler -> {
                 taskList.add("Play Normal Mode 1 Time")
@@ -514,7 +654,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 else
                     taskProgressList.add("${progress2}/100")
                 if (progress1 >= 1 && progress2 >= 100)
-                    button.text = "Level Up"
+                    levelUp = true
 
             }
             Rank.Beginner ->{
@@ -527,10 +667,24 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 val progress2 = sharedPreference.getInt("beginner2",0)
                 val progress3 = sharedPreference.getInt("beginner3",0)
                 val progress4 = sharedPreference.getInt("beginner4",0)
-                taskProgressList.add("${progress1}/200")
-                taskProgressList.add("${progress2}/250")
-                taskProgressList.add("${progress3}/1")
-                taskProgressList.add("${progress4}/3")
+                if (progress1 >= 200)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress1}/200")
+                if (progress2 >= 250)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress2}/250")
+                if (progress3 >= 1)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress3}/1")
+                if (progress4 >= 3)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress4}/3")
+                if (progress1 >= 200 && progress2 >= 250 && progress3 >=1 && progress4 >=3)
+                    levelUp = true
             }
             Rank.Senior -> {
                 taskList.add("Reach 200 Point in Odd Even")

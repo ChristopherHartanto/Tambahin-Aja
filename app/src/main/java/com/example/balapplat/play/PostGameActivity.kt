@@ -3,6 +3,8 @@ package com.example.balapplat.play
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.solver.widgets.ConstraintAnchor
+import androidx.constraintlayout.widget.Constraints
 import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.R
 import com.example.balapplat.main.MainActivity

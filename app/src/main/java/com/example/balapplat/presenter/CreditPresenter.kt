@@ -44,13 +44,13 @@ class CreditPresenter(private val view: MainView, private val database: Database
 
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
-                    val quantity = p0.getValue(CreditShop::class.java)!!.quantity!!.toInt() - 1
-                    database.child("credit").child(key.toString()).setValue(quantity)
+                    val quantity = p0.value.toString().toInt() - 1
+                    database.child("credit").child(key.toString()).child("quantity").setValue(quantity)
                 }
             }
 
         }
-        database.child("credit").child(key.toString()).addListenerForSingleValueEvent(postListener)
+        database.child("credit").child(key.toString()).child("quantity").addListenerForSingleValueEvent(postListener)
     }
 
     fun updateCredit(credit: Long){

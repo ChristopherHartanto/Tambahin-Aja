@@ -32,6 +32,7 @@ import com.example.balapplat.play.StatusPlayer
 import com.example.balapplat.play.WaitingActivity
 import com.example.balapplat.presenter.HomePresenter
 import com.example.balapplat.rank.AvailableGame
+import com.example.balapplat.rank.Rank
 import com.example.balapplat.rank.RankActivity
 import com.example.balapplat.rank.RankRecyclerViewAdapter
 import com.example.balapplat.utils.showSnackBar
@@ -72,11 +73,13 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var sharedPreference: SharedPreferences
+    private lateinit var editor : SharedPreferences.Editor
     private lateinit var customGameAdapter: CustomGameRecyclerViewAdapter
     private var bundle: Bundle = Bundle()
-    var puzzleType = 1
-    var puzzleAnswer = 0
-    var playedPuzzleToday = false
+    private var puzzleType = 1
+    private var puzzleAnswer = 0
+    private var credit = 0
+    private var playedPuzzleToday = false
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
     private var currentDate = ""
@@ -116,10 +119,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         btnOnline.typeface = typeface
         btnLeaderboard.typeface = typeface
 
-        val credit = sharedPreference.getInt("credit",0)
-        tvCredit.text = "${credit}"
-        if (auth.currentUser != null)
+        if (auth.currentUser != null){
             homePresenter.checkDailyPuzzle()
+            homePresenter.fetchCredit()
+        }
 
         btnCustomPlay.onClick {
             if (auth.currentUser != null)
@@ -217,8 +220,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
         if (date != currentDate){
             playedPuzzleToday = true
+            val animationFadeIn = AnimationUtils.loadAnimation(ctx, R.anim.fade_in)
+            ivDailyPuzzle.startAnimation(animationFadeIn)
             ivDailyPuzzle.visibility = View.VISIBLE
-            tvPuzzleInfo.visibility = View.VISIBLE
+            tvPuzzleInfo.text = "!"
 
             val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
             animationBounce.repeatCount = Animation.INFINITE
@@ -227,7 +232,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             tvPuzzleInfo.startAnimation(animationBounce)
 
         }else{
-            tvPuzzleInfo.visibility = View.GONE
+            tvPuzzleInfo.text = ""
             ivDailyPuzzle.visibility = View.GONE
         }
 
@@ -262,10 +267,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 }
             }
         }
-        val editor = sharedPreference.edit()
-        editor.putInt("puzzleAnswer",generateAnswer())
-        editor.putString("puzzleQuestion", tvDailyPuzzleQuestion.text.toString())
-        editor.apply()
 
         puzzleAnswer = generateAnswer()
     }
@@ -294,9 +295,18 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     }
 
     private fun checkAnswer(value : String) {
-        val editor = sharedPreference.edit()
 
         if (value == puzzleAnswer.toString()){
+            // tambah credit
+            val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
+            if (currentRank == Rank.Beginner.toString()){
+                val progress4 = sharedPreference.getInt("beginner4",0)
+                editor = sharedPreference.edit()
+                editor.putInt("beginner4",progress4+1)
+                editor.apply()
+            }
+            homePresenter.rewardPuzzlePopUp()
+            homePresenter.updateCredit(credit.toLong() + 10)
             toast("True")
         }else
             toast("false")
@@ -332,11 +342,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
         fragment_home.alpha = 0.1F
         main_activity.alpha = 0.1F
-//        layoutPuzzle.onClick {
-//            fragment_home.alpha = 1F
-//            main_activity.alpha = 1F
-//            popupWindow.dismiss()
-//        }
 
         val btnAnswerPuzzle = view.findViewById<Button>(R.id.btnAnswerPuzzle)
         val tvAnswerPuzzle = view.findViewById<TextView>(R.id.tvAnswerPuzzle)
@@ -366,7 +371,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 checkAnswer(tvAnswerPuzzle.text.toString())
 
             ivDailyPuzzle.visibility = View.GONE
-            tvPuzzleInfo.visibility = View.GONE
+            tvPuzzleInfo.text = ""
             homePresenter.updatePuzzle()
             popupWindow.dismiss()
             fragment_home.alpha = 1F
@@ -435,7 +440,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         val view = inflater.inflate(R.layout.pop_up_custom_game,null)
         val main_view = inflater.inflate(R.layout.activity_main,null)
 
-
         // Initialize a new instance of popup window
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
@@ -448,7 +452,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             popupWindow.elevation = 10.0F
         }
         var position = -1
-        var timer = 0
+        var timer = 30
         val main_activity = main_view.findViewById<RelativeLayout>(R.id.activity_main)
         val rvCustomGame = view.findViewById<RecyclerView>(R.id.rvCustomGame)
         val ivCustomGame = view.findViewById<ImageView>(R.id.ivCustomGame)
@@ -466,6 +470,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         tvCustomGameTitle.typeface = typeface
         tvCustomGameTime.typeface = typeface
 
+        tvCustomGameTime.text = "Time : 30"
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             sbTime.min = 30
         }
@@ -474,12 +480,24 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
                 if(progress < 30) {
-                    timer = progress
-                    tvCustomGameTime.text = "Time : 30"
+                    if (position == 2){
+                        timer = 3
+                        tvCustomGameTime.text = "Time : 3"
+                    }
+                    else{
+                        timer = 30
+                        tvCustomGameTime.text = "Time : 30"
+                    }
                 }
                 else {
-                    timer = progress
-                    tvCustomGameTime.text = "Time : $progress"
+                    if (position == 2){
+                        timer = progress/10
+                        tvCustomGameTime.text = "Time : ${timer}"
+                    }else{
+                        timer = progress
+                        tvCustomGameTime.text = "Time : $timer"
+                    }
+
                 }
 
             }
@@ -626,6 +644,11 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         if (response == "dailyPuzzle"){
             val date = dataSnapshot.value
             checkPlayedPuzzle(date.toString())
+        }else if(response == "fetchCredit"){
+            credit = dataSnapshot.value.toString().toInt()
+            tvCredit.text = "${credit}"
+        }else if(response == "updateCredit"){
+            homePresenter.fetchCredit()
         }else if(response == "availableGame"){
             if (dataSnapshot.exists()){
                 availableGameList.clear()

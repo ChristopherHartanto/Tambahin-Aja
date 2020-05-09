@@ -60,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:id="@+id/sbTime"
-                android:max="60"
+                android:max="90"
                 android:layout_marginHorizontal="10dp"
                 android:progress="10"
                 android:thumbTint="@color/fbutton_color_sun_flower"

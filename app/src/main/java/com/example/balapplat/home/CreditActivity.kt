@@ -23,6 +23,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -37,6 +38,7 @@ class CreditActivity : AppCompatActivity(), MainView {
     private lateinit var creditHistoryAdapter: CreditHistoryRecyclerViewAdapter
     private lateinit var adapter: CreditRecyclerViewAdapter
     private lateinit var mAdView : AdView
+    private lateinit var auth: FirebaseAuth
     private lateinit var presenter: CreditPresenter
     private lateinit var database: DatabaseReference
     private var creditHistoryItems : MutableList<CreditHistory> = mutableListOf()
@@ -51,6 +53,7 @@ class CreditActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_credit)
 
         supportActionBar?.hide()
+        auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvCredit.typeface = typeface
@@ -58,13 +61,17 @@ class CreditActivity : AppCompatActivity(), MainView {
         presenter = CreditPresenter(this,database)
 
         adapter = CreditRecyclerViewAdapter(this,creditShopItems){
-            index = it
-            if (credit.toLong() < creditShopItems[it].price!!){
-                popUpMessage(Message.ReadOnly,"Not Enough Credit")
-            }else if(creditShopItems[it].quantity!!.toInt() == 0){
-                popUpMessage(Message.ReadOnly, "Already Sold Out")
-            }else{
-                popUpMessage(Message.Reply,"Do You Want to Buy?")
+            if (auth.currentUser == null)
+                popUpMessage(Message.ReadOnly,"You Must Sign In First")
+            else{
+                index = it
+                if (credit.toLong() < creditShopItems[it].price!!){
+                    popUpMessage(Message.ReadOnly,"Not Enough Credit")
+                }else if(creditShopItems[it].quantity!!.toInt() <= 0){ // lebih bagus ulang fetch soalnya kalau qty udah habis bakal berkurang lagi
+                    popUpMessage(Message.ReadOnly, "Already Sold Out")
+                }else{
+                    popUpMessage(Message.Reply,"Do You Want to Buy?")
+                }
             }
         }
 
@@ -77,14 +84,20 @@ class CreditActivity : AppCompatActivity(), MainView {
         adView.adSize = AdSize.SMART_BANNER
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
-        presenter.fetchCredit()
+        if (auth.currentUser != null)
+            presenter.fetchCredit()
+
         presenter.fetchCreditShop()
         rvCredit.layoutManager = LinearLayoutManager(this)
         rvCredit.adapter = adapter
 
         ivCreditHistory.onClick {
-            creditHistoryItems.clear()
-            popUpCreditHistory()
+            if (auth.currentUser != null){
+                creditHistoryItems.clear()
+                popUpCreditHistory()
+            }else
+                popUpMessage(Message.ReadOnly,"You Must Sign In First")
+
         }
     }
 

@@ -28,10 +28,12 @@ import com.example.balapplat.play.StatusPlayer
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.profile.ProfileFragment
 import com.example.balapplat.rank.Balance
+import com.example.balapplat.tournament.FragmentListener
 import com.example.balapplat.utils.UtilsConstants
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
 import com.facebook.AccessToken
+import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
@@ -44,7 +46,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class MainActivity : AppCompatActivity(), MainView {
+class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var database: DatabaseReference
@@ -91,6 +93,10 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun loadHomeFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
+            if (supportFragmentManager.findFragmentById(R.id.fragment_profile) != null)
+                supportFragmentManager.beginTransaction().remove(supportFragmentManager.findFragmentById(R.id.fragment_profile)!!)
+            if (supportFragmentManager.findFragmentById(R.id.fragment_tournament) != null)
+                supportFragmentManager.beginTransaction().remove(supportFragmentManager.findFragmentById(R.id.fragment_tournament)!!)
             supportFragmentManager
                 .beginTransaction()
                 .replace(
@@ -102,6 +108,10 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun loadTournamentFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
+            if (supportFragmentManager.findFragmentById(R.id.fragment_profile) != null)
+                supportFragmentManager.beginTransaction().remove(supportFragmentManager.findFragmentById(R.id.fragment_profile)!!)
+            if (supportFragmentManager.findFragmentById(R.id.fragment_home) != null)
+                supportFragmentManager.beginTransaction().remove(supportFragmentManager.findFragmentById(R.id.fragment_home)!!)
             supportFragmentManager
                 .beginTransaction()
                 .replace(
@@ -113,6 +123,10 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun loadProfileFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
+            if (supportFragmentManager.findFragmentById(R.id.fragment_home) != null)
+                supportFragmentManager.beginTransaction().remove(supportFragmentManager.findFragmentById(R.id.fragment_home)!!)
+            if (supportFragmentManager.findFragmentById(R.id.fragment_tournament) != null)
+                supportFragmentManager.beginTransaction().remove(supportFragmentManager.findFragmentById(R.id.fragment_tournament)!!)
             supportFragmentManager
                 .beginTransaction()
                 .replace(
@@ -124,11 +138,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if(response == "fetchCredit"){
-            val editor = sharedPreference.edit()
-            editor.putInt("credit", dataSnapshot.getValue(Balance::class.java)?.credit!!)
-            editor.apply()
-        }else if(response == "reward"){
+        if(response == "reward"){
             reward = dataSnapshot.getValue(Reward::class.java)!!
             popUpMessage(com.example.balapplat.friends.Message.ReadOnly,reward.description.toString())
         }else{
@@ -266,7 +276,11 @@ class MainActivity : AppCompatActivity(), MainView {
             if (it is Event.ConnectivityEvent) handleConnectivityChange(it.state)
         })
 
-        if(AccessToken.getCurrentAccessToken() != null){
+//        if(AccessToken.getCurrentAccessToken() != null){
+//            presenter.receiveInvitation()
+//            presenter.receiveReward()
+//        }
+        if(auth.currentUser != null && Profile.getCurrentProfile() != null){
             presenter.receiveInvitation()
             presenter.receiveReward()
         }
@@ -280,9 +294,6 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun onResume() {
-        if(AccessToken.getCurrentAccessToken() != null){
-            presenter.fetchCredit()
-        }
         super.onResume()
     }
     override fun onPause() {
@@ -299,6 +310,12 @@ class MainActivity : AppCompatActivity(), MainView {
         toast("Please click BACK again to exit")
 
         Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
+    }
+
+
+
+    override fun showPopUp(type: com.example.balapplat.friends.Message, message: String) {
+        popUpMessage(type,message)
     }
 }
 

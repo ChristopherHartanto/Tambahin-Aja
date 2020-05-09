@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -37,6 +38,7 @@ import kotlinx.android.synthetic.main.activity_normal_game.tvPoint
 import kotlinx.android.synthetic.main.activity_rank.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import java.text.SimpleDateFormat
 import java.util.*
 
 class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, MatchView {
@@ -68,6 +70,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
     var type = GameType.Normal
     var mix = false
     var player = StatusPlayer.Single
+    private var tournamentEndDate = ""
     private lateinit var popupWindow : PopupWindow
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
@@ -436,6 +439,9 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                         StatusPlayer.Inviter -> {
                             matchPresenter.addToHistory(auth,point,opponentPoint, joinFriendFacebookId,
                                     joinFriendName,"friend")
+                            val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
+                            if (currentRank == Rank.Beginner.toString())
+                                updateRank(currentRank)
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
                                     "scoreOpponent" to opponentPoint, "opponentName" to joinFriendName, "opponentFacebookId" to joinFriendFacebookId, "gameResult" to text))
                             finish()
@@ -444,6 +450,9 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                             matchPresenter.addToHistory(auth,point,opponentPoint, inviterFacebookId,
                                     inviterName,"friend"
                             )
+                            val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
+                            if (currentRank == Rank.Beginner.toString())
+                                updateRank(currentRank)
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
                                     "scoreOpponent" to opponentPoint, "opponentName" to inviterName, "opponentFacebookId" to inviterFacebookId, "gameResult" to text))
                             finish()
@@ -560,10 +569,26 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
 
         btnOdd.onClick {
             checkAnswer(1)
+
+            val handler = Handler()
+            btnEven.isEnabled = false
+            btnOdd.isEnabled = false
+            handler.postDelayed({
+                btnOdd.isEnabled = true
+                btnEven.isEnabled = true
+            }, 1000)
         }
 
         btnEven.onClick {
             checkAnswer(0)
+
+            val handler = Handler()
+            btnEven.isEnabled = false
+            btnOdd.isEnabled = false
+            handler.postDelayed({
+                btnOdd.isEnabled = true
+                btnEven.isEnabled = true
+            }, 1000)
         }
     }
 
@@ -640,6 +665,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 calculateReward()
                 val currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString())
                 updateRank(currentRank!!)
+                matchPresenter.getTournamentType()
                 startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
                 finish()
             }
@@ -698,6 +724,22 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 pointReward = point * 3 / 100
                 creditReward = point * 5 / 100
             }
+            Rank.Beginner.toString()->{
+                pointReward = point * 3 / 100
+                creditReward = point * 5 / 100
+            }
+            Rank.Senior.toString()->{
+                pointReward = point * 3 / 100
+                creditReward = point * 5 / 100
+            }
+            Rank.Master.toString()->{
+                pointReward = point * 3 / 100
+                creditReward = point * 5 / 100
+            }
+            Rank.GrandMaster.toString()->{
+                pointReward = point * 3 / 100
+                creditReward = point * 5 / 100
+            }
         }
         matchPresenter.updateCredit(creditReward.toLong(),auth)
         matchPresenter.updatePoint(pointReward.toLong(),auth)
@@ -737,10 +779,10 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
     }
 
     fun addPointToTournament(tournamentType: String){
-        val joinTournament = sharedPreference.getBoolean("joinTournament",false)
-        if (joinTournament){
+        val joinTournamentEndDate = sharedPreference.getString("joinTournament","")
+        if (joinTournamentEndDate == tournamentEndDate){
             if (tournamentType == type.toString()){
-                matchPresenter.updateTournament(auth)
+                matchPresenter.updateTournament(auth, point.toLong())
             }
         }
     }
@@ -786,6 +828,18 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
     override fun loadData(dataSnapshot: DataSnapshot, message: String) {
         if(message == "fetchTournamentType"){
             dataSnapshot.getValue(TournamentData::class.java)!!.type?.let { addPointToTournament(it) }
+        }else if(message == "getTournamentEndDate"){
+            for ((index,data) in dataSnapshot.children.withIndex()){
+                val sdf = SimpleDateFormat("dd MMM yyyy")
+                val currentDate = Date().time
+                val tournamentDate = sdf.parse(data.key.toString()).time
+                val diff: Long = tournamentDate - currentDate
+
+                if(diff > 0){
+                    tournamentEndDate = data.key.toString()
+                    return
+                }
+            }
         }
     }
 
@@ -800,20 +854,27 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 }
             }
             Rank.Beginner -> {
-                if (type == GameType.Normal){
-                    val progress2 = sharedPreference.getInt("beginner2",0)
-                    if (point > progress2){
-                        editor = sharedPreference.edit()
-                        editor.putInt("beginner2",point)
-                        editor.apply()
-                    }
+                if (player == StatusPlayer.JoinFriend || player == StatusPlayer.Inviter){
+                    val progress3 = sharedPreference.getInt("beginner3",0)
+                    editor = sharedPreference.edit()
+                    editor.putInt("beginner3",progress3+1)
+                    editor.apply()
+                }else{
+                    if (type == GameType.Normal){
+                        val progress2 = sharedPreference.getInt("beginner2",0)
+                        if (point > progress2){
+                            editor = sharedPreference.edit()
+                            editor.putInt("beginner2",point)
+                            editor.apply()
+                        }
 
-                }else if(type == GameType.OddEven){
-                    val progress1 = sharedPreference.getInt("beginner1",0)
-                    if (point > progress1){
-                        editor = sharedPreference.edit()
-                        editor.putInt("beginner1",point)
-                        editor.apply()
+                    }else if(type == GameType.OddEven){
+                        val progress1 = sharedPreference.getInt("beginner1",0)
+                        if (point > progress1){
+                            editor = sharedPreference.edit()
+                            editor.putInt("beginner1",point)
+                            editor.apply()
+                        }
                     }
                 }
             }

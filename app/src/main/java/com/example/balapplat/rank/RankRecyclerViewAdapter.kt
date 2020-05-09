@@ -70,7 +70,8 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
                 if (!availableGame) {
                     payGame.text = "${chooseGame.priceGame}"
                     llPayGame.visibility = View.VISIBLE
-                }
+                }else
+                    llPayGame.visibility = View.GONE
             }
 
 
