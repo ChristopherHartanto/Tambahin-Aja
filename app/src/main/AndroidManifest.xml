@@ -19,8 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         tools:ignore="LockedOrientationActivity">
-        <service
-            android:name=".push_notification.MyFirebaseInstanceIdService">
+        <activity android:name=".TutorialActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <service android:name=".push_notification.MyFirebaseInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
