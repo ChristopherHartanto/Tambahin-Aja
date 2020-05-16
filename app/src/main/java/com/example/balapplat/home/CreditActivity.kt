@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.balapplat.R
 import com.example.balapplat.friends.Message
+import com.example.balapplat.model.User
 import com.example.balapplat.presenter.CreditPresenter
 import com.example.balapplat.rank.Balance
 import com.example.balapplat.view.MainView
@@ -107,7 +108,6 @@ class CreditActivity : AppCompatActivity(), MainView {
         val view = inflater.inflate(R.layout.pop_up_credit_history,null)
         val main_view = inflater.inflate(R.layout.activity_main,null)
 
-
         // Initialize a new instance of popup window
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
@@ -127,6 +127,9 @@ class CreditActivity : AppCompatActivity(), MainView {
         tvCreditHistoryTitle.typeface = typeface
 
         presenter.fetchCreditHistory()
+        val linearLayoutManager = LinearLayoutManager(this)
+        linearLayoutManager.reverseLayout = true
+        linearLayoutManager.stackFromEnd = true
         rvCreditHistory.layoutManager = LinearLayoutManager(this)
 
         btnClose.onClick {
@@ -167,6 +170,11 @@ class CreditActivity : AppCompatActivity(), MainView {
                 creditShopItems.add(item!!)
             }
             adapter.notifyDataSetChanged()
+        }else if(response == "fetchUser"){
+            if (dataSnapshot.getValue(User::class.java)!!.email == "" || dataSnapshot.getValue(User::class.java)!!.noHandphone == "")
+                popUpMessage(Message.ReadOnly,"Please Fill Your Profile First")
+            else
+                presenter.exchangeCredit(creditShopItems[index].price!!.toInt() + 1)
         }
     }
 
@@ -216,7 +224,7 @@ class CreditActivity : AppCompatActivity(), MainView {
             btnReject.text = "No"
             btnClose.text = "yes"
             btnClose.onClick {
-                presenter.exchangeCredit(creditShopItems[index].price!!.toInt() + 1)
+                presenter.fetchUser()
                 btnClose.startAnimation(clickAnimation)
                 activity_credit.alpha = 1F
                 popupWindow.dismiss()

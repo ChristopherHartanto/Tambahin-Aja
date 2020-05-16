@@ -1,5 +1,6 @@
 package com.example.balapplat.presenter
 
+import android.util.Log
 import com.example.balapplat.view.MainView
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.rank.Balance
@@ -107,6 +108,7 @@ class RankPresenter(private val view: RankView, private val database: DatabaseRe
     }
 
     fun updateEnergy(energyRemaining: Long, response: Boolean){
+        Log.d("energy from rank", energyRemaining.toString())
         database.child("users").child(auth.currentUser!!.uid).child("balance").child("energy").setValue(energyRemaining).addOnFailureListener {
             view.response(it.message!!,"error")
         }.addOnSuccessListener {

@@ -36,7 +36,7 @@ class PostGameActivity : AppCompatActivity() {
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvPostGameTitle.typeface = typeface
         tvGetCredit.typeface = typeface
-        tvBackMenu.typeface = typeface
+        btnBackMenu.typeface = typeface
         tvGetPoint.typeface = typeface
         tvSinglePoint.typeface = typeface
         tvOpponentName.typeface = typeface
@@ -79,12 +79,11 @@ class PostGameActivity : AppCompatActivity() {
 
         MobileAds.initialize(this)
         val adView = AdView(this)
-        adView.adSize = AdSize.SMART_BANNER
+        adView.adSize = AdSize.BANNER
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
-        tvBackMenu.onClick {
+        btnBackMenu.onClick {
             finish()
-            startActivity<MainActivity>()
         }
     }
     private fun getFacebookProfilePicture(userID: String): String {

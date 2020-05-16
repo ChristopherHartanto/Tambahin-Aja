@@ -4,11 +4,17 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.balapplat.DailyWorker
 import com.example.balapplat.R
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import org.jetbrains.anko.intentFor
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 class SplashActivity : AppCompatActivity() {
 
@@ -56,8 +62,6 @@ class SplashActivity : AppCompatActivity() {
 
         }
 
-
-
         val timer = object: CountDownTimer(1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
             }
@@ -72,5 +76,20 @@ class SplashActivity : AppCompatActivity() {
             }
         }
         timer.start()
+        val constraints = Constraints.Builder().build()
+        val currentDate = Calendar.getInstance()
+        val dueDate = Calendar.getInstance()
+// Set Execution around 05:00:00 AM
+        dueDate.set(Calendar.HOUR_OF_DAY, 5)
+        dueDate.set(Calendar.MINUTE, 0)
+        dueDate.set(Calendar.SECOND, 0)
+        if (dueDate.before(currentDate)) {
+            dueDate.add(Calendar.HOUR_OF_DAY, 24)
+        }
+        val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
+        val dailyWorkRequest = OneTimeWorkRequestBuilder<DailyWorker>()
+                .setConstraints(constraints) .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
+                .build()
+        WorkManager.getInstance(this).enqueue(dailyWorkRequest)
     }
 }

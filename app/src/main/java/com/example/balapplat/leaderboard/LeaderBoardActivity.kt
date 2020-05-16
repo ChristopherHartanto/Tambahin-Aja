@@ -1,6 +1,10 @@
 package com.example.balapplat.leaderboard
 
+import android.graphics.Typeface
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +25,7 @@ import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_leader_board.*
+import kotlinx.android.synthetic.main.layout_loading.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
@@ -33,6 +38,9 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     lateinit var data: Inviter
+    private lateinit var typeface: Typeface
+    private var loadingCount = 4
+    private lateinit var loadingTimer : CountDownTimer
     private lateinit var adapter: LeaderBoardRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,9 +52,10 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
 
-        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvLeaderboardInfo.typeface = typeface
         tvLeaderboardTitle.typeface = typeface
+        loadingTimer()
 
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
@@ -93,6 +102,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
             id?.let { retrieveUser(it,total) }
         }
+        layout_loading.visibility = View.GONE
         toast("" + items)
     }
 
@@ -139,6 +149,37 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
+    fun loadingTimer(){
+        val view = findViewById<View>(R.id.layout_loading)
+
+        val tvLoadingTitle = view.findViewById<TextView>(R.id.tvLoadingTitle)
+        val tvLoadingInfo = view.findViewById<TextView>(R.id.tvLoadingInfo)
+
+        tvLoadingInfo.text = "Be Number One!"
+
+        tvLoadingInfo.typeface = typeface
+        tvLoadingTitle.typeface = typeface
+
+
+        loadingTimer = object: CountDownTimer(30000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                when (loadingCount) {
+                    3 -> tvLoadingTitle.text = "Fetching Data ."
+                    2 -> tvLoadingTitle.text = "Fetching Data . ."
+                    1 -> tvLoadingTitle.text = "Fetching Data . . ."
+                    else -> loadingCount = 4
+                }
+                loadingCount--
+            }
+
+            override fun onFinish() {
+                finish()
+                toast("Oops Something Wrongs!")
+            }
+        }
+        loadingTimer.start()
+    }
+
     override fun onStart() {
         retrieve()
         adapter.notifyDataSetChanged()
@@ -149,6 +190,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         items.clear()
         profileItems.clear()
         adapter.notifyDataSetChanged()
+        loadingTimer.cancel()
         super.onPause()
     }
 

@@ -7,10 +7,12 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Message
+import android.text.Layout
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -26,6 +28,7 @@ import com.example.balapplat.view.MainView
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.R
 import com.example.balapplat.home.MarketActivity
+import com.example.balapplat.main.MainActivity
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.GameType
 import com.example.balapplat.play.StatusPlayer
@@ -52,8 +55,10 @@ import kotlinx.android.synthetic.main.activity_rank.*
 import kotlinx.android.synthetic.main.activity_rank.ivProfile
 import kotlinx.android.synthetic.main.activity_rank.tvEnergy
 import kotlinx.android.synthetic.main.activity_rank.tvPoint
+import kotlinx.android.synthetic.main.activity_waiting.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlinx.android.synthetic.main.layout_loading.*
 import kotlinx.android.synthetic.main.pop_up_task.*
 import kotlinx.android.synthetic.main.row_choose_game.*
 import kotlinx.android.synthetic.main.row_rank.*
@@ -74,6 +79,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     lateinit var rankPresenter: RankPresenter
     private lateinit var auth: FirebaseAuth
     lateinit var data: Inviter
+    private var loadingCount = 4
+    private lateinit var loadingTimer : CountDownTimer
+    private lateinit var typeface: Typeface
     var energy = 0
     var energyLimit = 100
     var point = 0
@@ -99,13 +107,15 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
         supportActionBar?.hide()
 
-        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvRank.typeface = typeface
         tvPoint.typeface = typeface
         tvEnergy.typeface = typeface
         tvTotalScore.typeface = typeface
 
         val clickAnimation = AlphaAnimation(1.2F,0.6F)
+
+        loadingTimer()
 
         ivTask.onClick {
             ivTask.startAnimation(clickAnimation)
@@ -117,8 +127,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
 
         layout_point_energy.onClick {
-            finish()
             startActivity<MarketActivity>()
+            finish()
         }
 
         taskAdapter = TaskRecyclerViewAdapter(this,taskList,taskProgressList)
@@ -138,8 +148,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                         popUpMessage(2,"Not Enough Energy")
                     else{
                         position = it
-                        val energyRemaining = energy - items[it].energy!!
-                        rankPresenter.updateEnergy(energyRemaining.toLong(),true)
+                        popUpTutorial()
                     }
 
                 }
@@ -156,6 +165,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 if (event.state.isConnected) {
                     showSnackBar(activity_rank, "The network is back !", "LONG")
                 } else {
+                    finish()
                     showSnackBar(activity_rank, "There is no more network", "INFINITE")
                 }
             }
@@ -183,9 +193,10 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             items.add(ChooseGame("Mix", 28,0,800))
             items.add(ChooseGame("Double Attack", 25,0,1000))
         }
-
-
         adapter.notifyDataSetChanged()
+
+        layout_loading.visibility = View.GONE
+        loadingTimer.cancel()
 }
 
     fun getFacebookProfilePicture(userID: String): String {
@@ -239,7 +250,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         btnTask.onClick {
             if (btnTask.text == "Level Up" && levelUp){
                 levelUp = !levelUp
-                tvTaskInfo.text = ""
+                tvTaskInfo.visibility = View.GONE
 
                 var nextRank = ""
                 var nextEnergyLimit = 0
@@ -410,6 +421,78 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
     }
 
+    private fun popUpTutorial(){
+        val inflater: LayoutInflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        val view = inflater.inflate(R.layout.tutorial,null)
+
+        // Initialize a new instance of popup window
+        popupWindow = PopupWindow(
+                view, // Custom view to show in popup window
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+        )
+
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        val btnWatchTutorial = view.findViewById<Button>(R.id.btnWatchTutorial)
+        val btnStartPlay = view.findViewById<Button>(R.id.btnStartPlay)
+        val btnClose = view.findViewById<Button>(R.id.btnClose)
+        val tvGameTypeInfo = view.findViewById<TextView>(R.id.tvRankGameTypeInfo)
+        val tvTutorialTitle = view.findViewById<TextView>(R.id.tvTutorialTitle)
+        val ivRankGameType = view.findViewById<ImageView>(R.id.ivRankGameType)
+
+        tvTutorialTitle.typeface = typeface
+        tvGameTypeInfo.typeface = typeface
+
+        activity_rank.alpha = 0.1F
+
+        when(position){
+            0 -> ivRankGameType.setImageResource(R.drawable.normal_game)
+            1 -> ivRankGameType.setImageResource(R.drawable.odd_even_game)
+            2 -> ivRankGameType.setImageResource(R.drawable.rush_game)
+            3 -> ivRankGameType.setImageResource(R.drawable.alpha_num_game)
+        }
+
+        btnClose.onClick {
+            btnClose.startAnimation(clickAnimation)
+            popupWindow.dismiss()
+            activity_rank.alpha = 1F
+        }
+
+        btnStartPlay.onClick {
+            val energyRemaining = energy - items[position].energy!!
+            rankPresenter.updateEnergy(energyRemaining.toLong(),true)
+            popupWindow.dismiss()
+            activity_rank.alpha = 1F
+        }
+
+        btnWatchTutorial.onClick {
+            ivRankGameType.layoutParams.height = 800
+            ivRankGameType.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            when(position){
+                0 -> ivRankGameType.setImageResource(R.drawable.ss1)
+                1 -> ivRankGameType.setImageResource(R.drawable.ss1)
+                2 -> ivRankGameType.setImageResource(R.drawable.ss1)
+                3 -> ivRankGameType.setImageResource(R.drawable.ss1)
+            }
+            btnWatchTutorial.visibility = View.GONE
+        }
+
+        TransitionManager.beginDelayedTransition(activity_rank)
+        popupWindow.showAtLocation(
+                activity_rank, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+        )
+
+    }
+
     override fun onStart() {
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         database = FirebaseDatabase.getInstance().reference
@@ -444,6 +527,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         editor.putLong("countedEnergy",counted.toLong())
         editor.apply()
         countDownTimer.cancel()
+        loadingTimer.cancel()
 
         super.onPause()
     }
@@ -478,7 +562,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             currentRank = dataSnapshot.value.toString()
             loadTask()
             if (levelUp){
-                tvTaskInfo.text = "!"
+                tvTaskInfo.visibility = View.VISIBLE
                 val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
                 animationBounce.repeatCount = Animation.INFINITE
                 animationBounce.repeatMode = Animation.REVERSE
@@ -539,35 +623,31 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             Rank.Toddler -> {
                 rankDetailItems.clear()
                 rankDetailItems.add("Energy Limit 100")
-                rankDetailItems.add("Extra 1% Credit Reward")
+                rankDetailItems.add("Get Energy Every 5 Minutes")
             }
             Rank.Beginner -> {
                 rankDetailItems.clear()
-                rankDetailItems.add("Get 5 Extra Credit when Solve Puzzle")
                 rankDetailItems.add("Energy Limit 105")
-                rankDetailItems.add("Extra 2% Credit Reward")
+                rankDetailItems.add("Bonus 1 Point when Answered Correct")
+                rankDetailItems.add("Extra 1% Extra Reward")
             }
             Rank.Senior -> {
                 rankDetailItems.clear()
-                rankDetailItems.add("Get 8 Extra Credit when Solve Puzzle")
                 rankDetailItems.add("Energy Limit 110")
-                rankDetailItems.add("Extra 4% Credit Reward")
-                rankDetailItems.add("Extra 10% Point when Answered Correct")
+                rankDetailItems.add("Get Energy Every 4 Minutes")
+                rankDetailItems.add("Bonus 2 Point when Answered Correct")
             }
             Rank.Master -> {
                 rankDetailItems.clear()
-                rankDetailItems.add("Get 10 Extra Credit when Solve Puzzle")
                 rankDetailItems.add("Energy Limit 115")
-                rankDetailItems.add("Extra 5% Credit Reward")
-                rankDetailItems.add("Extra 12% Point when Answered Correct")
+                rankDetailItems.add("Bonus 3 Point when Answered Correct")
+                rankDetailItems.add("Extra 2% Extra Reward")
             }
             Rank.GrandMaster -> {
                 rankDetailItems.clear()
-                rankDetailItems.add("Get 12 Extra Credit when Solve Puzzle")
                 rankDetailItems.add("Energy Limit 120")
-                rankDetailItems.add("Extra 8% Credit Reward")
-                rankDetailItems.add("Extra 15% Point when Answered Correct")
-                rankDetailItems.add("Energy Revive 5% Faster")
+                rankDetailItems.add("Get Energy Every 3 Minutes")
+                rankDetailItems.add("Bonus 5 Point when Answered Correct")
             }
         }
         rankDetailAdapter.notifyDataSetChanged()
@@ -575,7 +655,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
     fun setUpEnergyTimer(){
         if (energy != energyLimit) {
-            val remainingEnergyToFull = (energyLimit - energy) * 120 // 10 detik
+            val remainingEnergyToFull = (energyLimit - energy) * 30 // 10 detik
             val currentDate = Date().time
 
             val lastCountEnergy = sharedPreference.getLong("lastCountEnergy", currentDate)
@@ -589,47 +669,46 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     }
 
     fun energyTimer(){
-        if (remainTime > 0 && !checkUpdateEnergy){
+        if (!checkUpdateEnergy){
             checkUpdateEnergy = true
-            var energyGet = diff / 1000 / 120
-            if (energyGet > energyLimit)
-                energyGet = energyLimit.toLong()
-            Log.d("energy get", energyGet.toString())
-            rankPresenter.updateEnergy(energy.toLong() + energyGet,false)
-            rankPresenter.fetchBalance()
+            val energyGet = diff / 1000 / 30
+            if (energyGet + energy >= energyLimit) // energy get + energy >= energy limit, energy = energy limit
+                energy = energyLimit // else energy += energyget
+            else
+                energy += energyGet.toInt()
+            if (energyGet.toInt() != 0){
+                rankPresenter.updateEnergy(energy.toLong(),false)
+                counted = 0
+            }
         }
-        if (remainTime > 0){
+        if (remainTime > 0 && energy < energyLimit){
 
-            var timerSec = remainTime % 120 // 100 detik
+            var timerSec = remainTime % 30 // 100 detik
             var timerMin = 0
 
-            if(timerSec == 0){
-                rankPresenter.updateEnergy(energy.toLong(),false)
-                remainTime--
-                energyTimer()
-            }else{
-                if (timerSec > 60){
-                    timerMin = timerSec / 60
-                    timerSec %= 60
-                }
-                countDownTimer = object : CountDownTimer((timerSec.toLong()+1) * 1000,1000){
-                    override fun onFinish() {
-                        remainTime--
-                        tvEnergy.text = "${energy}/${energyLimit}"
-                        energyTimer()
+            if (timerSec > 60){
+                timerMin = timerSec / 60
+                timerSec %= 60
+            }
+            countDownTimer = object : CountDownTimer((timerSec.toLong()+1) * 1000,1000){
+                override fun onFinish() {
+                    remainTime--
+                    tvEnergy.text = "${energy}/${energyLimit}"
+                    if (timerMin == 0){
                         energy++
                         rankPresenter.updateEnergy(energy.toLong(),false)
-                        rankPresenter.fetchBalance()
+                        energyTimer()
+                        counted = 0
                     }
-
-                    override fun onTick(millisUntilFinished: Long) {
-                        counted += 1
-                        remainTime--
-                    }
-
                 }
-                countDownTimer.start()
+
+                override fun onTick(millisUntilFinished: Long) {
+                    counted += 1
+                    remainTime--
+                }
+
             }
+            countDownTimer.start()
         }
 
 
@@ -687,40 +766,77 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                     levelUp = true
             }
             Rank.Senior -> {
-                taskList.add("Reach 200 Point in Odd Even")
-                taskList.add("Reach 250 Point in Normal Mode")
-                taskList.add("Play with Friends 1 times")
-                taskList.add("Play Daily Quest 3 Times")
+                taskList.add("Reach 200 Point in AlphaNum")
+                taskList.add("Reach 250 Point in Rush")
+                taskList.add("Reach 300 Point in Normal Mode")
+                taskList.add("Join Tournament 1 Time")
 
-                val progress1 = sharedPreference.getInt("beginner1",0)
-                val progress2 = sharedPreference.getInt("beginner2",0)
-                val progress3 = sharedPreference.getInt("beginner3",0)
-                val progress4 = sharedPreference.getInt("beginner4",0)
-                taskProgressList.add("${progress1}/200")
-                taskProgressList.add("${progress2}/250")
-                taskProgressList.add("${progress3}/1")
-                taskProgressList.add("${progress4}/3")
+                val progress1 = sharedPreference.getInt("senior1",0)
+                val progress2 = sharedPreference.getInt("senior2",0)
+                val progress3 = sharedPreference.getInt("senior3",0)
+                val progress4 = sharedPreference.getInt("senior4",0)
+
+                if (progress1 >= 200)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress1}/250")
+                if (progress2 >= 250)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress2}/300")
+                if (progress3 >= 300)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress3}/200")
+                if (progress4 >= 1)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress4}/1")
+                if (progress1 >= 200 && progress2 >= 250 && progress3 >= 300 && progress4 >= 1)
+                    levelUp = true
             }
             Rank.Master -> {
-                taskList.add("Reach 200 Point in Odd Even")
-                taskList.add("Reach 250 Point in Normal Mode")
-                taskList.add("Play with Friends 1 times")
-                taskList.add("Play Daily Quest 3 Times")
+                taskList.add("Win Tournament 1 Time")
+                taskList.add("Reach 300 Points in Rush")
+                taskList.add("Reach 300 Points in Mix")
+                taskList.add("Reach 400 Points in Normal")
+                taskList.add("Solve Daily Quest 5 Times")
 
-                val progress1 = sharedPreference.getInt("beginner1",0)
-                val progress2 = sharedPreference.getInt("beginner2",0)
-                val progress3 = sharedPreference.getInt("beginner3",0)
-                val progress4 = sharedPreference.getInt("beginner4",0)
-                taskProgressList.add("${progress1}/200")
-                taskProgressList.add("${progress2}/250")
-                taskProgressList.add("${progress3}/1")
-                taskProgressList.add("${progress4}/3")
+                val progress1 = sharedPreference.getInt("master1",0)
+                val progress2 = sharedPreference.getInt("master2",0)
+                val progress3 = sharedPreference.getInt("master3",0)
+                val progress4 = sharedPreference.getInt("master4",0)
+                val progress5 = sharedPreference.getInt("master5",0)
+
+                if (progress1 >= 1)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress1}/1")
+                if (progress2 >= 300)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress2}/300")
+                if (progress3 >= 300)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress3}/300")
+                if (progress4 >= 400)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress4}/400")
+                if (progress5 >= 5)
+                    taskProgressList.add("completed")
+                else
+                    taskProgressList.add("${progress5}/5")
+
+                if (progress1 >= 1 && progress2 >= 300 && progress3 >= 300 && progress4 >= 400 && progress5 >= 5)
+                    levelUp = true
             }
             Rank.GrandMaster -> {
-                taskList.add("Reach 200 Point in Odd Even")
-                taskList.add("Reach 250 Point in Normal Mode")
-                taskList.add("Play with Friends 1 times")
-                taskList.add("Play Daily Quest 3 Times")
+                taskList.add("Win Leaderboard 1 Time")
+                taskList.add("Win Tournament 3 Times")
+                taskList.add("Reach 300 Points in Double Attack")
+                taskList.add("Reach 400 Points in Mix")
 
                 val progress1 = sharedPreference.getInt("beginner1",0)
                 val progress2 = sharedPreference.getInt("beginner2",0)
@@ -733,6 +849,34 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             }
         }
         taskAdapter.notifyDataSetChanged()
+    }
+
+    fun loadingTimer(){
+        val view = findViewById<View>(R.id.layout_loading)
+
+        val tvLoadingTitle = view.findViewById<TextView>(R.id.tvLoadingTitle)
+        val tvLoadingInfo = view.findViewById<TextView>(R.id.tvLoadingInfo)
+
+        tvLoadingInfo.typeface = typeface
+        tvLoadingTitle.typeface = typeface
+
+        loadingTimer = object: CountDownTimer(30000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                when (loadingCount) {
+                    3 -> tvLoadingTitle.text = "Fetching Data ."
+                    2 -> tvLoadingTitle.text = "Fetching Data . ."
+                    1 -> tvLoadingTitle.text = "Fetching Data . . ."
+                    else -> loadingCount = 4
+                }
+                loadingCount--
+            }
+
+            override fun onFinish() {
+                finish()
+                toast("Oops Something Wrongs!")
+            }
+        }
+        loadingTimer.start()
     }
 
 }

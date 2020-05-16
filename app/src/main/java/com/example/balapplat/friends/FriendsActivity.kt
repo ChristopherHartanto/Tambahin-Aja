@@ -1,6 +1,10 @@
 package com.example.balapplat.friends
 
+import android.graphics.Typeface
 import android.os.Bundle
+import android.view.View
+import android.view.animation.AlphaAnimation
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.example.balapplat.R
@@ -29,6 +33,10 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener, Friend
     private lateinit var database: DatabaseReference
     private lateinit var mAdView : AdView
     lateinit var data: Inviter
+    lateinit var typeface: Typeface
+    private lateinit var tvLoadingTitle : TextView
+    private lateinit var tvLoadingInfo : TextView
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +45,16 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener, Friend
         supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)!!
+
+        val view = findViewById<View>(R.id.layout_loading)
+
+        tvLoadingTitle = view.findViewById(R.id.tvLoadingTitle)
+        tvLoadingInfo = view.findViewById(R.id.tvLoadingInfo)
+
+        tvLoadingInfo.typeface = typeface
+        tvLoadingTitle.typeface = typeface
+
         tvFriendsTitle.typeface = typeface
 
         mAdView = findViewById(R.id.adView)
@@ -51,19 +68,12 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener, Friend
 
         checkFriends(savedInstanceState)
 
-        cvAddFriends.onClick {
+        ivAddFriends.onClick {
+            ivAddFriends.startAnimation(clickAnimation)
             startActivity<AddFriendsActivity>()
         }
     }
 
-    private fun loadNoFriendFragment(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.container_friend, NoFriendFragment(), NoFriendFragment::class.java.simpleName)
-                .commit()
-        }
-    }
 
     private fun loadListFriendsFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
@@ -80,10 +90,15 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener, Friend
             val postListener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
-                    if(dataSnapshot.exists())
+                    if(dataSnapshot.exists()){
+                        container_friend.visibility = View.VISIBLE
+                        layout_loading.visibility = View.GONE
                         loadListFriendsFragment(savedInstanceState)
-                    else
-                        loadNoFriendFragment(savedInstanceState)
+                    }
+                    else{
+                        tvLoadingTitle.text = "Go and Get Some Friends"
+                        tvLoadingInfo.text = "There are Friends, There is Family, and There are Friends Become Family"
+                    }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {

@@ -46,7 +46,8 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
                             val values: HashMap<String, Any> = hashMapOf(
                                 "name" to Profile.getCurrentProfile().name,
-                                "facebookId" to Profile.getCurrentProfile().id
+                                "facebookId" to Profile.getCurrentProfile().id,
+                                "status" to true
                             )
                             database.child("waitingList").child(data.key!!).setValue(values).addOnFailureListener {
                                 it.message?.let { it1 -> view.response(it1) }

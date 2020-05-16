@@ -21,7 +21,7 @@ class TournamentRecyclerViewAdapter(private val context: Context, private val to
             ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_leaderboard, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(tournamentParticipants[position],position, context)
+        holder.bindItem(tournamentParticipants[position],position, tournamentParticipants.size, context)
     }
 
     override fun getItemCount(): Int = tournamentParticipants.size
@@ -33,17 +33,20 @@ class TournamentRecyclerViewAdapter(private val context: Context, private val to
         private val score = view.findViewById<TextView>(R.id.tvScoreLeader)
         private val image = view.findViewById<ImageView>(R.id.ivLeader)
 
-        fun bindItem(tournamentParticipants: TournamentParticipant,position: Int, context: Context) {
-            val counter = position + 1
+        fun bindItem(tournamentParticipants: TournamentParticipant,position: Int, size: Int, context: Context) {
+            val counter = size - position
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             name.typeface = typeface
             score.typeface = typeface
 
-            when (position) {
-                0 -> count.backgroundResource = R.drawable.first_medal
-                1 -> count.backgroundResource = R.drawable.second_medal
-                2 -> count.backgroundResource = R.drawable.third_medal
-                else -> count.text = "" + counter + ". "
+            when (counter) {
+                1-> count.backgroundResource = R.drawable.first_medal
+                2 -> count.backgroundResource = R.drawable.second_medal
+                3 -> count.backgroundResource = R.drawable.third_medal
+                else -> {
+                    count.backgroundResource = R.color.colorTransparent
+                    count.text = "" + counter + ". "
+                }
             }
 
             name.text = tournamentParticipants.name

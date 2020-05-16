@@ -150,14 +150,31 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     fun updateStats(winStatus: Boolean, value: Long, auth: FirebaseAuth) {
         if (winStatus) {
-            database.child("stats").child(auth.currentUser!!.uid).child("win").setValue(value + 1)
+            database.child(auth.currentUser!!.uid).child("stats").child("win").setValue(value + 1)
         } else {
-            database.child("stats").child(auth.currentUser!!.uid).child("lose").setValue(value + 1)
+            database.child(auth.currentUser!!.uid).child("stats").child("lose").setValue(value + 1)
         }
     }
 
     fun updatePoint(point: Long,auth: FirebaseAuth){
-        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").setValue(point)
+
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                view.response(p0.message)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists())
+                {
+                    val totalPoint = p0.value.toString().toInt() + point
+
+                    database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").setValue(totalPoint)
+
+                }
+            }
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").addListenerForSingleValueEvent(postListener)
+
     }
 
     fun getTournamentType(){
@@ -172,7 +189,6 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
                         if(diff > 0){
                             view.loadData(dataSnapshot,"getTournamentEndDate")
-                            loadTournamentType(data.key.toString())
                             return
                         }
                     }
@@ -215,7 +231,6 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
                         if(diff > 0){
                             updateTournamentPoint(auth,data.key.toString(), point)
-                            return
                         }
                     }
                 }
@@ -262,7 +277,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
                     val values: HashMap<String, Any>
                     val totalCredit = p0.value.toString().toInt() + credit
                     values  = hashMapOf(
-                            "info" to "You Got ${credit} credits from Rank",
+                            "info" to "-",
                             "credit" to credit
                     )
 

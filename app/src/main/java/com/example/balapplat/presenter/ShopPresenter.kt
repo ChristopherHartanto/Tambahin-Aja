@@ -1,5 +1,6 @@
 package com.example.balapplat.presenter
 
+import android.util.Log
 import com.example.balapplat.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -31,7 +32,10 @@ class ShopPresenter(private val view: MainView, private val database: DatabaseRe
     }
 
     fun updateEnergy(energy: Long){
+        Log.d("energy from shop", energy.toString())
         database.child("users").child(auth.currentUser!!.uid).child("balance")
-                .child("energy").setValue(energy)
+                .child("energy").setValue(energy).addOnSuccessListener {
+                    view.response("updateEnergy")
+                }
     }
 }

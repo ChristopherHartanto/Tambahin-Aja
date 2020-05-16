@@ -24,6 +24,7 @@ import com.example.balapplat.R
 import com.example.balapplat.tournament.Tournament
 import com.example.balapplat.model.Inviter
 import com.example.balapplat.play.CountdownActivity
+import com.example.balapplat.play.GameType
 import com.example.balapplat.play.StatusPlayer
 import com.example.balapplat.presenter.Presenter
 import com.example.balapplat.profile.ProfileFragment
@@ -155,10 +156,10 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
             startActivity(intentFor<CountdownActivity>("inviterFacebookId" to data.facebookId,
                 "inviterName" to data.name,
                     "status" to StatusPlayer.JoinFriend,
-                    "type" to data.type,
+                    "type" to data.type as GameType,
                     "timer" to data.timer))
         }else if(message === "dismissInvitation"){
-            popUpMessage(com.example.balapplat.friends.Message.ReadOnly,"You Have been Rejected")
+            //popUpMessage(com.example.balapplat.friends.Message.ReadOnly,"You Have been Rejected")
         }
 
     }
@@ -233,7 +234,7 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
             btnReject.visibility = View.GONE
 
             tvMessageTitle.text = "Reward"
-            tvMessageReward.text = message
+//            tvMessageReward.text = message
             if (reward.type == "credit")
                 ivMessageReward.setImageResource(R.drawable.credit)
             else if (reward.type == "point")
@@ -312,11 +313,10 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
         Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 
-
-
-    override fun showPopUp(type: com.example.balapplat.friends.Message, message: String) {
-        popUpMessage(type,message)
+    override fun finishFragment() {
+        finish()
     }
+
 }
 
 data class Reward(

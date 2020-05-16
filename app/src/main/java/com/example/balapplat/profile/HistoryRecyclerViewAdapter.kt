@@ -45,7 +45,7 @@ class HistoryRecyclerViewAdapter(private val context: Context, private val histo
             opponentPoint.typeface = typeface
 
             playerName.text = profileItems.name
-            playerPoint.text = history.playerPoint.toString()
+            playerPoint.text = history.point.toString()
             opponentName.text = history.opponentName
             opponentPoint.text = history.opponentPoint.toString()
             status.text = history.status

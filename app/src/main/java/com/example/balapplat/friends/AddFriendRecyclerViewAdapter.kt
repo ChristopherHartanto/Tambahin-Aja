@@ -36,6 +36,7 @@ class AddFriendRecyclerViewAdapter(private val context: Context, private val ite
 
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             name.typeface = typeface
+            status.typeface = typeface
 
             name.text = items.name
             items.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(items.facebookId!!)).fit().into(image) }
@@ -43,10 +44,10 @@ class AddFriendRecyclerViewAdapter(private val context: Context, private val ite
             if (statusFriend){
                 status.text = "Friend"
             }
-            else {
-                status.text = "Add Friend +"
-                status.textColor = R.color.colorPrimary
-            }
+//            else {
+//                status.text = "Add Friend +"
+//                status.textColor = R.color.colorPrimary
+//            }
 
 
             status.setOnClickListener{

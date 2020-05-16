@@ -38,7 +38,11 @@ class CreditHistoryRecyclerViewAdapter(private val context: Context, private val
             info.typeface = typeface
             date.typeface = typeface
 
-            info.text = creditHistory.info
+            if (creditHistory.info == "-")
+                info.text = "You Got ${creditHistory.credit} from Rank"
+            else
+                info.text = creditHistory.info
+
             date.text = creditHistory.date
 
         }

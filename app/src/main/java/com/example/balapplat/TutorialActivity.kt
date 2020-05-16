@@ -6,12 +6,20 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.ViewPager
+import kotlinx.android.synthetic.main.activity_tutorial.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class TutorialActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tutorial)
+
+        supportActionBar?.hide()
+
+        btnExitTutorial.onClick {
+            finish()
+        }
 
         val sliderDotsPanel = findViewById<LinearLayout>(R.id.sliderDots)
         val viewPager = findViewById<ViewPager>(R.id.viewPager)

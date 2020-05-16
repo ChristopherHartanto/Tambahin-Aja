@@ -109,6 +109,23 @@ class CreditPresenter(private val view: MainView, private val database: Database
         database.child("users").child(auth.currentUser!!.uid).child("creditHistory").addListenerForSingleValueEvent(postListener)
     }
 
+    fun fetchUser(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    view.loadData(p0,"fetchUser")
+                }
+                database.removeEventListener(this)
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
+    }
+
     fun dismissListener(){
         database.removeEventListener(postListener)
     }

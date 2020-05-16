@@ -24,6 +24,7 @@ import com.example.balapplat.main.MainActivity
 import com.example.balapplat.model.HighScore
 import com.example.balapplat.model.User
 import com.example.balapplat.presenter.TournamentPresenter
+import com.example.balapplat.rank.Rank
 import com.example.balapplat.utils.getFacebookProfilePicture
 import com.example.balapplat.utils.showSnackBar
 import com.example.balapplat.view.MainView
@@ -58,6 +59,8 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
     private lateinit var tournamentPresenter: TournamentPresenter
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var dataTournament: TournamentData
+    private lateinit var currentRank : String
+    private var diff: Long = 0
     private var price = 0
     private lateinit var adapter: TournamentRecyclerViewAdapter
     private var tournamentEndDate = ""
@@ -78,8 +81,10 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         tournamentPresenter = TournamentPresenter(this,database)
         callback = activity as MainActivity
+        currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString()
         val linearLayoutManager = LinearLayoutManager(ctx)
-        //linearLayoutManager.reverseLayout = true
+        linearLayoutManager.reverseLayout = true
+        linearLayoutManager.stackFromEnd = true
         rvStanding.layoutManager = linearLayoutManager
 
         rvStanding.adapter = adapter
@@ -91,6 +96,8 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvTournamentTitle.typeface = typeface
         tvStandingTitle.typeface = typeface
+        tvTournamentProfile.typeface = typeface
+        tvTournamentTimeLeft.typeface = typeface
 
         btnInfo.onClick {
             btnInfo.startAnimation(clickAnimation)
@@ -109,31 +116,6 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
     fun loadData(dataSnapshot: DataSnapshot, status: Boolean){
 
-//        val data = dataSnapshot.getValue(TournamentData::class.java)
-//
-//        if (data != null && status) {
-//            tvTournamentTitle.text = data.title
-//            tvTournamentDesc.text = data.description
-//            tvTournamentTimeLeft.text = data.deadLine
-//
-//            retrieve()
-////            GlobalScope.launch {
-////                val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
-////                val currentDate = sdf.format(Date())
-////
-////                Duration.
-////                val diff: Long = Date.from() - date2.getTime()
-////                val seconds = diff / 1000
-////                val minutes = seconds / 60
-////                val hours = minutes / 60
-////                val days = hours / 24
-////            }
-//        }
-//        else{
-//            tvTournamentTitle.text = "No Tournament Right Now"
-//            tvTournamentDesc.text = ""
-////            tvTournamentTimeLeft.text = ""
-////        }
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -217,40 +199,46 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                     val currentDate = Date().time
                     val tournamentDate = sdf.parse(data.key.toString()).time
-                    val diff: Long = tournamentDate - currentDate
+                    diff = tournamentDate - currentDate
 
-                    if (diff > 0) {
-                        val joinTournament = sharedPreference.getString("joinTournament","")
-                        if (data.key.toString() == joinTournament){
-                            btnJoinTournament.visibility = View.GONE
-                            ivTournamentProfile.visibility = View.VISIBLE
-                            tvTournamentProfile.visibility = View.VISIBLE
-                        }else{
-                            btnJoinTournament.visibility = View.VISIBLE
-                            ivTournamentProfile.visibility = View.GONE
-                            tvTournamentProfile.visibility = View.GONE
-                        }
-                        dataTournament = data.getValue(TournamentData::class.java)!!
-                        tvTournamentTitle.text = dataTournament.title
-                        tournamentEndDate = data.key.toString()
-                        tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
-                        val seconds = diff / 1000
-                        val minutes = seconds / 60
-                        val hours = minutes / 60
-                        val days = hours / 24
+                    if (diff > 0)
+                        btnJoinTournament.visibility = View.VISIBLE
+                    else
+                        btnJoinTournament.visibility = View.GONE
 
-                        if (days >= 1)
-                            tvTournamentTimeLeft.text = "Ends In ${days} Days"
-                        else if(hours in 1..23)
-                            tvTournamentTimeLeft.text = "Ends In ${hours} Hours"
-                        else if(minutes in 1..59)
-                            tvTournamentTimeLeft.text = "Ends In ${minutes}"
-                        else if(minutes >= 0)
-                            tvTournamentTimeLeft.text = "Less Than 1 Minute"
-                        else
-                            tvTournamentTimeLeft.text = "End"
+                    val joinTournament = sharedPreference.getString("joinTournament","")
+                    if (data.key.toString() == joinTournament){
+                        btnJoinTournament.visibility = View.GONE
+                        ivTournamentProfile.visibility = View.VISIBLE
+                        tvTournamentProfile.visibility = View.VISIBLE
+                    }else{
+                        editor = sharedPreference.edit()
+                        editor.remove("joinTournament")
+                        editor.apply()
 
+                        btnJoinTournament.visibility = View.VISIBLE
+                        ivTournamentProfile.visibility = View.GONE
+                        tvTournamentProfile.visibility = View.GONE
                     }
+                    dataTournament = data.getValue(TournamentData::class.java)!!
+                    tvTournamentTitle.text = dataTournament.title
+                    tournamentEndDate = data.key.toString()
+                    tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
+                    val seconds = diff / 1000
+                    val minutes = seconds / 60
+                    val hours = minutes / 60
+                    val days = hours / 24
+
+                    if (days >= 1)
+                        tvTournamentTimeLeft.text = "Ends In ${days} Days ${hours/24} Hours"
+                    else if(hours in 1..23)
+                        tvTournamentTimeLeft.text = "Ends In ${hours} Hours ${minutes/60} Minutes"
+                    else if(minutes in 1..59)
+                        tvTournamentTimeLeft.text = "Ends In ${minutes}"
+                    else if(minutes >= 0)
+                        tvTournamentTimeLeft.text = "Less Than 1 Minute"
+                    else
+                        tvTournamentTimeLeft.text = "End"
                 }
 
             }else{
@@ -267,6 +255,19 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                             Picasso.get().load(getFacebookProfilePicture(data.getValue(TournamentParticipant::class.java)!!.facebookId.toString()))
                                     .into(ivTournamentProfile)
                             tvTournamentProfile.text = "#$count " + auth.currentUser!!.displayName +" ${data.getValue(TournamentParticipant::class.java)!!.point}"
+                        }
+                        if (diff < 0 && count.toInt() == 1){ // update rank
+                            if (currentRank == Rank.Master.toString()){
+                                val progress1 = sharedPreference.getInt("master1",0)
+                                editor = sharedPreference.edit()
+                                editor.putInt("master1",progress1+1)
+                                editor.apply()
+                            }else if (currentRank == Rank.GrandMaster.toString()){
+                                val progress2 = sharedPreference.getInt("gMaster2",0)
+                                editor = sharedPreference.edit()
+                                editor.putInt("gMaster2",progress2+1)
+                                editor.apply()
+                            }
                         }
                     }
                     count--
@@ -306,7 +307,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
             layoutMessageBasic.visibility = View.VISIBLE
             layoutMessageInvitation.visibility = View.GONE
             btnReject.visibility = View.GONE
-
+            tvMessageInfo.text = message
             tvMessageTitle.text = "Message"
 
             btnClose.onClick {
@@ -360,6 +361,11 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
             popUp(Message.ReadOnly,"Success Join this Tournament")
             btnJoinTournament.visibility = View.GONE
             tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
+            if (currentRank == Rank.Senior.toString()){
+                editor = sharedPreference.edit()
+                editor.putInt("senior4",1)
+                editor.apply()
+            }
         }else if(message == "continueJoinTournament"){
             popUp(Message.Reply,"Do You Want to Join this Tournament?")
         }else if(message == "notEnoughPoint"){
@@ -393,5 +399,5 @@ data class TournamentParticipant(
 )
 
 interface FragmentListener{
-    fun showPopUp(type: Message, message: String)
+    fun finishFragment()
 }

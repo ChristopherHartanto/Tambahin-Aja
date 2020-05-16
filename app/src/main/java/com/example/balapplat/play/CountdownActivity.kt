@@ -65,7 +65,7 @@ class CountdownActivity : AppCompatActivity(), NetworkConnectivityListener {
                         val joinFriendFacebookId = intent.extras!!.getString("joinFriendFacebookId")
                         val joinFriendName = intent.extras!!.getString("joinFriendName")
                         val timer = intent.extras!!.getInt("timer")
-                        startActivity(intentFor<NormalGameActivity>("joinFriendFacebookId" to joinFriendFacebookId, "joinName" to joinFriendName,"status" to status, "type" to type, "timer" to timer))
+                        startActivity(intentFor<NormalGameActivity>("joinFriendFacebookId" to joinFriendFacebookId, "joinFriendName" to joinFriendName,"status" to status, "type" to type, "timer" to timer))
                     }
                     StatusPlayer.JoinFriend -> {
                         val inviterFacebookId = intent.extras!!.getString("inviterFacebookId")

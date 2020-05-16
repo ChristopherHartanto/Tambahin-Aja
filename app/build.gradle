@@ -7,6 +7,10 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
     defaultConfig {
         applicationId "com.example.balapplat"
         minSdkVersion 21
@@ -27,6 +31,7 @@ android {
 }
 
 dependencies {
+    def work_version = "2.3.4"
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -58,6 +63,6 @@ dependencies {
     implementation 'com.android.billingclient:billing:2.2.0'
     implementation 'com.android.billingclient:billing-ktx:2.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-
+    implementation "androidx.work:work-runtime-ktx:$work_version"
     implementation project(path: ':network')
 }

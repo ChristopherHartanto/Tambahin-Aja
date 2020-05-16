@@ -109,16 +109,15 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
 
 
         if (creator){
-            finish()
-
             startActivity(intentFor<CountdownActivity>("joinOnlineFacebookId" to dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId
                 , "joinOnlineName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
                 , "status" to StatusPlayer.Creator, "type" to GameType.Normal))
-        }else{
             finish()
+        }else{
             startActivity(intentFor<CountdownActivity>("creatorFacebookId" to dataSnapshot.key
                 , "creatorName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
                 , "status" to StatusPlayer.JoinOnline, "type" to GameType.Normal))
+            finish()
         }
 
     }

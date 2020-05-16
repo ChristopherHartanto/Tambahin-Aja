@@ -1,50 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:gravity="center"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    android:layout_marginHorizontal="20sp"
+    android:layout_marginVertical="50dp"
+    android:weightSum="6"
+    android:padding="5dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvCreditHistoryTitle"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:layout_margin="10dp"
+        android:textColor="@color/colorWhite"
+        android:text="Credit History"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/rvCreditHistory"
+        android:layout_marginHorizontal="10dp"
+        android:layout_weight="1"
+        android:layout_marginVertical="20dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/colorPrimary"
-        android:layout_marginHorizontal="20sp"
-        android:layout_marginVertical="50dp"
-        android:padding="5dp">
+        android:layout_weight="5"
+        android:gravity="bottom |center_horizontal">
 
-        <TextView
-            android:layout_width="match_parent"
+        <info.hoang8f.widget.FButton
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tvCreditHistoryTitle"
-            android:gravity="center"
-            android:textSize="20sp"
-            android:textColor="@color/fbutton_color_sun_flower"
-            android:text="Credit History"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rvCreditHistory"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="20dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="bottom |center_horizontal">
-
-            <info.hoang8f.widget.FButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
-                android:text="Okay"
-                android:layout_marginBottom="10dp"
-                android:id="@+id/btnCreditHistory"/>
-
-        </LinearLayout>
+            android:textColor="@color/colorWhite"
+            android:text="Okay"
+            android:layout_marginBottom="5dp"
+            android:id="@+id/btnCreditHistory"/>
 
     </LinearLayout>
 

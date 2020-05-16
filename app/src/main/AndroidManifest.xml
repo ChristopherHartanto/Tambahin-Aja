@@ -34,7 +34,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-        <activity android:name=".home.CreditActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".home.CreditActivity" android:screenOrientation="portrait"/>
         <activity android:name=".home.MarketActivity" android:screenOrientation="portrait"/>
         <activity android:name=".play.PostGameActivity" android:screenOrientation="portrait"/>
         <activity android:name=".profile.SettingActivity" android:screenOrientation="portrait"/>

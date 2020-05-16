@@ -105,7 +105,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
     fun fetchProfileFriends(dataSnapshot: DataSnapshot){
 
         srFriendsList.isRefreshing = false
-        toast(" "+dataSnapshot)
         val item = dataSnapshot.getValue(User::class.java)!!
         ProfileItems.add(item)
         adapter.notifyDataSetChanged()
@@ -163,17 +162,21 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             sbTime.min = 30
         }
-        timer = 0
+        timer = 30
         sbTime.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
-                if(progress < 30) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     timer = progress
-                    tvCustomGameTime.text = "Time : 30"
-                }
-                else {
-                    timer = progress
-                    tvCustomGameTime.text = "Time : $progress"
+                    tvCustomGameTime.text = "Time : $timer"
+                }else{
+                    if (position == 2){
+                        timer = progress/10
+                        tvCustomGameTime.text = "Time : $timer"
+                    }else {
+                        timer = progress
+                        tvCustomGameTime.text = "Time : $timer"
+                    }
                 }
             }
 
@@ -214,7 +217,7 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
                         tvCustomGameName.text = "Rush"
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             sbTime.min = 3
-                            sbTime.max = 6
+                            sbTime.max = 8
                         }
                         ivCustomGame.setImageResource(R.drawable.rush_game)
                     }

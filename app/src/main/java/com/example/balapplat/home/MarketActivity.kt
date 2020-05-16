@@ -16,6 +16,7 @@ import com.example.balapplat.R
 import com.example.balapplat.leaderboard.LeaderBoardRecyclerViewAdapter
 import com.example.balapplat.presenter.ShopPresenter
 import com.example.balapplat.rank.Balance
+import com.example.balapplat.rank.Rank
 import com.example.balapplat.view.MainView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -46,6 +47,8 @@ class MarketActivity : AppCompatActivity(), MainView {
     private lateinit var database: DatabaseReference
     lateinit private var billingClient: BillingClient
     private lateinit var countDownTimer : CountDownTimer
+    private lateinit var currentRank : String
+    private var energyTime = 0
     private var point = 0
     private var energy = 0
     private var energyLimit = 0
@@ -65,6 +68,7 @@ class MarketActivity : AppCompatActivity(), MainView {
         tvShopTitle.typeface = typeface
         tvEnergy.typeface = typeface
         tvPoint.typeface = typeface
+        tvEnergyTimer.typeface = typeface
 
         shopPresenter = ShopPresenter(this,database)
 
@@ -104,6 +108,15 @@ class MarketActivity : AppCompatActivity(), MainView {
 
     override fun onStart() {
         shopPresenter.fetchBalance()
+        currentRank = sharedPreferences.getString("currentRank", Rank.Toddler.toString()).toString()
+
+        energyTime = when(enumValueOf<Rank>(currentRank)){
+            Rank.Toddler -> 300
+            Rank.Beginner -> 300
+            Rank.Senior -> 240
+            Rank.Master -> 240
+            Rank.GrandMaster -> 180
+        }
 
         countDownTimer = object : CountDownTimer(1000,1000){
             override fun onFinish() {
@@ -118,74 +131,74 @@ class MarketActivity : AppCompatActivity(), MainView {
 
     fun setUpEnergyTimer(){
         if (energy != energyLimit) {
-            val remainingEnergyToFull = (energyLimit - energy) * 120 // 10 detik
+            val remainingEnergyToFull = (energyLimit - energy) * energyTime
             val currentDate = Date().time
 
             val lastCountEnergy = sharedPreferences.getLong("lastCountEnergy", currentDate)
             counted = sharedPreferences.getLong("countedEnergy", 0).toInt()
 
             diff = currentDate - lastCountEnergy
-
             remainTime = (remainingEnergyToFull - (diff / 1000) - counted).toInt()
 
             val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
             Log.d("testcurrent date : ",sdf.format(currentDate))
             Log.d("testlast date : ",sdf.format(lastCountEnergy))
             Log.d("testdiff : ",diff.toString())
+            Log.d("testReaminingEnergy : ",remainingEnergyToFull.toString())
             Log.d("testremainTime : ",remainTime.toString())
             energyTimer()
         }
     }
 
     fun energyTimer(){
-        if (remainTime > 0 && !checkUpdateEnergy){
+        if (!checkUpdateEnergy){ // last
             checkUpdateEnergy = true
-            var energyGet = diff / 1000 / 120
-            if (energyGet > energyLimit)
-                energyGet = energyLimit.toLong()
-            Log.d("energy get", energyGet.toString())
-            shopPresenter.updateEnergy(energy.toLong() + energyGet)
+            val energyGet = diff / 1000 / energyTime
+            if (energyGet + energy >= energyLimit) // energy get + energy >= energy limit, energy = energy limit
+                energy = energyLimit // else energy += energyget
+            else
+                energy += energyGet.toInt()
+            if (energyGet.toInt() != 0){
+                shopPresenter.updateEnergy(energy.toLong())
+                counted = 0
+            }
         }
-        if (remainTime > 0){
+        if (remainTime > 0 && energy < energyLimit){
 
-            var timerSec = remainTime % 120 // 100 detik
+            var timerSec = remainTime % energyTime
             var timerMin = 0
 
-            if(timerSec == 0){
-                shopPresenter.updateEnergy(energy.toLong())
-                remainTime--
-                energyTimer()
-            }else{
-                if (timerSec > 60){
-                    timerMin = timerSec / 60
-                    timerSec %= 60
-                }
-                Log.d("remainTime : ",remainTime.toString())
-                Log.d("timer seconds",timerSec.toString())
-                var seconds = timerSec
-                countDownTimer = object : CountDownTimer((timerSec.toLong()+1) * 1000,1000){
-                    override fun onFinish() {
-                        Log.d("tick",timerSec.toString())
-                        seconds--
-                        tvEnergyTimer.text = "${timerMin}:${seconds}"
-                        remainTime--
-                        energyTimer()
-                        energy++
-                        tvEnergy.text = "${energy}/${energyLimit}"
-                        shopPresenter.updateEnergy(energy.toLong())
-                    }
-
-                    override fun onTick(millisUntilFinished: Long) {
-                        Log.d("tick",timerSec.toString())
-                        tvEnergyTimer.text = "${timerMin}:${seconds}"
-                        seconds--
-                        counted += 1
-                        remainTime--
-                    }
-
-                }
-                countDownTimer.start()
+            if (timerSec > 60){
+                timerMin = timerSec / 60
+                timerSec %= 60
             }
+            Log.d("remainTime : ",remainTime.toString())
+            Log.d("timer seconds",timerSec.toString())
+            var seconds = timerSec
+            countDownTimer = object : CountDownTimer((timerSec.toLong()+2) * 1000,1000){
+                override fun onFinish() {
+                    Log.d("finish tick",timerSec.toString())
+                    seconds--
+                    tvEnergyTimer.text = "${timerMin}:${seconds}"
+                    remainTime--
+                    energyTimer()
+                    if (timerMin == 0){
+                        energy++
+                        shopPresenter.updateEnergy(energy.toLong())
+                        counted = 0
+                    }
+                }
+
+                override fun onTick(millisUntilFinished: Long) {
+                    Log.d("tick",timerSec.toString())
+                    tvEnergyTimer.text = "${timerMin}:${seconds}"
+                    seconds--
+                    counted += 1
+                    remainTime--
+                }
+
+            }
+            countDownTimer.start()
         }else{
             tvEnergyTimer.text = "Full"
         }
@@ -214,12 +227,14 @@ class MarketActivity : AppCompatActivity(), MainView {
             energyLimit = dataSnapshot.getValue(Balance::class.java)!!.energyLimit!!
             point = dataSnapshot.getValue(Balance::class.java)!!.point!!
             tvPoint.text = point.toString()
-            toast("aa")
             setUpEnergyTimer()
             tvEnergy.text = "${energy}/${energyLimit}"
         }
     }
 
     override fun response(message: String) {
+        if (message == "updateEnergy"){
+            tvEnergy.text = "${energy}/${energyLimit}"
+        }
     }
 }

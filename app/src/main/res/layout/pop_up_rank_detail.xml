@@ -20,7 +20,7 @@
             android:id="@+id/tvRankTitle"
             android:gravity="center"
             android:textSize="32sp"
-            android:textColor="@color/fbutton_color_sun_flower"
+            android:textColor="@color/colorWhite"
             android:text="Task"/>
 
         <androidx.recyclerview.widget.RecyclerView
