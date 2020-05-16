@@ -6,14 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".play.CountdownActivity"
     android:orientation="vertical"
-    android:background="@color/colorPrimary">
+    android:background="@color/colorWhite">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/tvCountdown"
         android:gravity="center"
-        android:textColor="@color/colorWhite"
+        android:textColor="@color/colorPrimary"
         android:textSize="50sp"/>
 
 </LinearLayout>

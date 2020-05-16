@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.balapplat">
+    package="com.example.tambahinaja">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name=".MainApplication"
+        android:name="com.example.tambahinaja.MainApplication"
         android:hardwareAccelerated="false"
         android:largeHeap="true"
         android:allowBackup="true"
@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         tools:ignore="LockedOrientationActivity">
-        <activity android:name=".TutorialActivity"
+        <activity android:name="com.example.tambahinaja.TutorialActivity"
             android:screenOrientation="portrait">
         </activity>
 
@@ -29,20 +29,20 @@
             </intent-filter>
         </service>
         <service
-            android:name=".push_notification.MyFirebaseMessagingService">
+            android:name="com.example.tambahinaja.push_notification.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-        <activity android:name=".home.CreditActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".home.MarketActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".play.PostGameActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".profile.SettingActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".rank.RankActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".play.OddEvenGameActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".play.WaitingActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".leaderboard.LeaderBoardActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".main.SplashActivity"
+        <activity android:name="com.example.tambahinaja.home.CreditActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.home.MarketActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.play.PostGameActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.profile.SettingActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.rank.RankActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.play.OddEvenGameActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.play.WaitingActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.leaderboard.LeaderBoardActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.main.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,14 +50,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlayActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".play.CountdownActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".RegisterActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".main.LoginActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".friends.AddFriendsActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".friends.FriendsActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".play.NormalGameActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".main.MainActivity"
+        <activity android:name="com.example.tambahinaja.PlayActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.play.CountdownActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.RegisterActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.main.LoginActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.friends.AddFriendsActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.friends.FriendsActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.play.NormalGameActivity" android:screenOrientation="portrait"/>
+        <activity android:name="com.example.tambahinaja.main.MainActivity"
             android:screenOrientation="portrait" />
 
         <meta-data

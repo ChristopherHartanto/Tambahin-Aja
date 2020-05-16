@@ -76,19 +76,19 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:padding="12dp"
-        android:layout_margin="10dp"
-        android:src="@drawable/question"
+        android:src="@drawable/shopping_cart"
         android:background="@drawable/button_bg_round"
-        android:id="@+id/ivTutorial"/>
+        android:layout_margin="10dp"
+        android:id="@+id/ivShop"/>
 
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:padding="12dp"
-        android:src="@drawable/shopping_cart"
-        android:background="@drawable/button_bg_round"
         android:layout_margin="10dp"
-        android:id="@+id/ivShop"/>
+        android:src="@drawable/question"
+        android:background="@drawable/button_bg_round"
+        android:id="@+id/ivTutorial"/>
 
     <TextView
         android:layout_width="match_parent"

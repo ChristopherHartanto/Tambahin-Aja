@@ -5,7 +5,7 @@
     android:id="@+id/activity_waiting"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorWhite"
     android:gravity="center"
     tools:context=".play.WaitingActivity">
 
@@ -37,7 +37,7 @@
         android:layout_marginBottom="10dp"
         android:gravity="center"
         android:text="Waiting . . ."
-        android:textColor="@color/colorWhite"
+        android:textColor="@color/colorPrimary"
         android:textSize="21sp"
         android:textStyle="bold" />
 
@@ -48,7 +48,7 @@
         android:layout_below="@id/tvWaiting"
         android:gravity="center"
         android:text="Tips"
-        android:textColor="@color/colorWhite"
+        android:textColor="@color/colorPrimary"
         android:textSize="18dp" />
 
 </RelativeLayout>

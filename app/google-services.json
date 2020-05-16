@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:930773989893:android:3177b5e012d25af2c3fa6c",
         "android_client_info": {
-          "package_name": "com.example.balapplat"
+          "package_name": "com.example.tambahinaja"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "930773989893-bmphpbsbknk75nujb379jchlrif45h6d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.balapplat",
+            "package_name": "com.example.tambahinaja",
             "certificate_hash": "d89f20724b79eca58c71d664be481fbb58e4ccb0"
           }
         },
