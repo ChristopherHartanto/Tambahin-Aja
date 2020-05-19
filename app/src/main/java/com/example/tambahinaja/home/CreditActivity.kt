@@ -130,7 +130,7 @@ class CreditActivity : AppCompatActivity(), MainView {
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         linearLayoutManager.stackFromEnd = true
-        rvCreditHistory.layoutManager = LinearLayoutManager(this)
+        rvCreditHistory.layoutManager = linearLayoutManager
 
         btnClose.onClick {
             btnClose.startAnimation(clickAnimation)

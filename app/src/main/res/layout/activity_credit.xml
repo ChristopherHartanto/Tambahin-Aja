@@ -53,7 +53,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorWhite"
+        android:background="@color/fbutton_color_silver"
         android:id="@+id/rvCredit"/>
 
 </LinearLayout>

@@ -43,7 +43,8 @@ class AddFriendRecyclerViewAdapter(private val context: Context, private val ite
 
             if (statusFriend){
                 status.text = "Friend"
-            }
+            }else
+                status.text = ""
 //            else {
 //                status.text = "Add Friend +"
 //                status.textColor = R.color.colorPrimary

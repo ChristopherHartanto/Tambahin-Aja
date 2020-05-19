@@ -15,6 +15,7 @@ import com.example.tambahinaja.model.HighScore
 import com.example.tambahinaja.model.Inviter
 import com.example.tambahinaja.model.User
 import com.example.tambahinaja.play.CountdownActivity
+import com.example.tambahinaja.rank.LeaderBoard
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
@@ -41,6 +42,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_leader_board)
 
+
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
@@ -55,7 +57,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         linearLayoutManager.reverseLayout = true
         linearLayoutManager.stackFromEnd = true
         rvLeaderBoard.layoutManager = linearLayoutManager
-        rvLeaderBoard.adapter = adapter
 
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivLeaderboard)
         ivLeaderboard.backgroundResource = R.drawable.button_bg_round
@@ -76,12 +77,16 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
 
             }
-            database.child("leaderboards").orderByChild("total").addListenerForSingleValueEvent(postListener)
+            database.child("leaderboards").orderByChild("total").limitToFirst(50).addListenerForSingleValueEvent(postListener)
 
         }
     }
 
     fun fetchData(dataSnapshot: DataSnapshot){
+        dataSnapshot.children.sortedBy {
+            it.getValue(LeaderBoard::class.java)!!.total
+        }
+
         var count = dataSnapshot.childrenCount
         for ((index,ds) in dataSnapshot.children.withIndex()) {
 
@@ -91,13 +96,15 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
             }
             count--
+        }
+        for ((index,ds) in dataSnapshot.children.withIndex()) {
+
             val total = ds.getValue(Leaderboard::class.java)!!.total
             val id = ds.key
 
             id?.let { retrieveUser(it,total) }
+            Thread.sleep(5)
         }
-        layout_loading.visibility = View.GONE
-        toast("" + items)
     }
 
     fun retrieveUser(id : String,score: Int?){
@@ -124,7 +131,10 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         val item = dataSnapshot.getValue(User::class.java)!!
         profileItems.add(item)
 
-        adapter.notifyDataSetChanged()
+        if (profileItems.size == items.size){
+            rvLeaderBoard.adapter = adapter
+            layout_loading.visibility = View.GONE
+        }
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -176,7 +186,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
     override fun onStart() {
         retrieve()
-        adapter.notifyDataSetChanged()
         super.onStart()
     }
 

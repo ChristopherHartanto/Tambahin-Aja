@@ -31,13 +31,11 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
                 if(p0.exists()){
                     if (p0.getValue(Inviter::class.java)!!.status == false)
                         view.loadData(p0,"receiveInvitation")
-
-                    database.removeEventListener(this)
                 }
             }
 
         }
-        database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
+        database.child("invitation").child(Profile.getCurrentProfile().id).addListenerForSingleValueEvent(postListener)
     }
 
     fun replyInvitation(status: Boolean){
@@ -59,7 +57,7 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
                 }
 
             }
-            database.child("invitation").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
+            database.child("invitation").child(Profile.getCurrentProfile().id).addListenerForSingleValueEvent(postListener)
         }else
             database.child("invitation").child(Profile.getCurrentProfile().id).removeValue().addOnSuccessListener {
                 view.response("rejectedGame")
@@ -67,6 +65,7 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
 
     }
     fun receiveReward(){
+        var count = 0
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -74,12 +73,16 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
 
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists()){
-                    view.loadData(p0,"reward")
+                    if (count == 0){
+                        count = 1
+                        view.loadData(p0,"reward")
+                        database.removeEventListener(this)
+                    }
                 }
             }
 
         }
-        database.child("users").child(auth.currentUser!!.uid).child("reward").addValueEventListener(postListener)
+        database.child("users").child(auth.currentUser!!.uid).child("reward").limitToFirst(1).addValueEventListener(postListener)
 
     }
 
@@ -118,7 +121,7 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
             }
 
         }
-        database.child("users").child(auth.currentUser!!.uid).child("balance").addListenerForSingleValueEvent(postListener)
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("credit").addListenerForSingleValueEvent(postListener)
 
     }
 
@@ -139,12 +142,14 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
 
     fun rewardPuzzlePopUp(){
         val values  = hashMapOf(
-                "description" to "You Got 50 Credit",
+                "description" to "You Got 20 Credit",
                 "type" to "Credit",
-                "quantity" to 50
+                "quantity" to 20
         )
 
-        database.child("users").child(auth.currentUser!!.uid).child("reward").setValue(values)
+        database.child("users").child(auth.currentUser!!.uid).child("reward").setValue(values).addOnSuccessListener {
+            view.response("rewardPuzzlePopUp")
+        }
     }
 
     fun updateCredit(credit: Long){

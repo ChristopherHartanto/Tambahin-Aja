@@ -19,6 +19,7 @@ import androidx.lifecycle.Observer
 import androidx.transition.TransitionManager
 import com.example.tambahinaja.home.HomeFragment
 import com.example.tambahinaja.R
+import com.example.tambahinaja.TutorialActivity
 import com.example.tambahinaja.tournament.Tournament
 import com.example.tambahinaja.model.Inviter
 import com.example.tambahinaja.play.CountdownActivity
@@ -48,7 +49,6 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var database: DatabaseReference
-    lateinit var presenter: Presenter
     private lateinit var auth: FirebaseAuth
     var data : Inviter = Inviter()
     private lateinit var reward: Reward
@@ -65,9 +65,11 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
         bottom_navigation.itemIconTintList = null
         supportActionBar?.hide()
+
         savedInstanceState?.let {
             prevState = it.getBoolean(UtilsConstants.LOST_CONNECTION)
         }
+
 
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -78,7 +80,10 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
                     loadTournamentFragment(savedInstanceState)
                 }
                 R.id.profile -> {
-                    loadProfileFragment(savedInstanceState)
+                    if (auth.currentUser == null)
+                        toast("Login First")
+                    else
+                        loadProfileFragment(savedInstanceState)
                 }
 
             }
@@ -166,18 +171,21 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
     override fun onStart() {
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
-        presenter = Presenter(this, database)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
+
+        val watchTutorial = sharedPreference.getBoolean("tutorial",false)
+
+        if (!watchTutorial){
+            val editor = sharedPreference.edit()
+            editor.putBoolean("tutorial", true)
+            editor.apply()
+
+            startActivity<TutorialActivity>()
+        }
 
         NetworkEvents.observe(this, Observer {
             if (it is Event.ConnectivityEvent) handleConnectivityChange(it.state)
         })
-
-//        if(AccessToken.getCurrentAccessToken() != null){
-//            presenter.receiveInvitation()
-//            presenter.receiveReward()
-//        }
-
 
         val editor = sharedPreference.edit()
         editor.putBoolean("continueRank",true)
@@ -187,13 +195,6 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
         super.onStart()
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-    override fun onPause() {
-        presenter.dismissListener()
-        super.onPause()
-    }
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed()

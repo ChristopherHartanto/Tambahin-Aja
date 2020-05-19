@@ -240,7 +240,9 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()){
                     database.child("tournament").child(tournamentEndDate).child("participants")
-                            .child(auth.currentUser!!.uid).child("point").setValue(dataSnapshot.value.toString().toLong() + point)
+                            .child(auth.currentUser!!.uid).child("point").setValue(dataSnapshot.value.toString().toLong() + point).addOnSuccessListener {
+                                view.response("updateTournament")
+                            }
                 }
             }
 

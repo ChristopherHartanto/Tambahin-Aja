@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".home.MarketActivity"
+    android:id="@+id/activity_market"
     android:background="@color/colorPrimary">
 
     <TextView
@@ -75,7 +76,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorWhite"
+        android:background="@color/fbutton_color_silver"
         android:id="@+id/rvMarket"/>
 
 </LinearLayout>

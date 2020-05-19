@@ -52,9 +52,7 @@ class TournamentPresenter(private val view: MainView, private val database: Data
                 }
 
             }
-            database.child("tournament").addValueEventListener(postListener)
-            database.keepSynced(true)
-
+            database.child("tournament").addListenerForSingleValueEvent(postListener)
         }
     }
 

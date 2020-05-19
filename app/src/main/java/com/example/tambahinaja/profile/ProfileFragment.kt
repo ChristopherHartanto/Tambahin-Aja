@@ -62,7 +62,8 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
-    override fun onStart() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         callback = activity as MainActivity
@@ -73,43 +74,35 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         }
         else{
             profilePresenter.fetchHistory()
-            profilePresenter.fetchUserProfile()
             profilePresenter.fetchStats()
         }
-
-        historyAdapter = HistoryRecyclerViewAdapter(ctx,historyItems, User(name,Profile.getCurrentProfile().id,"",""))
-        val linearLayoutManager = LinearLayoutManager(ctx)
-        linearLayoutManager.reverseLayout = true
-        linearLayoutManager.stackFromEnd = true
-        rvHistory.layoutManager = linearLayoutManager
-        rvHistory.adapter = historyAdapter
-
-        updateUI()
 
         ivSetting.onClick {
             startActivity<SettingActivity>()
         }
-        super.onStart()
+        updateUI()
     }
 
-        fun updateUI(){
+    private fun updateUI(){
+        if (context != null){
             val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
             tvProfileName.typeface = typeface
             tvHistoryTitle.typeface = typeface
             tvWinTournament.typeface = typeface
             tvWin.typeface = typeface
 
-        if (auth.currentUser != null){
+            if (auth.currentUser != null){
 
-            profilePresenter.fetchName()
+                profilePresenter.fetchName()
 
-            Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
+                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
 
-            layout_edit_profile.onClick {
-                popUpEditProfile()
+                layout_edit_profile.onClick {
+                    popUpEditProfile()
+                }
+            }else{
+                tvProfileName.text = "Unknown"
             }
-        }else{
-            tvProfileName.text = "Unknown"
         }
     }
 
@@ -226,8 +219,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
                 val item = data.getValue(History::class.java)
                 historyItems.add(item!!)
             }
-            historyItems.reversed()
-            historyAdapter.notifyDataSetChanged()
+            profilePresenter.fetchUserProfile()
         }else if(response == "fetchName"){
             tvProfileName.text = dataSnapshot.value.toString()
         }else if(response == "fetchStats"){
@@ -241,8 +233,17 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
             user = User(dataSnapshot.getValue(User::class.java)!!.name,
                     "", dataSnapshot.getValue(User::class.java)?.email,
                     dataSnapshot.getValue(User::class.java)?.noHandphone,null)
-            historyAdapter.notifyDataSetChanged()
+            initRv()
         }
+    }
+
+    fun initRv(){
+        historyAdapter = HistoryRecyclerViewAdapter(ctx,historyItems, User(name,Profile.getCurrentProfile().id,"",""))
+        val linearLayoutManager = LinearLayoutManager(ctx)
+        linearLayoutManager.reverseLayout = true
+        linearLayoutManager.stackFromEnd = true
+        rvHistory.layoutManager = linearLayoutManager
+        rvHistory.adapter = historyAdapter
     }
 
     override fun response(message: String) {

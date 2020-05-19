@@ -7,6 +7,8 @@ import android.content.pm.ActivityInfo
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -77,6 +79,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private lateinit var editor : SharedPreferences.Editor
     private var dataInviter : Inviter = Inviter()
     private lateinit var reward: Reward
+    private var countPuzzle = 0
     private lateinit var customGameAdapter: CustomGameRecyclerViewAdapter
     private var bundle: Bundle = Bundle()
     private lateinit var currentRank : String
@@ -87,6 +90,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
     private var currentDate = ""
+    private var handler = Handler()
+    private lateinit var runnable : Runnable
     private var numberArr : MutableList<Int> = mutableListOf()
     private val availableGameList : MutableList<Boolean> = mutableListOf()
 
@@ -95,7 +100,12 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+
+        runnable = Runnable {
+            setSeasonTimer()
+            firebaseSingleListenerRepeat()
+        }
+
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
@@ -110,11 +120,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString()
         bundle = Bundle()
 
-        if(auth.currentUser != null && Profile.getCurrentProfile() != null){
-            homePresenter.receiveInvitation()
-            homePresenter.receiveReward()
-        }
-
         val sdf = SimpleDateFormat("dd MMM yyyy")
         currentDate = sdf.format(Date())
 
@@ -123,8 +128,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
 
+        tvSeason.typeface = typeface
         tvCredit.typeface = typeface
-        tvTitle.typeface = typeface
         btnCustomPlay.typeface = typeface
         btnRank.typeface = typeface
         btnPlayFriend.typeface = typeface
@@ -152,7 +157,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 availableGameList.add(false)
                 availableGameList.add(false)
 
-                customGameAdapter.notifyDataSetChanged()
             }
             popUpCustomGame()
         }
@@ -227,7 +231,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         if(AccessToken.getCurrentAccessToken() == null)
             auth.signOut()
 
-        //updateUI()
+
+        firebaseSingleListenerRepeat()
 
         super.onStart()
     }
@@ -262,25 +267,49 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     @SuppressLint("SetTextI18n")
     private fun generate(tvDailyPuzzleQuestion: TextView){
 
-        if (puzzleType == 1){
+        var difficulty = 0
 
-            tvDailyPuzzleQuestion.text = ""
-            numberArr.clear()
+        tvDailyPuzzleQuestion.text = ""
+        numberArr.clear()
 
-            for(x in 0 until 8)
-            {
-                var value = 0
-                val choose = Random().nextInt(2)
+        when(enumValueOf<Rank>(currentRank)){
+            Rank.Toddler ->{
+                difficulty = 3
+                countPuzzle = 5
+            }
+            Rank.Beginner ->{
+                difficulty = 5
+                countPuzzle = 6
+            }
+            Rank.Senior ->{
+                difficulty = 8
+                countPuzzle = 7
+            }
+            Rank.Master ->{
+                difficulty = 12
+                countPuzzle = 8
+            }
+            Rank.GrandMaster ->{
+                difficulty = 15
+                countPuzzle = 10
+            }
+        }
 
-                if (choose == 1){
-                    value = Random().nextInt(10) + 65
-                    numberArr.add(value)
-                    tvDailyPuzzleQuestion.text = tvDailyPuzzleQuestion.text.toString() + value.toChar()
-                }else{
-                    value = Random().nextInt(9)
-                    numberArr.add(value)
-                    tvDailyPuzzleQuestion.text = tvDailyPuzzleQuestion.text.toString() + value
-                }
+
+
+        for(x in 0 until countPuzzle)
+        {
+            var value = 0
+            val choose = Random().nextInt(2)
+
+            if (choose == 1){
+                value = Random().nextInt(difficulty) + 65
+                numberArr.add(value)
+                tvDailyPuzzleQuestion.text = tvDailyPuzzleQuestion.text.toString() + value.toChar()
+            }else{
+                value = Random().nextInt(9)
+                numberArr.add(value)
+                tvDailyPuzzleQuestion.text = tvDailyPuzzleQuestion.text.toString() + value
             }
         }
 
@@ -296,9 +325,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private fun generateAnswer() : Int {
         var result = 0
         val temp = numberArr
-        for(x in 0 until 8)
+        for(x in 0 until countPuzzle)
         {
-            if(x != 8-1) {
+            if(x != countPuzzle-1) {
                 if (temp[x] >= 65)
                     temp[x] -= 64
                 if (temp[x+1] >= 65)
@@ -313,13 +342,12 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 result = temp[x]
 
         }
+        toast("${result}")
         return result
     }
 
     private fun checkAnswer(value : String) {
-
         if (value == puzzleAnswer.toString()){
-
 
             if (currentRank == Rank.Beginner.toString()){
                 val progress4 = sharedPreference.getInt("beginner4",0)
@@ -332,15 +360,19 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 editor.putInt("master5",progress5+1)
                 editor.apply()
             }
+            popupWindow.dismiss()
+            fragment_home.alpha = 1F
             homePresenter.rewardPuzzlePopUp()
-            homePresenter.updateCredit(credit.toLong() + 10)
 
             editor = sharedPreference.edit()
             editor.remove("puzzleAnswer")
             editor.remove("puzzleQuestion")
             editor.apply()
-        }else
-            toast("false")
+        }else{
+            toast("Oops Try Again Tommorow")
+            popupWindow.dismiss()
+            fragment_home.alpha = 1F
+        }
 
     }
 
@@ -402,10 +434,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 checkAnswer(tvAnswerPuzzle.text.toString())
 
             ivDailyPuzzle.visibility = View.GONE
-            tvPuzzleInfo.visibility = View.GONE
+            tvPuzzleInfo.text = ""
             homePresenter.updatePuzzle()
-            popupWindow.dismiss()
-            fragment_home.alpha = 1F
 
         }
 
@@ -475,7 +505,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
                 LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+                LinearLayout.LayoutParams.MATCH_PARENT
         )
 
         // Set an elevation for the popup window
@@ -501,7 +531,8 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         tvCustomGameTitle.typeface = typeface
         tvCustomGameTime.typeface = typeface
 
-        tvCustomGameTime.text = "Time : 0"
+        timer = 30
+        tvCustomGameTime.text = "Time : ${timer}"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             sbTime.min = 30
@@ -540,6 +571,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             if (!availableGameList[it]){
                 toast("Not Available")
             }else{
+                sbTime.progress = 30
+                timer = 30
+                tvCustomGameTime.text = "Time : $timer"
                 position = it
                 when(position){
                     0 -> {
@@ -563,6 +597,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             sbTime.min = 3
                             sbTime.max = 8
+
+                            sbTime.progress = 3
+                            timer = 3
+                            tvCustomGameTime.text = "Time : $timer"
                         }
                         ivCustomGame.setImageResource(R.drawable.rush_game)
                     }
@@ -762,6 +800,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             customGameAdapter.notifyDataSetChanged()
 
         }else if(response == "reward"){
+            Log.d("reward","masuk sini")
             reward = dataSnapshot.getValue(Reward::class.java)!!
             popUpMessage(com.example.tambahinaja.friends.Message.ReadOnly,reward.description.toString())
         }else{
@@ -772,96 +811,101 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     }
 
     private fun popUpMessage(type: com.example.tambahinaja.friends.Message, message: String){
-        val inflater: LayoutInflater = ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        if (context != null){
+            val inflater: LayoutInflater = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-        val view = inflater.inflate(R.layout.pop_up_message,null)
+            val view = inflater.inflate(R.layout.pop_up_message,null)
 
-        // Initialize a new instance of popup window
-        popupWindow = PopupWindow(
-                view, // Custom view to show in popup window
-                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-                LinearLayout.LayoutParams.MATCH_PARENT// Window height
-        )
+            // Initialize a new instance of popup window
+            popupWindow = PopupWindow(
+                    view, // Custom view to show in popup window
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    true
+            )
 
-        // Set an elevation for the popup window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            popupWindow.elevation = 10.0F
-        }
-        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
-
-        val layoutMessageInvitation = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
-        val layoutMessageBasic = view.findViewById<LinearLayout>(R.id.layout_message_basic)
-        val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
-        val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
-        val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
-        val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
-        val ivInviter = view.findViewById<CircleImageView>(R.id.ivInviter)
-        val tvMessageInviter = view.findViewById<TextView>(R.id.tvMessageInviter)
-
-        if (type == com.example.tambahinaja.friends.Message.Reply){
-            layoutMessageInvitation.visibility = View.VISIBLE
-            layoutMessageBasic.visibility = View.GONE
-            layoutMessageReward.visibility = View.GONE
-
-            btnClose.onClick {
-                homePresenter.replyInvitation(true)
-                btnClose.startAnimation(clickAnimation)
-                fragment_home.alpha = 1F
-                popupWindow.dismiss()
+            // Set an elevation for the popup window
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                popupWindow.elevation = 10.0F
             }
+            val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
 
-            btnReject.onClick {
-                homePresenter.replyInvitation(false)
-                btnReject.startAnimation(clickAnimation)
-                fragment_home.alpha = 1F
-                popupWindow.dismiss()
-            }
-
-            Picasso.get().load(getFacebookProfilePicture(dataInviter.facebookId!!)).fit().into(ivInviter)
-            tvMessageInviter.text = message
-        }else if (type == com.example.tambahinaja.friends.Message.ReadOnly){
+            val layoutMessageInvitation = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
+            val layoutMessageBasic = view.findViewById<LinearLayout>(R.id.layout_message_basic)
             val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
-            val ivMessageReward = view.findViewById<ImageView>(R.id.ivMessageReward)
-            val tvMessageReward = view.findViewById<TextView>(R.id.tvMessageReward)
+            val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
+            val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
+            val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
+            val ivInviter = view.findViewById<CircleImageView>(R.id.ivInviter)
+            val tvMessageInviter = view.findViewById<TextView>(R.id.tvMessageInviter)
 
-            layoutMessageReward.visibility = View.VISIBLE
-            layoutMessageInvitation.visibility = View.GONE
-            btnReject.visibility = View.GONE
+            if (type == com.example.tambahinaja.friends.Message.Reply){
+                layoutMessageInvitation.visibility = View.VISIBLE
+                layoutMessageBasic.visibility = View.GONE
+                layoutMessageReward.visibility = View.GONE
 
-            tvMessageTitle.text = "Reward"
-//            tvMessageReward.text = message
-            if (reward.type == "credit")
-                ivMessageReward.setImageResource(R.drawable.credit)
-            else if (reward.type == "point")
-                ivMessageReward.setImageResource(R.drawable.money_bag)
+                btnClose.onClick {
+                    homePresenter.replyInvitation(true)
+                    btnClose.startAnimation(clickAnimation)
+                    fragment_home.alpha = 1F
+                    popupWindow.dismiss()
+                }
 
-            btnClose.onClick {
-                homePresenter.removePopUpReward()
-                btnClose.startAnimation(clickAnimation)
-                fragment_home.alpha = 1F
-                popupWindow.dismiss()
+                btnReject.onClick {
+                    homePresenter.replyInvitation(false)
+                    btnReject.startAnimation(clickAnimation)
+                    fragment_home.alpha = 1F
+                    popupWindow.dismiss()
+                }
+
+                Picasso.get().load(getFacebookProfilePicture(dataInviter.facebookId!!)).fit().into(ivInviter)
+                tvMessageInviter.text = message
+            }else if (type == com.example.tambahinaja.friends.Message.ReadOnly){
+                val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
+                val ivMessageReward = view.findViewById<ImageView>(R.id.ivMessageReward)
+                val tvMessageReward = view.findViewById<TextView>(R.id.tvMessageReward)
+
+                layoutMessageReward.visibility = View.VISIBLE
+                layoutMessageInvitation.visibility = View.GONE
+                btnReject.visibility = View.GONE
+
+                tvMessageTitle.text = "Reward"
+                tvMessageReward.text = message
+                tvMessageReward.typeface = typeface
+
+                if (reward.type == "credit")
+                    ivMessageReward.setImageResource(R.drawable.credit)
+                else if (reward.type == "point")
+                    ivMessageReward.setImageResource(R.drawable.money_bag)
+
+                btnClose.onClick {
+                    btnClose.startAnimation(clickAnimation)
+                    fragment_home.alpha = 1F
+                    popupWindow.dismiss()
+                    homePresenter.removePopUpReward()
+                }
             }
+
+            tvMessageTitle.typeface = typeface
+            tvMessageInviter.typeface = typeface
+
+            fragment_home.alpha = 0.1F
+
+            if (fragment_home != null && isAdded)
+                TransitionManager.beginDelayedTransition(fragment_home)
+
+            popupWindow.showAtLocation(
+                    getView(), // Location to display popup window
+                    Gravity.CENTER, // Exact position of layout to display popup
+                    0, // X offset
+                    0 // Y offset
+            )
         }
-
-        tvMessageTitle.typeface = typeface
-        tvMessageInviter.typeface = typeface
-
-        fragment_home.alpha = 0.1F
-
-        TransitionManager.beginDelayedTransition(fragment_home)
-        popupWindow.showAtLocation(
-                fragment_home, // Location to display popup window
-                Gravity.CENTER, // Exact position of layout to display popup
-                0, // X offset
-                0 // Y offset
-        )
 
     }
 
     override fun response(message: String) {
         if (message === "acceptedGame"){
-            toast("acceptedGame")
-
             startActivity(intentFor<CountdownActivity>("inviterFacebookId" to dataInviter.facebookId,
                     "inviterName" to dataInviter.name,
                     "status" to StatusPlayer.JoinFriend,
@@ -869,6 +913,51 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                     "timer" to dataInviter.timer))
         }else if(message === "dismissInvitation"){
             //popUpMessage(com.example.balapplat.friends.Message.ReadOnly,"You Have been Rejected")
+            toast("You Have been Rejected")
+        }else if(message === "rewardPuzzlePopUp"){
+            homePresenter.updateCredit(credit.toLong() + 20)
         }
+    }
+
+    private fun setSeasonTimer(){
+        val currentDate = Date().time
+
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MONTH, 1)
+        calendar.set(Calendar.DATE, calendar.getActualMinimum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+
+        val seasonEnd = calendar.time.time
+
+        val diff = seasonEnd - currentDate
+
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+        val days = hours / 24
+
+        when {
+            days >= 1 -> tvSeason.text = "Season End : ${days} Days ${hours%24} Hours"
+            hours in 1..23 -> tvSeason.text = "Season End : ${hours} Hours ${minutes%60} Minutes"
+            minutes in 1..59 -> tvSeason.text = "Season End : ${minutes}"
+            minutes >= 0 -> tvSeason.text = "Season End : Less Than 1 Minute"
+            else -> tvSeason.text = "End"
+        }
+
+    }
+
+    private fun firebaseSingleListenerRepeat(){
+        if(auth.currentUser != null && Profile.getCurrentProfile() != null){
+            homePresenter.receiveInvitation()
+            homePresenter.receiveReward()
+        }
+
+        handler.postDelayed(runnable,2000)
+    }
+
+    override fun onPause() {
+        handler.removeCallbacks(runnable)
+        homePresenter.dismissListener()
+        super.onPause()
     }
 }

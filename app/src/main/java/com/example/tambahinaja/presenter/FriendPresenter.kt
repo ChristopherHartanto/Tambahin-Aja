@@ -1,5 +1,6 @@
 package com.example.tambahinaja.presenter
 
+import com.example.tambahinaja.model.User
 import com.example.tambahinaja.view.MainView
 import com.example.tambahinaja.rank.Balance
 import com.google.firebase.auth.FirebaseAuth
@@ -37,6 +38,9 @@ class FriendPresenter(private val view: MainView, private val database: Database
     }
 
     fun fetchDataFriends(dataSnapshot: DataSnapshot){
+        dataSnapshot.children.sortedBy {
+            it.getValue(User::class.java)!!.name
+        }
         for (ds in dataSnapshot.children) {
             if (ds.key!! != auth.currentUser!!.uid){
                 retrieveProfileFriends(ds.key)
@@ -54,7 +58,7 @@ class FriendPresenter(private val view: MainView, private val database: Database
 
                 override fun onDataChange(p0: DataSnapshot) {
                     if (p0.exists())
-                        view.loadData(p0,"retriveProfileFriends")
+                        view.loadData(p0,"retrieveProfileFriends")
                 }
 
             }

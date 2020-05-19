@@ -64,6 +64,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorWhite"
+                    android:id="@+id/tvTutorialDesc"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:id="@+id/tvRankGameTypeInfo"
                     android:text="The Best You Start is From Normal Mode"
                     android:textSize="18sp"
@@ -84,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:textColor="@color/colorWhite"
-                    android:text="What is That?"
+                    android:text="How to Play?"
                     android:layout_margin="5dp"
                     android:id="@+id/btnWatchTutorial"/>
 

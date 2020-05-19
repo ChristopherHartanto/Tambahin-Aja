@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.SkuDetails
 import com.example.tambahinaja.R
 import org.jetbrains.anko.backgroundResource
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.toast
 
 class ShopRecyclerViewAdapter(
         private val context: Context,
@@ -70,6 +72,13 @@ class ShopRecyclerViewAdapter(
                     image.backgroundResource = R.drawable.treasure_box
                     buy.text = "Rp 49.900"
                 }
+            }
+
+            buy.onClick {
+                context.toast("on development")
+            }
+
+            itemView.onClick {
             }
 
         }

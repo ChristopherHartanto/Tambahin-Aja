@@ -51,7 +51,7 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, MatchView {
+class NormalGameActivity : AppCompatActivity(), MatchView {
 
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var database: DatabaseReference
@@ -336,101 +336,103 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
     }
 
     private fun checkAnswer(value : Int){
-        if (type == GameType.Normal){
-            if (answer == value){
-                point += 10
-                generate()
-            }else{
-                if(point > 3)
-                    point -= 3
-                else
-                    point = 0
+        if (timer > 0){
+            if (type == GameType.Normal){
+                if (answer == value){
+                    point += 10
+                    generate()
+                }else{
+                    if(point > 3)
+                        point -= 3
+                    else
+                        point = 0
+                }
+
+            }else if (type == GameType.OddEven){
+                if (answer == value){
+                    point += 10
+                    generate()
+                }else{
+                    if(point > 9)
+                        point -= 9
+                    else
+                        point = 0
+                }
+            }else if (type == GameType.AlphaNum){
+                if (answer == value){
+                    point += 15
+                    generate()
+                }else{
+                    if(point > 7)
+                        point -= 7
+                    else
+                        point = 0
+                }
+            }else if (type == GameType.Rush){
+                if (answer == value){
+                    point += 13
+                    generate()
+                    countDownTimer.cancel()
+                    timer = defaultTimer
+                    control(true)
+                }else{
+                    if(point > 4)
+                        point -= 4
+                    else
+                        point = 0
+                }
+            }
+            else if(type == GameType.AlphaNum){
+                if (answer == value){
+                    point += 12
+                    generate()
+                }else{
+                    if(point > 5)
+                        point -= 5
+                    else
+                        point = 0
+                }
+            }else if (type == GameType.DoubleAttack){
+                if (answer == value){
+                    point += 14
+                    generate()
+                }else{
+                    if(point > 4)
+                        point -= 4
+                    else
+                        point = 0
+                }
+
             }
 
-        }else if (type == GameType.OddEven){
             if (answer == value){
-                point += 10
-                generate()
-            }else{
-                if(point > 9)
-                    point -= 9
-                else
-                    point = 0
-            }
-        }else if (type == GameType.AlphaNum){
-            if (answer == value){
-                point += 15
-                generate()
-            }else{
-                if(point > 7)
-                    point -= 7
-                else
-                    point = 0
-            }
-        }else if (type == GameType.Rush){
-            if (answer == value){
-                point += 13
-                generate()
-                countDownTimer.cancel()
-                timer = defaultTimer
-                control(true)
-            }else{
-                if(point > 4)
-                    point -= 4
-                else
-                    point = 0
-            }
-        }
-        else if(type == GameType.AlphaNum){
-            if (answer == value){
-                point += 12
-                generate()
-            }else{
-                if(point > 5)
-                    point -= 5
-                else
-                    point = 0
-            }
-        }else if (type == GameType.DoubleAttack){
-            if (answer == value){
-                point += 14
-                generate()
-            }else{
-                if(point > 4)
-                    point -= 4
-                else
-                    point = 0
+                point += when(enumValueOf<Rank>(currentRank)){
+                    Rank.Toddler -> 0
+                    Rank.Beginner -> 1
+                    Rank.Senior -> 2
+                    Rank.Master -> 3
+                    Rank.GrandMaster -> 5
+                }
             }
 
-        }
-
-        if (answer == value){
-            point += when(enumValueOf<Rank>(currentRank)){
-                Rank.Toddler -> 0
-                Rank.Beginner -> 1
-                Rank.Senior -> 2
-                Rank.Master -> 3
-                Rank.GrandMaster -> 5
+            if (player != StatusPlayer.Single){
+                when (player) {
+                    StatusPlayer.Inviter -> matchPresenter.updateValue(true,point,opponentPoint,joinFriendFacebookId)
+                    StatusPlayer.JoinFriend -> matchPresenter.updateValue(false,point,opponentPoint,inviterFacebookId)
+                    StatusPlayer.JoinOnline -> matchPresenter.updateValue(false,point,opponentPoint,creatorFacebookId)
+                    StatusPlayer.Creator -> matchPresenter.updateValue(true,point,opponentPoint,joinOnlineFacebookId)
+                }
             }
-        }
 
-        if (player != StatusPlayer.Single){
-            when (player) {
-                StatusPlayer.Inviter -> matchPresenter.updateValue(true,point,opponentPoint,joinFriendFacebookId)
-                StatusPlayer.JoinFriend -> matchPresenter.updateValue(false,point,opponentPoint,inviterFacebookId)
-                StatusPlayer.JoinOnline -> matchPresenter.updateValue(false,point,opponentPoint,creatorFacebookId)
-                StatusPlayer.Creator -> matchPresenter.updateValue(true,point,opponentPoint,joinOnlineFacebookId)
+            val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+
+            if(player == StatusPlayer.Single || player == StatusPlayer.Rank){
+                tvPoint.text = "" + point
+                tvPoint.startAnimation(animationBounce)
+            }else{
+                tvPlayerPoint.text = ""+point
+                tvPlayerPoint.startAnimation(animationBounce)
             }
-        }
-
-        val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
-
-        if(player == StatusPlayer.Single || player == StatusPlayer.Rank){
-            tvPoint.text = "" + point
-            tvPoint.startAnimation(animationBounce)
-        }else{
-            tvPlayerPoint.text = ""+point
-            tvPlayerPoint.startAnimation(animationBounce)
         }
     }
 
@@ -459,8 +461,6 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                         }
 
                     }else{
-                        toast("your point : "+ point + "opponent point : " + opponentPoint)
-
                         text = when {
                             point > opponentPoint -> {
                                 matchPresenter.getStats(auth,true)
@@ -471,7 +471,6 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                                 "Lose"
                             }
                             point == opponentPoint -> {
-                                toast("1.  your point : "+ point + "opponent point : " + opponentPoint)
                                 "Draw"
                             }
                             else -> "error"
@@ -526,8 +525,7 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                                 calculateReward()
                                 updateRank(currentRank)
                                 matchPresenter.getTournamentType()
-                                startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
-                                finish()
+
                             }
                         }
                         StatusPlayer.Single->{
@@ -657,8 +655,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 tvOpponentName.text = ""+joinOnlineName
             }
             StatusPlayer.JoinOnline -> {
-                Picasso.get().load(getFacebookProfilePicture(joinOnlineFacebookId)).fit().into(ivOpponentImage)
-                tvOpponentName.text = ""+joinOnlineName
+                Picasso.get().load(getFacebookProfilePicture(creatorFacebookId)).fit().into(ivOpponentImage)
+                tvOpponentName.text = ""+creatorName
             }
         }
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerImage)
@@ -707,10 +705,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 activity_normal_game.alpha = 1F
                 popupWindow.dismiss()
                 updateRank(currentRank)
-                matchPresenter.getTournamentType()
                 calculateReward()
-                startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
-                finish()
+                matchPresenter.getTournamentType()
             }
 
             btnReject.onClick {
@@ -751,7 +747,14 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
     }
 
     override fun response(message: String) {
-        toast(""+ message)
+        if (message == "updateTournament"){
+            finishRank()
+        }
+    }
+
+    fun finishRank(){
+        startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
+        finish()
     }
 
     fun calculateReward(){
@@ -795,22 +798,20 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
 
     override fun onBackPressed() {
 //        database.child("onPlay").child(facebookId).child("pause").setValue(true)
-        if (player == StatusPlayer.JoinOnline || player == StatusPlayer.Creator)
-            toast("Cannot Exist in the Middle Game")
-        else{
-            countDownTimer.cancel()
+//        if (player == StatusPlayer.JoinOnline || player == StatusPlayer.Creator)
+//            toast("Cannot Exist in the Middle Game")
+//        else{
+//            countDownTimer.cancel()
 
-        alert {
+        alert ("You'll be Leave on This Game"){
             title = "Exit"
             yesButton {
                 // di isi
                 finish()
             }
             noButton {
-                control(true)
             }
         }.show()
-        }
 
     }
 
@@ -820,6 +821,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
             if (tournamentType == type.toString()){
                 matchPresenter.updateTournament(auth, point.toLong())
             }
+        }else{
+            finishRank()
         }
     }
 
@@ -845,17 +848,17 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
         }
     }
 
-    override fun networkConnectivityChanged(event: Event) {
-        when (event) {
-            is Event.ConnectivityEvent -> {
-                if (event.state.isConnected) {
-                    showSnackBar(activity_normal_game, "The network is back !", "LONG")
-                } else {
-                    showSnackBar(activity_normal_game, "There is no more network", "INFINITE")
-                }
-            }
-        }
-    }
+//    override fun networkConnectivityChanged(event: Event) {
+//        when (event) {
+//            is Event.ConnectivityEvent -> {
+//                if (event.state.isConnected) {
+//                    showSnackBar(activity_normal_game, "The network is back !", "LONG")
+//                } else {
+//                    showSnackBar(activity_normal_game, "There is no more network", "INFINITE")
+//                }
+//            }
+//        }
+//    }
 
     override fun loadHighScore(score: Long) {
        highScore = score.toInt()
@@ -877,10 +880,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                         editor.apply()
                     }else{
                         updateRank(currentRank)
-                        matchPresenter.getTournamentType()
                         calculateReward()
-                        startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
-                        finish()
+                        matchPresenter.getTournamentType()
                     }
                 }
                 override fun onUserEarnedReward(@NonNull reward: RewardItem) {
@@ -903,7 +904,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
         if(message == "fetchTournamentType"){
             if (dataSnapshot.getValue(TournamentData::class.java)!!.type == type.toString()) {
                 addPointToTournament(dataSnapshot.getValue(TournamentData::class.java)!!.type.toString())
-            }
+            }else
+                finishRank()
         }else if(message == "getTournamentEndDate"){
             for ((index,data) in dataSnapshot.children.withIndex()){
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -914,7 +916,8 @@ class NormalGameActivity : AppCompatActivity(), NetworkConnectivityListener, Mat
                 if(diff > 0){
                     tournamentEndDate = data.key.toString()
                     matchPresenter.loadTournamentType(tournamentEndDate)
-                }
+                }else
+                    finishRank()
             }
         }
     }

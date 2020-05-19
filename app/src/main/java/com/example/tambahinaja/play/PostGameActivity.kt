@@ -40,6 +40,17 @@ class PostGameActivity : AppCompatActivity() {
         tvPlayerPoint.typeface = typeface
         tvOpponentPoint.typeface = typeface
 
+        mAdView = this.findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
+        MobileAds.initialize(this)
+        val adView = AdView(this)
+        adView.adSize = AdSize.BANNER
+        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
+
+        Thread.sleep(100)
+
         val score = intent.extras!!.getInt("score",0)
         val status = intent.extras!!.getSerializable("status")
         if (score != 0){
@@ -66,17 +77,6 @@ class PostGameActivity : AppCompatActivity() {
 
             tvPostGameTitle.text = "You " +intent.extras!!.getString("gameResult","Result")
         }
-
-
-
-        mAdView = this.findViewById(R.id.adView)
-        val adRequest = AdRequest.Builder().build()
-        mAdView.loadAd(adRequest)
-
-        MobileAds.initialize(this)
-        val adView = AdView(this)
-        adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
         btnBackMenu.onClick {
             finish()

@@ -151,7 +151,10 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             sbTime.min = 30
         }
+
         timer = 30
+        tvCustomGameTime.text = "Time : ${timer}"
+
         sbTime.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
@@ -184,6 +187,9 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
             if (!availableGameList[it]){
                 toast("Not Available")
             }else{
+                sbTime.progress = 30
+                timer = 30
+                tvCustomGameTime.text = "Time : $timer"
                 position = it
                 when(position){
                     0 -> {
@@ -207,6 +213,10 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             sbTime.min = 3
                             sbTime.max = 8
+
+                            sbTime.progress = 3
+                            timer = 3
+                            tvCustomGameTime.text = "Time : $timer"
                         }
                         ivCustomGame.setImageResource(R.drawable.rush_game)
                     }
@@ -316,7 +326,7 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
             }
             customGameAdapter.notifyDataSetChanged()
 
-        }else if(response == "retriveProfileFriends"){
+        }else if(response == "retrieveProfileFriends"){
             fetchProfileFriends(dataSnapshot)
         }
 

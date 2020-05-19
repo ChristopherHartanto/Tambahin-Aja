@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_setting.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 
 class SettingActivity : AppCompatActivity() {
 
@@ -33,13 +34,17 @@ class SettingActivity : AppCompatActivity() {
 
         settingItems.add(Setting("Review Us!",""))
         settingItems.add(Setting("Privacy Policy",""))
+        settingItems.add(Setting("Terms and Condition",""))
         settingItems.add(Setting("About Us",""))
         settingItems.add(Setting("Version",""))
         settingItems.add(Setting("Contact Us",""))
 
         adapter = SettingRecyclerViewAdapter(this,settingItems){
             when(it){
-                4 ->sendEmail()
+                1 ->openWebsite("https://tambahin-aja.flycricket.io/privacy.html")
+                2 ->openWebsite("https://tambahin-aja.flycricket.io/terms.html")
+                4 -> toast("Current Version 1.0")
+                5 ->sendEmail()
             }
         }
         rvSetting.layoutManager = LinearLayoutManager(this)
@@ -49,6 +54,11 @@ class SettingActivity : AppCompatActivity() {
             auth.signOut()
             finish()
         }
+    }
+
+    private fun openWebsite(url: String){
+        val i = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(i)
     }
 
     private fun sendEmail() {

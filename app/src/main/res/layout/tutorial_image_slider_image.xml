@@ -2,15 +2,39 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="10">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:textSize="32sp"
+        android:text="Welcome"
+        android:gravity="center"
+        android:textColor="@color/colorPrimary"
+        android:layout_margin="10dp"
+        android:id="@+id/tvTutorialTitle"
+        android:layout_weight="1"/>
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_margin="10dp"
         android:src="@mipmap/ic_launcher"
         android:scaleType="fitXY"
         android:adjustViewBounds="true"
-        android:id="@+id/imageView" />
+        android:id="@+id/imageView"
+        android:layout_weight="7"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:textSize="20sp"
+        android:text="This is Tutorial"
+        android:gravity="center"
+        android:textColor="@color/colorPrimary"
+        android:layout_margin="10dp"
+        android:id="@+id/tvTutorialInfo"
+        android:layout_weight="2"/>
 
 </LinearLayout>

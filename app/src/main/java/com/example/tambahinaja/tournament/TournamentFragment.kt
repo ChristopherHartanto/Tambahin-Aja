@@ -31,9 +31,12 @@ import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.fragment_list_friends.*
 import kotlinx.android.synthetic.main.fragment_tournament.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.onRefresh
+import org.jetbrains.anko.support.v4.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -66,7 +69,9 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         return inflater.inflate(R.layout.fragment_tournament, container, false)
     }
 
-    override fun onStart() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         adapter = TournamentRecyclerViewAdapter(ctx,tournamentParticipants)
@@ -84,12 +89,19 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         tournamentParticipants.clear()
         tournamentPresenter.fetchTournament()
 
+        srTournament.onRefresh {
+            tournamentParticipants.clear()
+            tournamentPresenter.fetchTournament()
+        }
 
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvTournamentTitle.typeface = typeface
         tvStandingTitle.typeface = typeface
         tvTournamentProfile.typeface = typeface
         tvTournamentTimeLeft.typeface = typeface
+    }
+
+    override fun onStart() {
 
         btnInfo.onClick {
             btnInfo.startAnimation(clickAnimation)
@@ -97,11 +109,12 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         }
 
         btnJoinTournament.onClick {
-            tournamentPresenter.checkPoint(auth,price.toLong())
-
+            if (auth.currentUser != null && dataTournament.price!!.toInt() != 0)
+                tournamentPresenter.checkPoint(auth,price.toLong())
+            else
+                toast("login first")
         }
 
-        tournamentPresenter.fetchTournament()
         super.onStart()
     }
 
@@ -186,86 +199,94 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == "fetchTournament"){
-            if (dataSnapshot.exists()){
-                for ((index,data) in dataSnapshot.children.withIndex()){
-                    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                    val currentDate = Date().time
-                    val tournamentDate = sdf.parse(data.key.toString()).time
-                    diff = tournamentDate - currentDate
+            if (context != null) {
+                if (dataSnapshot.exists()) {
+                    for ((index, data) in dataSnapshot.children.withIndex()) {
+                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        val currentDate = Date().time
+                        val tournamentDate = sdf.parse(data.key.toString()).time
+                        diff = tournamentDate - currentDate
 
-                    if (diff > 0)
-                        btnJoinTournament.visibility = View.VISIBLE
-                    else
-                        btnJoinTournament.visibility = View.GONE
+                        if (diff > 0)
+                            btnJoinTournament.visibility = View.VISIBLE
+                        else
+                            btnJoinTournament.visibility = View.GONE
 
-                    val joinTournament = sharedPreference.getString("joinTournament","")
-                    if (data.key.toString() == joinTournament){
-                        btnJoinTournament.visibility = View.GONE
-                        ivTournamentProfile.visibility = View.VISIBLE
-                        tvTournamentProfile.visibility = View.VISIBLE
-                    }else{
-                        editor = sharedPreference.edit()
-                        editor.remove("joinTournament")
-                        editor.apply()
+                        val joinTournament = sharedPreference.getString("joinTournament", "")
+                        if (data.key.toString() == joinTournament) {
+                            btnJoinTournament.visibility = View.GONE
+                            ivTournamentProfile.visibility = View.VISIBLE
+                            tvTournamentProfile.visibility = View.VISIBLE
+                        } else {
+                            editor = sharedPreference.edit()
+                            editor.remove("joinTournament")
+                            editor.apply()
 
-                        btnJoinTournament.visibility = View.VISIBLE
-                        ivTournamentProfile.visibility = View.GONE
-                        tvTournamentProfile.visibility = View.GONE
+                            btnJoinTournament.visibility = View.VISIBLE
+                            ivTournamentProfile.visibility = View.GONE
+                            tvTournamentProfile.visibility = View.GONE
+                        }
+                        dataTournament = data.getValue(TournamentData::class.java)!!
+                        tvTournamentTitle.text = dataTournament.title
+                        tournamentEndDate = data.key.toString()
+                        tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
+                        val seconds = diff / 1000
+                        val minutes = seconds / 60
+                        val hours = minutes / 60
+                        val days = hours / 24
+
+                        if (days >= 1)
+                            tvTournamentTimeLeft.text = "Ends In ${days} Days ${hours % 24} Hours"
+                        else if (hours in 1..23)
+                            tvTournamentTimeLeft.text = "Ends In ${hours} Hours ${minutes % 60} Minutes"
+                        else if (minutes in 1..59)
+                            tvTournamentTimeLeft.text = "Ends In ${minutes}"
+                        else if (minutes >= 0)
+                            tvTournamentTimeLeft.text = "Less Than 1 Minute"
+                        else
+                            tvTournamentTimeLeft.text = "End"
                     }
-                    dataTournament = data.getValue(TournamentData::class.java)!!
-                    tvTournamentTitle.text = dataTournament.title
-                    tournamentEndDate = data.key.toString()
-                    tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
-                    val seconds = diff / 1000
-                    val minutes = seconds / 60
-                    val hours = minutes / 60
-                    val days = hours / 24
 
-                    if (days >= 1)
-                        tvTournamentTimeLeft.text = "Ends In ${days} Days ${hours/24} Hours"
-                    else if(hours in 1..23)
-                        tvTournamentTimeLeft.text = "Ends In ${hours} Hours ${minutes/60} Minutes"
-                    else if(minutes in 1..59)
-                        tvTournamentTimeLeft.text = "Ends In ${minutes}"
-                    else if(minutes >= 0)
-                        tvTournamentTimeLeft.text = "Less Than 1 Minute"
-                    else
-                        tvTournamentTimeLeft.text = "End"
+                } else {
+                    btnJoinTournament.visibility = View.GONE
                 }
-
-            }else{
-                btnJoinTournament.visibility = View.GONE
             }
         }else if(response == "fetchTournamentParticipants"){
-            if (dataSnapshot.exists()){
-                tournamentParticipants.clear()
-                var count = dataSnapshot.childrenCount
-                for (data in dataSnapshot.children){
+            if (context != null){
+                if (dataSnapshot.exists()){
+                    tournamentParticipants.clear()
+                    var count = dataSnapshot.childrenCount
+                    for (data in dataSnapshot.children){
 
-                    if (auth.currentUser != null){
-                        if (data.getValue(TournamentParticipant::class.java)!!.facebookId.equals(Profile.getCurrentProfile().id)){
-                            Picasso.get().load(getFacebookProfilePicture(data.getValue(TournamentParticipant::class.java)!!.facebookId.toString()))
-                                    .into(ivTournamentProfile)
-                            tvTournamentProfile.text = "#$count " + auth.currentUser!!.displayName +" ${data.getValue(TournamentParticipant::class.java)!!.point}"
-                        }
-                        if (diff < 0 && count.toInt() == 1){ // update rank
-                            if (currentRank == Rank.Master.toString()){
-                                val progress1 = sharedPreference.getInt("master1",0)
-                                editor = sharedPreference.edit()
-                                editor.putInt("master1",progress1+1)
-                                editor.apply()
-                            }else if (currentRank == Rank.GrandMaster.toString()){
-                                val progress2 = sharedPreference.getInt("gMaster2",0)
-                                editor = sharedPreference.edit()
-                                editor.putInt("gMaster2",progress2+1)
-                                editor.apply()
+                        if (auth.currentUser != null){
+                            if (data.getValue(TournamentParticipant::class.java)!!.facebookId.equals(Profile.getCurrentProfile().id)){
+                                Picasso.get().load(getFacebookProfilePicture(data.getValue(TournamentParticipant::class.java)!!.facebookId.toString()))
+                                        .into(ivTournamentProfile)
+                                tvTournamentProfile.text = "#$count " + auth.currentUser!!.displayName +" ${data.getValue(TournamentParticipant::class.java)!!.point}"
+                            }
+                            if (diff < 0 && count.toInt() == 1){ // update rank
+                                if (currentRank == Rank.Master.toString()){
+                                    val progress1 = sharedPreference.getInt("master1",0)
+                                    editor = sharedPreference.edit()
+                                    editor.putInt("master1",progress1+1)
+                                    editor.apply()
+                                }else if (currentRank == Rank.GrandMaster.toString()){
+                                    val progress2 = sharedPreference.getInt("gMaster2",0)
+                                    editor = sharedPreference.edit()
+                                    editor.putInt("gMaster2",progress2+1)
+                                    editor.apply()
+                                }
                             }
                         }
+                        count--
+                        tournamentParticipants.add(data.getValue(TournamentParticipant::class.java)!!)
                     }
-                    count--
-                    tournamentParticipants.add(data.getValue(TournamentParticipant::class.java)!!)
+                    tournamentParticipants.sortBy {
+                        it.point
+                    }
+                    srTournament.isRefreshing = false
+                    adapter.notifyDataSetChanged()
                 }
-                adapter.notifyDataSetChanged()
             }
         }
     }
@@ -322,11 +343,11 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
             }
 
             btnClose.onClick {
-                tournamentPresenter.updatePoint(auth,price.toLong())
-                tournamentPresenter.joinTournament(auth,tournamentEndDate)
                 btnClose.startAnimation(clickAnimation)
                 fragment_tournament.alpha = 1F
                 popupWindow.dismiss()
+                tournamentPresenter.updatePoint(auth,price.toLong())
+                tournamentPresenter.joinTournament(auth,tournamentEndDate)
             }
         }
 
@@ -359,7 +380,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                 editor.apply()
             }
         }else if(message == "continueJoinTournament"){
-            popUp(Message.Reply,"Do You Want to Join this Tournament?")
+            popUp(Message.Reply,"Do You Want to Join this Tournament \n price ${dataTournament.price} points?")
         }else if(message == "notEnoughPoint"){
             popUp(Message.ReadOnly,"Not Enough Point")
         }else{

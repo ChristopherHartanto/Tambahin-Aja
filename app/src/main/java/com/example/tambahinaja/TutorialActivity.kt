@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.activity_tutorial.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -17,16 +18,16 @@ class TutorialActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
-        btnExitTutorial.onClick {
-            finish()
-        }
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
+        btnExitTutorial.typeface = typeface
 
         val sliderDotsPanel = findViewById<LinearLayout>(R.id.sliderDots)
         val viewPager = findViewById<ViewPager>(R.id.viewPager)
         val viewPagerAdapter = TutorialImageSliderAdapter(this)
         viewPager.adapter = viewPagerAdapter
         val dotsCount = viewPagerAdapter.count
-        var dots: Array<ImageView?> = arrayOfNulls(dotsCount)
+        val dots: Array<ImageView?> = arrayOfNulls(dotsCount)
+
         for(i in 0 until dotsCount){
             dots[i] = ImageView(this)
             dots[i]?.setImageDrawable(ContextCompat.getDrawable(applicationContext, R.drawable.tutorial_image_slider_non_active_dot))
@@ -53,8 +54,21 @@ class TutorialActivity : AppCompatActivity() {
                     dots[i]?.setImageDrawable(ContextCompat.getDrawable(applicationContext, R.drawable.tutorial_image_slider_non_active_dot))
                 }
                 dots[position]?.setImageDrawable(ContextCompat.getDrawable(applicationContext, R.drawable.tutorial_image_slider_active_dot))
+
+                if (position != viewPagerAdapter.count - 1)
+                    btnExitTutorial.text = "Next"
+                else
+                    btnExitTutorial.text = "Done"
+
             }
 
         })
+
+        btnExitTutorial.onClick {
+            if (btnExitTutorial.text.toString() == "Next")
+                viewPager.currentItem = viewPager.currentItem + 1
+            else
+                finish()
+        }
     }
 }

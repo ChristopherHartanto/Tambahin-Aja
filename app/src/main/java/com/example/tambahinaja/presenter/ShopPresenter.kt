@@ -38,4 +38,18 @@ class ShopPresenter(private val view: MainView, private val database: DatabaseRe
                     view.response("updateEnergy")
                 }
     }
+
+    fun updateEnergyLimit(energyLimit: Long){
+        database.child("users").child(auth.currentUser!!.uid).child("balance")
+                .child("energyLimit").setValue(energyLimit).addOnSuccessListener {
+                    view.response("updateEnergyLimit")
+                }
+    }
+
+    fun updatePoint(point: Long){
+        database.child("users").child(auth.currentUser!!.uid).child("balance")
+                .child("point").setValue(point).addOnSuccessListener {
+                    view.response("updatePoint")
+                }
+    }
 }

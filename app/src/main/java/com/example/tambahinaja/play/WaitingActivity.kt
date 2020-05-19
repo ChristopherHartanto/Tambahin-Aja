@@ -3,6 +3,7 @@ package com.example.tambahinaja.play
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import androidx.core.content.res.ResourcesCompat
 import com.example.tambahinaja.main.MainActivity
 import com.example.tambahinaja.view.MainView
@@ -33,6 +34,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
     lateinit var presenter: Presenter
     lateinit var waitingPresenter: WaitingPresenter
     var registerWaitingList = false
+    private lateinit var countDownTimer: CountDownTimer
     var timer = 0
     var type = GameType.Normal
 
@@ -75,7 +77,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
     fun timer(text: String){
         var count = 3
 
-        val timer = object: CountDownTimer(1000000, 1000) {
+        countDownTimer = object: CountDownTimer(12000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 when (count) {
                     3 -> tvWaiting.text = "$text ."
@@ -87,11 +89,15 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
             }
 
             override fun onFinish() {
+                dismissWaiting()
+                if (intent.extras!!.getBoolean("playOnline"))
+                    toast("Don't Worry, Lot Fun Stuff are on Progress")
+                else
+                    toast("Looks Like Your Friend is Busy")
                 finish()
-                startActivity(intentFor<MainActivity>().clearTask())
             }
         }
-        timer.start()
+        countDownTimer.start()
 
     }
 
@@ -106,18 +112,19 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
         else
             Picasso.get().load(getFacebookProfilePicture(dataSnapshot.key!!)).fit().into(ivOpponentImageWaiting)
 
-
-        if (creator){
-            startActivity(intentFor<CountdownActivity>("joinOnlineFacebookId" to dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId
-                , "joinOnlineName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
-                , "status" to StatusPlayer.Creator, "type" to GameType.Normal))
-            finish()
-        }else{
-            startActivity(intentFor<CountdownActivity>("creatorFacebookId" to dataSnapshot.key
-                , "creatorName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
-                , "status" to StatusPlayer.JoinOnline, "type" to GameType.Normal))
-            finish()
-        }
+        Handler().postDelayed({
+            if (creator){
+                startActivity(intentFor<CountdownActivity>("joinOnlineFacebookId" to dataSnapshot.getValue(OpponentOnline::class.java)!!.facebookId
+                        , "joinOnlineName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
+                        , "status" to StatusPlayer.Creator, "type" to GameType.Normal))
+                finish()
+            }else{
+                startActivity(intentFor<CountdownActivity>("creatorFacebookId" to dataSnapshot.key
+                        , "creatorName" to dataSnapshot.getValue(OpponentOnline::class.java)!!.name
+                        , "status" to StatusPlayer.JoinOnline, "type" to GameType.Normal))
+                finish()
+            }
+        },1000)
 
     }
 
@@ -154,6 +161,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
     }
 
     override fun onPause() {
+        countDownTimer.cancel()
         dismissWaiting()
 
         super.onPause()

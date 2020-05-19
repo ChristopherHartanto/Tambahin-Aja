@@ -21,12 +21,14 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ivPlayerWaiting"
             android:layout_width="100dp"
-            android:layout_height="100dp" />
+            android:layout_height="100dp"
+            android:layout_marginEnd="10dp"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ivOpponentImageWaiting"
             android:layout_width="100dp"
-            android:layout_height="100dp" />
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"/>
 
     </LinearLayout>
 

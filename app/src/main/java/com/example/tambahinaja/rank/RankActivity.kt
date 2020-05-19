@@ -82,6 +82,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     private var loadingCount = 4
     private lateinit var loadingTimer : CountDownTimer
     private lateinit var typeface: Typeface
+    private var energyTime = 300
     var energy = 0
     var energyLimit = 100
     var point = 0
@@ -165,7 +166,6 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 if (event.state.isConnected) {
                     showSnackBar(activity_rank, "The network is back !", "LONG")
                 } else {
-                    finish()
                     showSnackBar(activity_rank, "There is no more network", "INFINITE")
                 }
             }
@@ -213,7 +213,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
                 LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+                LinearLayout.LayoutParams.MATCH_PARENT
         )
 
         // Set an elevation for the popup window
@@ -250,7 +250,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         btnTask.onClick {
             if (btnTask.text == "Level Up" && levelUp){
                 levelUp = !levelUp
-                tvTaskInfo.visibility = View.GONE
+                tvTaskInfo.text = ""
 
                 var nextRank = ""
                 var nextEnergyLimit = 0
@@ -302,7 +302,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
                 LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+                LinearLayout.LayoutParams.MATCH_PARENT
         )
 
         // Set an elevation for the popup window
@@ -347,8 +347,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         // Initialize a new instance of popup window
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
-                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
         )
 
         // Set an elevation for the popup window
@@ -395,6 +395,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             layoutMessageReward.visibility = View.GONE
 
             btnReject.visibility = View.GONE
+            tvMessageInfo.typeface = typeface
+
             tvMessageInfo.text = message
             if (auth.currentUser != null)
                 rankPresenter.fetchGameAvailable()
@@ -456,17 +458,25 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         when(position){
             0 -> {
                 ivRankGameType.setImageResource(R.drawable.normal_game)
-
+                tvGameTypeInfo.text = "Once You Stop Learning, You Start Dying"
             }
             1 -> {
                 ivRankGameType.setImageResource(R.drawable.odd_even_game)
-
+                tvGameTypeInfo.text = "Try Something ODD, Because ODD Seems More EVEN"
             }
             2 -> {
                 ivRankGameType.setImageResource(R.drawable.rush_game)
+                tvGameTypeInfo.text = "Don't Rush Anything. When the Time is Right, it'll Happen"
             }
             3 -> {
                 ivRankGameType.setImageResource(R.drawable.alpha_num_game)
+                tvGameTypeInfo.text = "If Plan 'A' Didn't Work, the Alphabet has More 25 Letters"
+            }
+            4 ->{
+                tvGameTypeInfo.text = "Never Mix Business with Pleasure"
+            }
+            5 ->{
+                tvGameTypeInfo.text = "Do Good and The Good Life will Follow"
             }
         }
 
@@ -484,7 +494,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
 
         btnWatchTutorial.onClick {
-            ivRankGameType.layoutParams.height = 800
+            ivRankGameType.layoutParams.height = 1200
             ivRankGameType.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
             when(position){
                 0 -> ivRankGameType.setImageResource(R.drawable.normal_tutorial)
@@ -514,10 +524,10 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
 
         if (auth.currentUser != null){
-            rankPresenter.fetchBalance()
             rankPresenter.fetchGameAvailable()
             rankPresenter.fetchScore()
             rankPresenter.fetchRank()
+            rankPresenter.fetchBalance()
         }
 
         countDownTimer = object : CountDownTimer(1000,1000){
@@ -666,8 +676,19 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     }
 
     fun setUpEnergyTimer(){
-        if (energy != energyLimit) {
-            val remainingEnergyToFull = (energyLimit - energy) * 30 // 10 detik
+        if (energy <= energyLimit) {
+
+            currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString()
+
+            energyTime = when(enumValueOf<Rank>(currentRank)){
+                Rank.Toddler -> 300
+                Rank.Beginner -> 300
+                Rank.Senior -> 240
+                Rank.Master -> 240
+                Rank.GrandMaster -> 180
+            }
+
+            val remainingEnergyToFull = (energyLimit - energy) * energyTime
             val currentDate = Date().time
 
             val lastCountEnergy = sharedPreference.getLong("lastCountEnergy", currentDate)
@@ -683,7 +704,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     fun energyTimer(){
         if (!checkUpdateEnergy){
             checkUpdateEnergy = true
-            val energyGet = diff / 1000 / 30
+            val energyGet = diff / 1000 / energyTime
             if (energyGet + energy >= energyLimit) // energy get + energy >= energy limit, energy = energy limit
                 energy = energyLimit // else energy += energyget
             else
@@ -695,7 +716,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
         if (remainTime > 0 && energy < energyLimit){
 
-            var timerSec = remainTime % 30 // 100 detik
+            var timerSec = remainTime % energyTime
             var timerMin = 0
 
             if (timerSec > 60){
@@ -791,15 +812,15 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 if (progress1 >= 200)
                     taskProgressList.add("completed")
                 else
-                    taskProgressList.add("${progress1}/250")
+                    taskProgressList.add("${progress1}/200")
                 if (progress2 >= 250)
                     taskProgressList.add("completed")
                 else
-                    taskProgressList.add("${progress2}/300")
+                    taskProgressList.add("${progress2}/250")
                 if (progress3 >= 300)
                     taskProgressList.add("completed")
                 else
-                    taskProgressList.add("${progress3}/200")
+                    taskProgressList.add("${progress3}/300")
                 if (progress4 >= 1)
                     taskProgressList.add("completed")
                 else

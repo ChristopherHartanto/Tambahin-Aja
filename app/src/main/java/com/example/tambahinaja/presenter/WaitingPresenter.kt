@@ -28,6 +28,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
     }
 
     fun getWaitingList(){
+        var count = 0
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 view.response(p0.message)
@@ -37,7 +38,8 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                 if(p0.exists())
                 {
                     for (data in p0.children){
-                        if (data.child("status").value == false && !data.key.equals(Profile.getCurrentProfile().id)){
+                        if (data.child("status").value == false && !data.key.equals(Profile.getCurrentProfile().id) && count == 0){
+                            count = 1
                             view.loadData(data, false)
 
                             val values: HashMap<String, Any> = hashMapOf(
@@ -84,7 +86,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
     }
 
     private fun getResponseOnline(){
-
+        var count = 0
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 view.response(""+p0.message)
@@ -93,7 +95,8 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
             override fun onDataChange(p0: DataSnapshot) {
                 if(p0.exists())
                 {
-                    if (p0.getValue(OpponentOnline::class.java)!!.status == true){
+                    if (p0.getValue(OpponentOnline::class.java)!!.status == true && count == 0){
+                        count = 1
                         view.loadData(p0, true)
                         createGame(Profile.getCurrentProfile().id,true)
                         removeWaitingList()

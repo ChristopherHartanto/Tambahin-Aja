@@ -2,14 +2,25 @@ package com.example.tambahinaja.home
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.animation.AlphaAnimation
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.billingclient.api.BillingClient
 import com.example.tambahinaja.R
+import com.example.tambahinaja.friends.Message
 import com.example.tambahinaja.presenter.ShopPresenter
 import com.example.tambahinaja.rank.Balance
 import com.example.tambahinaja.rank.Rank
@@ -21,9 +32,13 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_market.*
 import kotlinx.android.synthetic.main.activity_market.tvEnergy
 import kotlinx.android.synthetic.main.activity_market.tvPoint
+import org.jetbrains.anko.ctx
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,7 +53,7 @@ class MarketActivity : AppCompatActivity(), MainView {
     lateinit private var billingClient: BillingClient
     private lateinit var countDownTimer : CountDownTimer
     private lateinit var currentRank : String
-    private var energyTime = 0
+    private var energyTime = 300
     private var point = 0
     private var energy = 0
     private var energyLimit = 0
@@ -46,6 +61,8 @@ class MarketActivity : AppCompatActivity(), MainView {
     private var counted = 0
     private var diff: Long = 0
     private var checkUpdateEnergy = false
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
+    private lateinit var popupWindow : PopupWindow
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +90,7 @@ class MarketActivity : AppCompatActivity(), MainView {
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
         adapter = ShopRecyclerViewAdapter(this){
-
+            toast("on Development")
         }
         rvMarket.layoutManager = LinearLayoutManager(this)
         rvMarket.adapter = adapter
@@ -97,7 +114,6 @@ class MarketActivity : AppCompatActivity(), MainView {
     }
 
     override fun onStart() {
-        shopPresenter.fetchBalance()
         currentRank = sharedPreferences.getString("currentRank", Rank.Toddler.toString()).toString()
 
         energyTime = when(enumValueOf<Rank>(currentRank)){
@@ -107,6 +123,9 @@ class MarketActivity : AppCompatActivity(), MainView {
             Rank.Master -> 240
             Rank.GrandMaster -> 180
         }
+
+
+        shopPresenter.fetchBalance()
 
         countDownTimer = object : CountDownTimer(1000,1000){
             override fun onFinish() {
@@ -120,7 +139,7 @@ class MarketActivity : AppCompatActivity(), MainView {
     }
 
     fun setUpEnergyTimer(){
-        if (energy != energyLimit) {
+        if (energy <= energyLimit) {
             val remainingEnergyToFull = (energyLimit - energy) * energyTime
             val currentDate = Date().time
 
@@ -196,6 +215,77 @@ class MarketActivity : AppCompatActivity(), MainView {
 
     }
 
+    private fun popUpMessage(type: Message, message: String){
+        val inflater: LayoutInflater = ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        val view = inflater.inflate(R.layout.pop_up_message,null)
+
+        // Initialize a new instance of popup window
+        popupWindow = PopupWindow(
+                view, // Custom view to show in popup window
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
+                LinearLayout.LayoutParams.MATCH_PARENT// Window height
+        )
+
+        // Set an elevation for the popup window
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            popupWindow.elevation = 10.0F
+        }
+        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+
+        val basicLayout = view.findViewById<LinearLayout>(R.id.layout_message_basic)
+        val invitationLayout = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
+        val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
+        val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
+        val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)
+        val tvMessageInfo = view.findViewById<TextView>(R.id.tvMessageInfo)
+
+        invitationLayout.visibility = View.GONE
+        basicLayout.visibility = View.VISIBLE
+        tvMessageTitle.text = "Exchange"
+        tvMessageInfo.typeface = typeface
+
+        if (type == Message.Reply){
+            tvMessageInfo.text = message
+            btnReject.text = "No"
+            btnClose.text = "yes"
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_market.alpha = 1F
+                popupWindow.dismiss()
+            }
+
+            btnReject.onClick {
+                btnReject.startAnimation(clickAnimation)
+                activity_market.alpha = 1F
+                popupWindow.dismiss()
+            }
+        }
+        else if(type == Message.ReadOnly){
+            tvMessageInfo.text = message
+            btnReject.visibility = View.GONE
+
+            btnClose.onClick {
+                btnClose.startAnimation(clickAnimation)
+                activity_market.alpha = 1F
+                popupWindow.dismiss()
+            }
+        }
+
+        tvMessageTitle.typeface = typeface
+
+        activity_market.alpha = 0.1F
+
+        androidx.transition.TransitionManager.beginDelayedTransition(activity_market)
+        popupWindow.showAtLocation(
+                activity_market, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+        )
+
+    }
+
     override fun onPause() {
         editor = sharedPreferences.edit()
         editor.putLong("lastCountEnergy",Date().time)
@@ -225,6 +315,10 @@ class MarketActivity : AppCompatActivity(), MainView {
     override fun response(message: String) {
         if (message == "updateEnergy"){
             tvEnergy.text = "${energy}/${energyLimit}"
+        }else if (message == "updateEnergyLimit"){
+            popUpMessage(Message.ReadOnly,"Success Buy")
+        }else if (message == "updatePoint"){
+            popUpMessage(Message.ReadOnly,"Success Buy")
         }
     }
 }
