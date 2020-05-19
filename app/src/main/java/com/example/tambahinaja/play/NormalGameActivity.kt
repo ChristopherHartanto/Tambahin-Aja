@@ -46,6 +46,9 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_normal_game.*
 import kotlinx.android.synthetic.main.activity_normal_game.tvPoint
 import kotlinx.android.synthetic.main.activity_rank.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.text.SimpleDateFormat
@@ -61,6 +64,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     lateinit var data: Inviter
     lateinit var editor: SharedPreferences.Editor
     private lateinit var rewardedAd: RewardedAd
+    private var handler: Handler = Handler()
+    private lateinit var runnable: Runnable
+    private var continueGame = false
     private lateinit var currentRank : String
     var creditReward = 0
     var pointReward = 0
@@ -112,6 +118,15 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
         }
         rewardedAd.loadAd(AdRequest.Builder().build(), adLoadCallback)
+        runnable = Runnable {
+            if (!continueGame){
+                progress_bar.visibility = View.GONE
+                toast("Failed to Continue")
+                updateRank(currentRank)
+                calculateReward()
+                matchPresenter.getTournamentType()
+            }
+        }
 
         supportActionBar?.hide()
 
@@ -713,7 +728,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 btnReject.startAnimation(clickAnimation)
                 activity_normal_game.alpha = 1F
                 popupWindow.dismiss()
+                progress_bar.visibility = View.VISIBLE
                 loadRewardAd()
+                handler.postDelayed(runnable,5000)
             }
 
         }
@@ -791,6 +808,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     }
 
     override fun onPause() {
+        progress_bar.visibility = View.GONE
+        handler.removeCallbacks(runnable)
         countDownTimer.cancel()
         matchPresenter.dismissListener()
         super.onPause()
@@ -869,7 +888,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             val adCallback = object: RewardedAdCallback() {
                 var watched = false
                 override fun onRewardedAdOpened() {
-                    // Ad opened.
+                    progress_bar.visibility = View.GONE
+                    continueGame = true
                 }
                 override fun onRewardedAdClosed() {
                     if (watched){
@@ -893,9 +913,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 }
             }
             rewardedAd.show(this@NormalGameActivity, adCallback)
-        }
-        else {
-            Log.d("TAG", "The rewarded ad wasn't loaded yet.")
         }
         return  rewardedAd
     }

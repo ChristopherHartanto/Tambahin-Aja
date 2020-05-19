@@ -177,6 +177,15 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         if (dataSnapshot.exists()){
             tvTotalScore.text = "" + dataSnapshot.getValue(LeaderBoard::class.java)!!.total
 
+            if (enumValueOf<Rank>(currentRank) == Rank.GrandMaster){
+                val progress1 = sharedPreference.getInt("gMaster1",0)
+                if (dataSnapshot.getValue(LeaderBoard::class.java)!!.total!!.toInt() > progress1){
+                    editor = sharedPreference.edit()
+                    editor.putInt("gMaster1",point)
+                    editor.apply()
+                }
+            }
+
             items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal,0))
             items.add(ChooseGame("Odd Even", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
             items.add(ChooseGame("Rush", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
@@ -524,9 +533,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
 
         if (auth.currentUser != null){
-            rankPresenter.fetchGameAvailable()
-            rankPresenter.fetchScore()
             rankPresenter.fetchRank()
+            rankPresenter.fetchGameAvailable()
             rankPresenter.fetchBalance()
         }
 
@@ -582,7 +590,17 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             editor.putString("currentRank", dataSnapshot.value.toString())
             editor.apply()
             currentRank = dataSnapshot.value.toString()
+
+            when(enumValueOf<Rank>(currentRank)){
+                Rank.Toddler -> tvRank.backgroundColorResource = R.color.fbutton_color_sun_flower
+                Rank.Beginner -> tvRank.backgroundColorResource = R.color.fbutton_color_emerald
+                Rank.Senior -> tvRank.backgroundColorResource = R.color.fbutton_color_carrot
+                Rank.Master -> tvRank.backgroundColorResource = R.color.fbutton_color_pomegranate
+                Rank.GrandMaster -> tvRank.backgroundColorResource = R.color.fbutton_color_asbestos
+            }
+
             loadTask()
+            rankPresenter.fetchScore()
             if (levelUp){
                 tvTaskInfo.visibility = View.VISIBLE
                 val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
@@ -866,19 +884,19 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                     levelUp = true
             }
             Rank.GrandMaster -> {
-                taskList.add("Win Leaderboard 1 Time")
+                taskList.add("Total Point Rank 2000")
                 taskList.add("Win Tournament 3 Times")
                 taskList.add("Reach 300 Points in Double Attack")
                 taskList.add("Reach 400 Points in Mix")
 
-                val progress1 = sharedPreference.getInt("beginner1",0)
-                val progress2 = sharedPreference.getInt("beginner2",0)
-                val progress3 = sharedPreference.getInt("beginner3",0)
-                val progress4 = sharedPreference.getInt("beginner4",0)
-                taskProgressList.add("${progress1}/200")
-                taskProgressList.add("${progress2}/250")
-                taskProgressList.add("${progress3}/1")
-                taskProgressList.add("${progress4}/3")
+                val progress1 = sharedPreference.getInt("gMaster1",0)
+                val progress2 = sharedPreference.getInt("gMaster2",0)
+                val progress3 = sharedPreference.getInt("gMaster3",0)
+                val progress4 = sharedPreference.getInt("gMaster4",0)
+                taskProgressList.add("${progress1}/2000")
+                taskProgressList.add("${progress2}/3")
+                taskProgressList.add("${progress3}/300")
+                taskProgressList.add("${progress4}/400")
             }
         }
         taskAdapter.notifyDataSetChanged()

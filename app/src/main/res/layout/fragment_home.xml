@@ -60,6 +60,23 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="12dp"
+        android:src="@drawable/shopping_cart"
+        android:background="@drawable/button_bg_round"
+        android:layout_margin="10dp"
+        android:id="@+id/ivShop"/>
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="12dp"
+        android:layout_margin="10dp"
+        android:src="@drawable/question"
+        android:background="@drawable/button_bg_round"
+        android:id="@+id/ivTutorial"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -88,25 +105,6 @@
             android:src="@drawable/lightning"
             android:textColor="#ff0000"/>
     </FrameLayout>
-
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="12dp"
-        android:src="@drawable/shopping_cart"
-        android:background="@drawable/button_bg_round"
-        android:layout_margin="10dp"
-        android:id="@+id/ivShop"/>
-
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        android:src="@drawable/question"
-        android:background="@drawable/button_bg_round"
-        android:id="@+id/ivTutorial"/>
-
 
     <LinearLayout
         android:layout_width="match_parent"

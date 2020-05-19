@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.transition.TransitionManager
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -19,6 +20,7 @@ import com.example.tambahinaja.friends.Message
 import com.example.tambahinaja.model.User
 import com.example.tambahinaja.presenter.CreditPresenter
 import com.example.tambahinaja.rank.Balance
+import com.example.tambahinaja.utils.showSnackBar
 import com.example.tambahinaja.view.MainView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -28,13 +30,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_credit.tvCredit
+import kotlinx.android.synthetic.main.activity_market.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.toast
 
-class CreditActivity : AppCompatActivity(), MainView {
+class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListener {
 
     private lateinit var creditHistoryAdapter: CreditHistoryRecyclerViewAdapter
     private lateinit var adapter: CreditRecyclerViewAdapter
@@ -46,6 +52,9 @@ class CreditActivity : AppCompatActivity(), MainView {
     private var creditShopItems : MutableList<CreditShop> = mutableListOf()
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
+    private lateinit var typeface: Typeface
+    private var loadingCount = 4
+    private lateinit var loadingTimer : CountDownTimer
     private var credit = 0
     private var index = 0
 
@@ -56,10 +65,12 @@ class CreditActivity : AppCompatActivity(), MainView {
         supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvCredit.typeface = typeface
         tvCreditTitle.typeface = typeface
         presenter = CreditPresenter(this,database)
+
+        loadingTimer()
 
         adapter = CreditRecyclerViewAdapter(this,creditShopItems){
             if (auth.currentUser == null)
@@ -170,6 +181,8 @@ class CreditActivity : AppCompatActivity(), MainView {
                 creditShopItems.add(item!!)
             }
             adapter.notifyDataSetChanged()
+            layout_loading.visibility = View.GONE
+            loadingTimer.cancel()
         }else if(response == "fetchUser"){
             if (dataSnapshot.getValue(User::class.java)!!.email == "" || dataSnapshot.getValue(User::class.java)!!.noHandphone == "")
                 popUpMessage(Message.ReadOnly,"Please Fill Your Profile First")
@@ -259,6 +272,51 @@ class CreditActivity : AppCompatActivity(), MainView {
                 0 // Y offset
         )
 
+    }
+
+    fun loadingTimer(){
+        val view = findViewById<View>(R.id.layout_loading)
+
+        val tvLoadingTitle = view.findViewById<TextView>(R.id.tvLoadingTitle)
+        val tvLoadingInfo = view.findViewById<TextView>(R.id.tvLoadingInfo)
+
+        tvLoadingInfo.typeface = typeface
+        tvLoadingTitle.typeface = typeface
+
+        loadingTimer = object: CountDownTimer(15000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                when (loadingCount) {
+                    3 -> tvLoadingTitle.text = "Fetching Data ."
+                    2 -> tvLoadingTitle.text = "Fetching Data . ."
+                    1 -> tvLoadingTitle.text = "Fetching Data . . ."
+                    else -> loadingCount = 4
+                }
+                loadingCount--
+            }
+
+            override fun onFinish() {
+                finish()
+                toast("Oops Something Wrongs!")
+            }
+        }
+        loadingTimer.start()
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_credit, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_credit, "There is no more network", "INFINITE")
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        loadingTimer.cancel()
+        super.onPause()
     }
 }
 

@@ -24,6 +24,7 @@ import com.example.tambahinaja.friends.Message
 import com.example.tambahinaja.presenter.ShopPresenter
 import com.example.tambahinaja.rank.Balance
 import com.example.tambahinaja.rank.Rank
+import com.example.tambahinaja.utils.showSnackBar
 import com.example.tambahinaja.view.MainView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -32,6 +33,10 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.quantumhiggs.network.Event
+import com.quantumhiggs.network.NetworkConnectivityListener
+import com.quantumhiggs.network.NetworkStateHolder
+import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_market.*
 import kotlinx.android.synthetic.main.activity_market.tvEnergy
@@ -42,7 +47,7 @@ import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MarketActivity : AppCompatActivity(), MainView {
+class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView {
 
     private lateinit var shopPresenter: ShopPresenter
     private lateinit var sharedPreferences : SharedPreferences
@@ -319,6 +324,18 @@ class MarketActivity : AppCompatActivity(), MainView {
             popUpMessage(Message.ReadOnly,"Success Buy")
         }else if (message == "updatePoint"){
             popUpMessage(Message.ReadOnly,"Success Buy")
+        }
+    }
+
+    override fun networkConnectivityChanged(event: Event) {
+        when (event) {
+            is Event.ConnectivityEvent -> {
+                if (event.state.isConnected) {
+                    showSnackBar(activity_market, "The network is back !", "LONG")
+                } else {
+                    showSnackBar(activity_market, "There is no more network", "INFINITE")
+                }
+            }
         }
     }
 }

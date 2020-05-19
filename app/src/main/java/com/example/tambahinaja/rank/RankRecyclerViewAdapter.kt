@@ -4,10 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.GridLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tambahinaja.R
@@ -34,6 +31,7 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
+        private val background = view.findViewById<FrameLayout>(R.id.layout_rank_background)
         private val score = view.findViewById<TextView>(R.id.tvRankScore)
         private val name = view.findViewById<TextView>(R.id.tvRankName)
         private val image = view.findViewById<ImageView>(R.id.ivRank)
@@ -56,10 +54,22 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
             energy.text = ""+chooseGame.energy
             //score.text = "" + highScore.score
             when(position){
-                0 -> image.setImageResource(R.drawable.normal_game)
-                1 -> image.setImageResource(R.drawable.odd_even_game)
-                2 -> image.setImageResource(R.drawable.rush_game)
-                3 -> image.setImageResource(R.drawable.alpha_num_game)
+                0 -> {
+                    background.setBackgroundResource(R.color.colorNormal)
+                    image.setImageResource(R.drawable.normal_game)
+                }
+                1 -> {
+                    background.setBackgroundResource(R.color.colorOddEven)
+                    image.setImageResource(R.drawable.odd_even_game)
+                }
+                2 -> {
+                    background.setBackgroundResource(R.color.colorRush)
+                    image.setImageResource(R.drawable.rush_game)
+                }
+                3 -> {
+                    background.setBackgroundResource(R.color.colorAlphaNum)
+                    image.setImageResource(R.drawable.alpha_num_game)
+                }
             }
             if (position > 0){
                 if (!availableGame) {

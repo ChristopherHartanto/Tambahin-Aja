@@ -53,6 +53,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     var name = ""
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private var historyItems: MutableList<History> = mutableListOf()
+    private var fragmentActive = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,14 +78,30 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
             profilePresenter.fetchStats()
         }
 
+    }
+
+    override fun onStart() {
+        fragmentActive = true
+
         ivSetting.onClick {
             startActivity<SettingActivity>()
         }
+
+        ivWin.onClick {
+            toast("Total Win")
+        }
+
+        ivWinTournament.onClick {
+            toast("Total Win Tournament")
+        }
+
         updateUI()
+
+        super.onStart()
     }
 
     private fun updateUI(){
-        if (context != null){
+        if (context != null && fragmentActive){
             val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
             tvProfileName.typeface = typeface
             tvHistoryTitle.typeface = typeface
@@ -213,27 +230,29 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == "fetchHistory") {
-            historyItems.clear()
-            for (data in dataSnapshot.children) {
-                val item = data.getValue(History::class.java)
-                historyItems.add(item!!)
+        if (context != null && fragmentActive){
+            if (response == "fetchHistory") {
+                historyItems.clear()
+                for (data in dataSnapshot.children) {
+                    val item = data.getValue(History::class.java)
+                    historyItems.add(item!!)
+                }
+                profilePresenter.fetchUserProfile()
+            }else if(response == "fetchName"){
+                tvProfileName.text = dataSnapshot.value.toString()
+            }else if(response == "fetchStats"){
+                val data = dataSnapshot.getValue(Stats::class.java)
+                if (data != null) {
+                    tvWin.text = data.win.toString()
+                    tvWinTournament.text = data.tournamentWin.toString()
+                }
+            }else if(response == "fetchUserProfile"){
+                name = dataSnapshot.getValue(User::class.java)!!.name.toString()
+                user = User(dataSnapshot.getValue(User::class.java)!!.name,
+                        "", dataSnapshot.getValue(User::class.java)?.email,
+                        dataSnapshot.getValue(User::class.java)?.noHandphone,null)
+                initRv()
             }
-            profilePresenter.fetchUserProfile()
-        }else if(response == "fetchName"){
-            tvProfileName.text = dataSnapshot.value.toString()
-        }else if(response == "fetchStats"){
-            val data = dataSnapshot.getValue(Stats::class.java)
-            if (data != null) {
-                tvWin.text = data.win.toString()
-                tvWinTournament.text = data.tournamentWin.toString()
-            }
-        }else if(response == "fetchUserProfile"){
-            name = dataSnapshot.getValue(User::class.java)!!.name.toString()
-            user = User(dataSnapshot.getValue(User::class.java)!!.name,
-                    "", dataSnapshot.getValue(User::class.java)?.email,
-                    dataSnapshot.getValue(User::class.java)?.noHandphone,null)
-            initRv()
         }
     }
 
@@ -251,6 +270,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     }
 
     override fun onPause() {
+        fragmentActive = false
         profilePresenter.dismissListener()
         super.onPause()
     }

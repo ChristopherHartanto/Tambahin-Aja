@@ -87,23 +87,20 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
             it.getValue(LeaderBoard::class.java)!!.total
         }
 
-        var count = dataSnapshot.childrenCount
-        for ((index,ds) in dataSnapshot.children.withIndex()) {
+        var count = 0
 
+        for ((index,ds) in dataSnapshot.children.withIndex()) {
             if (auth.currentUser != null){
                 if (ds.key.equals(auth.currentUser!!.uid)){
-                    tvLeaderboardInfo.text = "#$count " + auth.currentUser!!.displayName +" "+ ds.getValue(Leaderboard::class.java)!!.total
+                    tvLeaderboardInfo.text = "#${dataSnapshot.childrenCount - count} " + auth.currentUser!!.displayName +" "+ ds.getValue(Leaderboard::class.java)!!.total
                 }
             }
-            count--
-        }
-        for ((index,ds) in dataSnapshot.children.withIndex()) {
-
+            count++
+            Thread.sleep(5)
             val total = ds.getValue(Leaderboard::class.java)!!.total
             val id = ds.key
 
             id?.let { retrieveUser(it,total) }
-            Thread.sleep(5)
         }
     }
 
@@ -133,6 +130,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
         if (profileItems.size == items.size){
             rvLeaderBoard.adapter = adapter
+            loadingTimer.cancel()
             layout_loading.visibility = View.GONE
         }
     }

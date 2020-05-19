@@ -21,53 +21,60 @@
         android:layout_height="wrap_content"
         android:id="@+id/rvSetting"/>
 
-    <androidx.cardview.widget.CardView
+<!--    <androidx.cardview.widget.CardView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content">-->
+
+<!--        <RelativeLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginVertical="5dp">-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:id="@+id/tvSettingJoinUs"-->
+<!--                android:text="Join Us"-->
+<!--                android:gravity="center"-->
+<!--                android:textColor="@color/colorPrimary"-->
+<!--                android:textSize="20sp" />-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_below="@id/tvSettingJoinUs">-->
+
+<!--                <com.facebook.login.widget.LoginButton-->
+<!--                    android:layout_width="30dp"-->
+<!--                    android:layout_height="30dp"-->
+<!--                    android:id="@+id/btnSettingFacebook"-->
+<!--                    android:layout_margin="10dp"/>-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:text="Facebook"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="16sp"-->
+<!--                    android:id="@+id/tvSettingFacebook"-->
+<!--                    android:gravity="center"/>-->
+<!--            </LinearLayout>-->
+
+<!--        </RelativeLayout>-->
+
+
+<!--    </androidx.cardview.widget.CardView>-->
+
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvSettingJoinUs"
-                android:text="Join Us"
-                android:gravity="center"
-                android:textColor="@color/colorPrimary"
-                android:textSize="20sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_below="@id/tvSettingJoinUs">
-
-                <com.facebook.login.widget.LoginButton
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:id="@+id/btnSettingFacebook"
-                    android:layout_margin="10dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Facebook"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="16sp"
-                    android:id="@+id/tvSettingFacebook"
-                    android:gravity="center"/>
-            </LinearLayout>
-
-        </RelativeLayout>
-
-
-    </androidx.cardview.widget.CardView>
+        android:layout_height="wrap_content"
+        android:id="@+id/btnAdmin"
+        android:background="@color/colorTransparent"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <info.hoang8f.widget.FButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

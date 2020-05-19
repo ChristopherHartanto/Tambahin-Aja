@@ -152,6 +152,7 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
     private fun handleConnectivityChange(networkState: NetworkState) {
         if (networkState.isConnected && !prevState) {
+            recreate()
             showSnackBar(activity_main, "The network is back !", "LONG")
         }
 

@@ -92,6 +92,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private var currentDate = ""
     private var handler = Handler()
     private lateinit var runnable : Runnable
+    private var fragmentActive = false
     private var numberArr : MutableList<Int> = mutableListOf()
     private val availableGameList : MutableList<Boolean> = mutableListOf()
 
@@ -111,6 +112,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     }
 
     override fun onStart() {
+        fragmentActive = true
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(ctx)
@@ -231,7 +233,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         if(AccessToken.getCurrentAccessToken() == null)
             auth.signOut()
 
-
+        setSeasonTimer()
         firebaseSingleListenerRepeat()
 
         super.onStart()
@@ -770,42 +772,44 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == "dailyPuzzle"){
-            val date = dataSnapshot.value
-            checkPlayedPuzzle(date.toString())
-        }else if(response == "fetchCredit"){
-            credit = dataSnapshot.value.toString().toInt()
-            tvCredit.text = "${credit}"
-        }else if(response == "updateCredit"){
-            homePresenter.fetchCredit()
-        }else if(response == "availableGame"){
-            if (dataSnapshot.exists()){
-                availableGameList.clear()
-                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
-                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
-                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
-                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.alphaNum!!)
-                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.mix!!)
-                availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.doubleAttack!!)
-            }
-            else{
-                availableGameList.clear()
-                availableGameList.add(true)
-                availableGameList.add(false)
-                availableGameList.add(false)
-                availableGameList.add(false)
-                availableGameList.add(false)
-                availableGameList.add(false)
-            }
-            customGameAdapter.notifyDataSetChanged()
+        if (context != null && fragmentActive){
+            if (response == "dailyPuzzle"){
+                val date = dataSnapshot.value
+                checkPlayedPuzzle(date.toString())
+            }else if(response == "fetchCredit"){
+                credit = dataSnapshot.value.toString().toInt()
+                tvCredit.text = "${credit}"
+            }else if(response == "updateCredit"){
+                homePresenter.fetchCredit()
+            }else if(response == "availableGame"){
+                if (dataSnapshot.exists()){
+                    availableGameList.clear()
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.oddEven!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.rush!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.alphaNum!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.mix!!)
+                    availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.doubleAttack!!)
+                }
+                else{
+                    availableGameList.clear()
+                    availableGameList.add(true)
+                    availableGameList.add(false)
+                    availableGameList.add(false)
+                    availableGameList.add(false)
+                    availableGameList.add(false)
+                    availableGameList.add(false)
+                }
+                customGameAdapter.notifyDataSetChanged()
 
-        }else if(response == "reward"){
-            Log.d("reward","masuk sini")
-            reward = dataSnapshot.getValue(Reward::class.java)!!
-            popUpMessage(com.example.tambahinaja.friends.Message.ReadOnly,reward.description.toString())
-        }else{
-            dataInviter = dataSnapshot.getValue(Inviter::class.java)!!
-            popUpMessage(com.example.tambahinaja.friends.Message.Reply,"${dataInviter.name} invited you to play")
+            }else if(response == "reward"){
+                Log.d("reward","masuk sini")
+                reward = dataSnapshot.getValue(Reward::class.java)!!
+                popUpMessage(com.example.tambahinaja.friends.Message.ReadOnly,reward.description.toString())
+            }else{
+                dataInviter = dataSnapshot.getValue(Inviter::class.java)!!
+                popUpMessage(com.example.tambahinaja.friends.Message.Reply,"${dataInviter.name} invited you to play")
+            }
         }
 
     }
@@ -905,17 +909,19 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     }
 
     override fun response(message: String) {
-        if (message === "acceptedGame"){
-            startActivity(intentFor<CountdownActivity>("inviterFacebookId" to dataInviter.facebookId,
-                    "inviterName" to dataInviter.name,
-                    "status" to StatusPlayer.JoinFriend,
-                    "type" to dataInviter.type as GameType,
-                    "timer" to dataInviter.timer))
-        }else if(message === "dismissInvitation"){
-            //popUpMessage(com.example.balapplat.friends.Message.ReadOnly,"You Have been Rejected")
-            toast("You Have been Rejected")
-        }else if(message === "rewardPuzzlePopUp"){
-            homePresenter.updateCredit(credit.toLong() + 20)
+        if (context != null && fragmentActive){
+            if (message === "acceptedGame"){
+                startActivity(intentFor<CountdownActivity>("inviterFacebookId" to dataInviter.facebookId,
+                        "inviterName" to dataInviter.name,
+                        "status" to StatusPlayer.JoinFriend,
+                        "type" to dataInviter.type as GameType,
+                        "timer" to dataInviter.timer))
+            }else if(message === "dismissInvitation"){
+                //popUpMessage(com.example.balapplat.friends.Message.ReadOnly,"You Have been Rejected")
+                toast("You Have been Rejected")
+            }else if(message === "rewardPuzzlePopUp"){
+                homePresenter.updateCredit(credit.toLong() + 20)
+            }
         }
     }
 
@@ -956,6 +962,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     }
 
     override fun onPause() {
+        fragmentActive = false
         handler.removeCallbacks(runnable)
         homePresenter.dismissListener()
         super.onPause()

@@ -12,6 +12,11 @@
     <color name="colorSecondaryText">#000000</color>
     <color name="colorRed">#FF0000</color>
 
+    <color name="colorAlphaNum">#B792E2</color>
+    <color name="colorNormal">#1CB4B9</color>
+    <color name="colorOddEven">#7EA0EA</color>
+    <color name="colorRush">#F67A7A</color>
+
     <color name="fbutton_color_turquoise">#1abc9c</color>
     <color name="fbutton_color_green_sea">#16a085</color>
     <color name="fbutton_color_emerald">#2ecc71</color>

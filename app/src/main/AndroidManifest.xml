@@ -9,40 +9,59 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name="com.example.tambahinaja.MainApplication"
-        android:hardwareAccelerated="false"
-        android:largeHeap="true"
+        android:name=".MainApplication"
         android:allowBackup="true"
-        android:icon="@drawable/logo"
+        android:hardwareAccelerated="false"
+        android:icon="@drawable/logo_transparent"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/logo"
+        android:largeHeap="true"
+        android:roundIcon="@drawable/logo_transparent"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         tools:ignore="LockedOrientationActivity">
-        <activity android:name="com.example.tambahinaja.TutorialActivity"
-            android:screenOrientation="portrait">
-        </activity>
+        <activity android:name=".admin.PlayerDetailActivity"></activity>
+        <activity android:name=".admin.AdminActivity" />
+        <activity
+            android:name=".TutorialActivity"
+            android:screenOrientation="portrait" />
 
         <service android:name=".push_notification.MyFirebaseInstanceIdService">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name="com.example.tambahinaja.push_notification.MyFirebaseMessagingService">
+        <service android:name=".push_notification.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <activity android:name="com.example.tambahinaja.home.CreditActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.home.MarketActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.play.PostGameActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.profile.SettingActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.rank.RankActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.play.OddEvenGameActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.play.WaitingActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.leaderboard.LeaderBoardActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.main.SplashActivity"
+
+        <activity
+            android:name=".home.CreditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".home.MarketActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".play.PostGameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".profile.SettingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".rank.RankActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".play.OddEvenGameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".play.WaitingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".leaderboard.LeaderBoardActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,14 +69,29 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.tambahinaja.PlayActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.play.CountdownActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.RegisterActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.main.LoginActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.friends.AddFriendsActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.friends.FriendsActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.play.NormalGameActivity" android:screenOrientation="portrait"/>
-        <activity android:name="com.example.tambahinaja.main.MainActivity"
+        <activity
+            android:name=".PlayActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".play.CountdownActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RegisterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friends.AddFriendsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".friends.FriendsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".play.NormalGameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.MainActivity"
             android:screenOrientation="portrait" />
 
         <meta-data

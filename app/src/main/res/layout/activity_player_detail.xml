@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".admin.PlayerDetailActivity">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/ivPlayer"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerName"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerEmail"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerNoHandphone"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerCredit"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerPoint"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerEnergy"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerEnergyLimit"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvPlayerCurrentRank"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="description"
+        android:id="@+id/etPopUpDescription"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="type: untuk sekarang isi credit dulu"
+        android:id="@+id/etPopUpType"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Reward : 100"
+        android:id="@+id/etPopUpQuantity"/>
+
+    <info.hoang8f.widget.FButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnSendReward"
+        android:text="Send Reward"
+        android:textColor="@color/colorWhite"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="07 May 2020 12:10:10"
+        android:id="@+id/etCreditHistoryDate"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="1000"
+        android:id="@+id/etCreditHistoryCredit"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="You bought XL Pulsa 10000"
+        android:id="@+id/etCreditHistoryInfo"/>
+
+    <info.hoang8f.widget.FButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnSendCreditHistory"
+        android:text="Send Credit History"
+        android:textColor="@color/colorWhite"/>
+</LinearLayout>

@@ -50,6 +50,12 @@
         ads:adSize="SMART_BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
 
+    <include
+        layout="@layout/layout_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_loading"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

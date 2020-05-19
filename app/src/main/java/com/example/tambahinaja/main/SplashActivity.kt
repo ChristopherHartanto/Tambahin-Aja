@@ -1,5 +1,6 @@
 package com.example.tambahinaja.main
 
+import android.animation.ObjectAnimator
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -12,6 +13,7 @@ import com.example.tambahinaja.R
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_splash.*
 import org.jetbrains.anko.intentFor
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -26,6 +28,12 @@ class SplashActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
         auth = FirebaseAuth.getInstance()
+
+        val rotate = ObjectAnimator.ofFloat(ivLogo, "rotation", 180f, 0f)
+//        rotate.setRepeatCount(10);
+        rotate.duration = 500
+        rotate.start()
+
         if (FirebaseApp.getApps(this).size == 0)
             FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 

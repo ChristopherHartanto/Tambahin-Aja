@@ -8,7 +8,10 @@ import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tambahinaja.R
+import com.example.tambahinaja.admin.AdminActivity
 import com.example.tambahinaja.main.LoginActivity
+import com.facebook.Profile
+import com.facebook.login.LoginManager
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_setting.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -29,22 +32,20 @@ class SettingActivity : AppCompatActivity() {
         supportActionBar?.hide()
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvSettingTitle.typeface = typeface
-        tvSettingJoinUs.typeface = typeface
-        tvSettingFacebook.typeface = typeface
 
-        settingItems.add(Setting("Review Us!",""))
-        settingItems.add(Setting("Privacy Policy",""))
-        settingItems.add(Setting("Terms and Condition",""))
-        settingItems.add(Setting("About Us",""))
-        settingItems.add(Setting("Version",""))
-        settingItems.add(Setting("Contact Us",""))
+        settingItems.add(Setting("Review Us!", ""))
+        settingItems.add(Setting("Privacy Policy", ""))
+        settingItems.add(Setting("Terms and Condition", ""))
+        settingItems.add(Setting("About Us", ""))
+        settingItems.add(Setting("Version", ""))
+        settingItems.add(Setting("Contact Us", ""))
 
-        adapter = SettingRecyclerViewAdapter(this,settingItems){
-            when(it){
-                1 ->openWebsite("https://tambahin-aja.flycricket.io/privacy.html")
-                2 ->openWebsite("https://tambahin-aja.flycricket.io/terms.html")
+        adapter = SettingRecyclerViewAdapter(this, settingItems) {
+            when (it) {
+                1 -> openWebsite("https://tambahin-aja.flycricket.io/privacy.html")
+                2 -> openWebsite("https://tambahin-aja.flycricket.io/terms.html")
                 4 -> toast("Current Version 1.0")
-                5 ->sendEmail()
+                5 -> sendEmail()
             }
         }
         rvSetting.layoutManager = LinearLayoutManager(this)
@@ -52,7 +53,13 @@ class SettingActivity : AppCompatActivity() {
 
         btnLogOut.onClick {
             auth.signOut()
+            LoginManager.getInstance().logOut()
             finish()
+        }
+
+        btnAdmin.onClick {
+            if (auth.currentUser!!.uid == "Zq4L26QlWYbf8WRAa2Nm3A38pOr1" || auth.currentUser!!.uid == "lqg53p8FmihSVntXTnZG4bmYYDh2")
+                startActivity<AdminActivity>()
         }
     }
 

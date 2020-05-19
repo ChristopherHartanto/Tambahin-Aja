@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +25,7 @@ class SettingRecyclerViewAdapter(private val context: Context, private val setti
     override fun getItemCount(): Int = settingItems.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
-
+        private val clickAnimation = AlphaAnimation(1.2F,0.6F)
         private val desc = view.findViewById<TextView>(R.id.tvSettingDesc)
         private val title = view.findViewById<TextView>(R.id.tvSettingTitle)
 
@@ -41,6 +42,7 @@ class SettingRecyclerViewAdapter(private val context: Context, private val setti
             title.text = setting.title
 
             itemView.onClick {
+                itemView.startAnimation(clickAnimation)
                 listener(position)
             }
         }

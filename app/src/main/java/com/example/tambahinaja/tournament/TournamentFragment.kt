@@ -59,6 +59,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
     private var price = 0
     private lateinit var adapter: TournamentRecyclerViewAdapter
     private var tournamentEndDate = ""
+    private var fragmentActive = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,6 +80,15 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         tournamentPresenter = TournamentPresenter(this,database)
         callback = activity as MainActivity
         currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString()
+
+        tournamentParticipants.clear()
+        tournamentPresenter.fetchTournament()
+    }
+
+    override fun onStart() {
+
+        fragmentActive = true
+
         val linearLayoutManager = LinearLayoutManager(ctx)
         linearLayoutManager.reverseLayout = true
         linearLayoutManager.stackFromEnd = true
@@ -86,22 +96,16 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
         rvStanding.adapter = adapter
 
-        tournamentParticipants.clear()
-        tournamentPresenter.fetchTournament()
-
-        srTournament.onRefresh {
-            tournamentParticipants.clear()
-            tournamentPresenter.fetchTournament()
-        }
-
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvTournamentTitle.typeface = typeface
         tvStandingTitle.typeface = typeface
         tvTournamentProfile.typeface = typeface
         tvTournamentTimeLeft.typeface = typeface
-    }
 
-    override fun onStart() {
+        srTournament.onRefresh {
+            tournamentParticipants.clear()
+            tournamentPresenter.fetchTournament()
+        }
 
         btnInfo.onClick {
             btnInfo.startAnimation(clickAnimation)
@@ -199,7 +203,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == "fetchTournament"){
-            if (context != null) {
+            if (context != null && fragmentActive) {
                 if (dataSnapshot.exists()) {
                     for ((index, data) in dataSnapshot.children.withIndex()) {
                         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -252,7 +256,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                 }
             }
         }else if(response == "fetchTournamentParticipants"){
-            if (context != null){
+            if (context != null && fragmentActive){
                 if (dataSnapshot.exists()){
                     tournamentParticipants.clear()
                     var count = dataSnapshot.childrenCount
@@ -390,6 +394,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
     }
 
     override fun onPause() {
+        fragmentActive = false
         tournamentPresenter.dismissListener()
         super.onPause()
     }

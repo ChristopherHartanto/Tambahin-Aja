@@ -94,7 +94,7 @@ class FriendsActivity : AppCompatActivity(), NetworkConnectivityListener, Friend
                     }
                     else{
                         tvLoadingTitle.text = "Go and Get Some Friends"
-                        tvLoadingInfo.text = "There are Friends, There is Family, and There are\n Friends Become Family"
+                        tvLoadingInfo.text = "There are Friends, There is Family, There are\n Friends Become Family"
                     }
                 }
 
