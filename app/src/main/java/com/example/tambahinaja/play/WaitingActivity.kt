@@ -1,5 +1,7 @@
 package com.example.tambahinaja.play
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -23,6 +25,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_waiting.*
 import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.toast
 
 class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainView,
@@ -30,12 +33,14 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
+    private lateinit var sharedPreferences: SharedPreferences
     var inviter = false
     lateinit var presenter: Presenter
     lateinit var waitingPresenter: WaitingPresenter
     var registerWaitingList = false
     private lateinit var countDownTimer: CountDownTimer
     var timer = 0
+    var name = ""
     var type = GameType.Normal
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +51,11 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         presenter = Presenter(this,database)
+        sharedPreferences =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+        name = sharedPreferences.getString("name","").toString()
+        if (name == "")
+            name = Profile.getCurrentProfile().name
+
         waitingPresenter = WaitingPresenter(this,database)
         waitingPresenter.loadTips()
 
@@ -58,7 +68,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
                inviter = true
                timer = intent.extras!!.getInt("timer")
                type = intent.extras!!.getSerializable("type") as GameType //  cek ini
-               intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.makeInvitation(it,type,timer) }
+               intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.makeInvitation(it,type,timer,name) }
                Picasso.get().load(getFacebookProfilePicture(intent.extras!!.getString("joinFriendFacebookId")!!)).fit().into(ivOpponentImageWaiting)
                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
 
@@ -67,7 +77,7 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
            }else if(intent.extras!!.getBoolean("playOnline")){ // jika main online
                timer("Searching")
                Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivPlayerWaiting)
-               waitingPresenter.getWaitingList()
+               waitingPresenter.getWaitingList(name)
            }
 
        }

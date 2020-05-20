@@ -1,5 +1,6 @@
 package com.example.tambahinaja.presenter
 
+import android.content.SharedPreferences
 import android.util.Log
 import com.example.tambahinaja.play.CountdownActivity
 import com.example.tambahinaja.play.GameType
@@ -27,7 +28,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
     }
 
-    fun getWaitingList(){
+    fun getWaitingList(name: String){
         var count = 0
         val postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
@@ -43,7 +44,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                             view.loadData(data, false)
 
                             val values: HashMap<String, Any> = hashMapOf(
-                                "name" to Profile.getCurrentProfile().name,
+                                "name" to name,
                                 "facebookId" to Profile.getCurrentProfile().id,
                                 "status" to true
                             )
@@ -53,15 +54,15 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
                             return
                         }
                         else if (data.key.equals(Profile.getCurrentProfile().id)){ // ulang bikin
-                            registerToWaitingList()
+                            registerToWaitingList(name)
                             return
                         }
 
                     }
-                    registerToWaitingList()
+                    registerToWaitingList(name)
                 }
                 else
-                    registerToWaitingList()
+                    registerToWaitingList(name)
 
                 database.child("waitingList").removeEventListener(this)
             }
@@ -71,9 +72,9 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 
     }
 
-    fun registerToWaitingList(){
+    fun registerToWaitingList(name: String){
         val values: HashMap<String, Any> = hashMapOf(
-            "name" to Profile.getCurrentProfile().name,
+            "name" to name,
             "facebookId" to Profile.getCurrentProfile().id,
             "status" to false
         )
@@ -111,7 +112,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
         database.child("waitingList").child(Profile.getCurrentProfile().id).addValueEventListener(postListener)
     }
 
-    fun makeInvitation(facebookId : String, gameType: GameType, timer: Int){
+    fun makeInvitation(facebookId : String, gameType: GameType, timer: Int,name: String){
 //        val type  = when(gameType){
 //            GameType.Normal -> "normal"
 //            GameType.OddEven -> "oddEven"
@@ -121,7 +122,7 @@ class WaitingPresenter(private val view: WaitingView, private val database: Data
 //            GameType.Mix -> "mix"
 //        }
         val values: HashMap<String, Any?> = hashMapOf(
-            "name" to Profile.getCurrentProfile().name,
+            "name" to name,
             "facebookId" to Profile.getCurrentProfile().id,
             "status" to false,
             "type" to gameType,

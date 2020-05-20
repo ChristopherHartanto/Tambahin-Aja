@@ -1,6 +1,7 @@
 package com.example.tambahinaja.profile
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -46,6 +47,8 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     private lateinit var auth: FirebaseAuth
     private lateinit var historyAdapter: HistoryRecyclerViewAdapter
     private lateinit var database: DatabaseReference
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
     private lateinit var callback: FragmentListener
     private lateinit var profilePresenter: ProfilePresenter
     private lateinit var popupWindow : PopupWindow
@@ -68,20 +71,22 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         callback = activity as MainActivity
+        sharedPreferences =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
+
 
         profilePresenter = ProfilePresenter(this,database)
-        if(AccessToken.getCurrentAccessToken() == null || auth.currentUser == null || Profile.getCurrentProfile() == null){
-            callback.backToHome()
-        }
-        else{
-            profilePresenter.fetchHistory()
-            profilePresenter.fetchStats()
-        }
 
     }
 
     override fun onStart() {
         fragmentActive = true
+
+        if(AccessToken.getCurrentAccessToken() == null || auth.currentUser == null || Profile.getCurrentProfile() == null){
+            callback.backToHome()
+        }else{
+            profilePresenter.fetchHistory()
+            profilePresenter.fetchStats()
+        }
 
         ivSetting.onClick {
             startActivity<SettingActivity>()
@@ -199,6 +204,11 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
             else {
                 profilePresenter.saveProfile(etEditProfileName.text.toString(),etEditProfileEmail.text.toString(),etEditProfileHandphone.text.toString())
                 tvProfileName.text = etEditProfileName.text.toString()
+
+                editor = sharedPreferences.edit()
+                editor.putString("name",etEditProfileName.text.toString())
+                editor.apply()
+
                 btnClose.startAnimation(clickAnimation)
                 fragment_profile.alpha = 1F
                 main_activity.alpha = 1F
@@ -266,7 +276,13 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     }
 
     override fun response(message: String) {
-
+        if (message == "Success Edit Profile"){
+            toast(message)
+        }else{
+            editor = sharedPreferences.edit()
+            editor.remove("name")
+            editor.apply()
+        }
     }
 
     override fun onPause() {
