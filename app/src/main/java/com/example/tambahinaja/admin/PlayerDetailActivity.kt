@@ -32,6 +32,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         supportActionBar?.hide()
         uid = intent.extras!!.getString("uid","")
 
+        tvPlayerUid.text = uid
         sendReward()
         fetchPlayer()
         sendCreditHistory()
@@ -47,7 +48,7 @@ class PlayerDetailActivity : AppCompatActivity() {
                 override fun onDataChange(p0: DataSnapshot) {
                     if (p0.exists()){
                         Picasso.get().load(getFacebookProfilePicture(p0.getValue(AllPlayer::class.java)!!.facebookId.toString())).into(ivPlayer)
-                        tvPlayerPoint.text = "Name : ${p0.getValue(AllPlayer::class.java)!!.name}"
+                        tvPlayerName.text = "Name : ${p0.getValue(AllPlayer::class.java)!!.name}"
                         tvPlayerCurrentRank.text = "Rank: ${p0.getValue(AllPlayer::class.java)!!.currentRank}"
                         tvPlayerNoHandphone.text = "no hp: ${p0.getValue(AllPlayer::class.java)!!.noHandphone}"
                         tvPlayerEmail.text = "email: ${p0.getValue(AllPlayer::class.java)!!.email}"

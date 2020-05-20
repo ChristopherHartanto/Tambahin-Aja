@@ -176,6 +176,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
             }
             creditHistoryAdapter.notifyDataSetChanged()
         }else if(response == "fetchCreditShop"){
+            creditShopItems.clear()
             for (data in dataSnapshot.children){
                 val item = data.getValue(CreditShop::class.java)
                 creditShopItems.add(item!!)
@@ -282,6 +283,8 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
 
         tvLoadingInfo.typeface = typeface
         tvLoadingTitle.typeface = typeface
+
+        tvLoadingInfo.text = "Save Money and Money will Save You"
 
         loadingTimer = object: CountDownTimer(15000, 1000) {
             override fun onTick(millisUntilFinished: Long) {

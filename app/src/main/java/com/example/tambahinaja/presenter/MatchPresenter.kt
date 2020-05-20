@@ -141,9 +141,9 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
 
     fun updateStats(winStatus: Boolean, value: Long, auth: FirebaseAuth) {
         if (winStatus) {
-            database.child(auth.currentUser!!.uid).child("stats").child("win").setValue(value + 1)
+            database.child("users").child(auth.currentUser!!.uid).child("stats").child("win").setValue(value + 1)
         } else {
-            database.child(auth.currentUser!!.uid).child("stats").child("lose").setValue(value + 1)
+            database.child("users").child(auth.currentUser!!.uid).child("stats").child("lose").setValue(value + 1)
         }
     }
 
@@ -197,9 +197,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     fun loadTournamentType(tournamentEndDate: String){
         postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
-                if (dataSnapshot.exists()){
-                    view.loadData(dataSnapshot,"fetchTournamentType")
-                }
+                view.loadData(dataSnapshot,"fetchTournamentType")
             }
 
             override fun onCancelled(databaseError: DatabaseError) {

@@ -34,6 +34,9 @@ class SplashActivity : AppCompatActivity() {
         rotate.duration = 500
         rotate.start()
 
+        val version = packageManager.getPackageInfo(packageName,0).versionName
+        tvVersion.text = "Version $version"
+
         if (FirebaseApp.getApps(this).size == 0)
             FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 

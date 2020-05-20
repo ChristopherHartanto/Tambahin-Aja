@@ -90,17 +90,19 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         var count = 0
 
         for ((index,ds) in dataSnapshot.children.withIndex()) {
+            Thread.sleep(5)
+            val total = ds.getValue(Leaderboard::class.java)!!.total
+            val id = ds.key
+
+            id?.let { retrieveUser(it,total) }
+        }
+        for ((index,ds) in dataSnapshot.children.withIndex()) {
             if (auth.currentUser != null){
                 if (ds.key.equals(auth.currentUser!!.uid)){
                     tvLeaderboardInfo.text = "#${dataSnapshot.childrenCount - count} " + auth.currentUser!!.displayName +" "+ ds.getValue(Leaderboard::class.java)!!.total
                 }
             }
             count++
-            Thread.sleep(5)
-            val total = ds.getValue(Leaderboard::class.java)!!.total
-            val id = ds.key
-
-            id?.let { retrieveUser(it,total) }
         }
     }
 

@@ -109,14 +109,17 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
         btnInfo.onClick {
             btnInfo.startAnimation(clickAnimation)
-            popUpTournamentDetail()
+            if (dataTournament.description == "")
+                toast("No Tournament Available")
+            else
+                popUpTournamentDetail()
         }
 
         btnJoinTournament.onClick {
-            if (auth.currentUser != null && dataTournament.price!!.toInt() != 0)
+            if (auth.currentUser != null && dataTournament.price!!.toInt() != 0 && price != 0)
                 tournamentPresenter.checkPoint(auth,price.toLong())
             else
-                toast("login first")
+                toast("Join Failed")
         }
 
         super.onStart()
@@ -231,6 +234,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                             tvTournamentProfile.visibility = View.GONE
                         }
                         dataTournament = data.getValue(TournamentData::class.java)!!
+                        price = dataTournament.price!!.toInt()
                         tvTournamentTitle.text = dataTournament.title
                         tournamentEndDate = data.key.toString()
                         tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
@@ -254,6 +258,8 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                 } else {
                     btnJoinTournament.visibility = View.GONE
                 }
+            }else if(!dataSnapshot.exists()){
+                srTournament.isRefreshing = false
             }
         }else if(response == "fetchTournamentParticipants"){
             if (context != null && fragmentActive){

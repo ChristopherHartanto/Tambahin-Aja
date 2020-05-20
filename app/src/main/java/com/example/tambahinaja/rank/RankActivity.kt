@@ -62,6 +62,7 @@ import kotlinx.android.synthetic.main.layout_loading.*
 import kotlinx.android.synthetic.main.pop_up_task.*
 import kotlinx.android.synthetic.main.row_choose_game.*
 import kotlinx.android.synthetic.main.row_rank.*
+import kotlinx.android.synthetic.main.tutorial.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
@@ -456,8 +457,10 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         val tvGameTypeInfo = view.findViewById<TextView>(R.id.tvRankGameTypeInfo)
         val tvTutorialTitle = view.findViewById<TextView>(R.id.tvTutorialTitle)
         val ivRankGameType = view.findViewById<ImageView>(R.id.ivRankGameType)
+        val tvTutorialDesc = view.findViewById<TextView>(R.id.tvTutorialDesc)
 
         tvTutorialTitle.typeface = typeface
+        tvTutorialDesc.typeface = typeface
         tvGameTypeInfo.typeface = typeface
         btnStartPlay.typeface = typeface
         btnWatchTutorial.typeface = typeface
@@ -505,12 +508,34 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         btnWatchTutorial.onClick {
             ivRankGameType.layoutParams.height = 1200
             ivRankGameType.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            tvTutorialDesc.visibility = View.VISIBLE
             when(position){
-                0 -> ivRankGameType.setImageResource(R.drawable.normal_tutorial)
-                1 -> ivRankGameType.setImageResource(R.drawable.odd_even_tutorial)
-                2 -> ivRankGameType.setImageResource(R.drawable.rush_tutorial)
-                3 -> ivRankGameType.setImageResource(R.drawable.alpha_num_tutorial)
+                0 -> {
+                    tvTutorialDesc.visibility = View.GONE
+                    ivRankGameType.setImageResource(R.drawable.normal_tutorial)
+                }
+                1 -> {
+                    ivRankGameType.visibility = View.GONE
+                    tvTutorialDesc.text = getString(R.string.oddEven_tutorial)
+                }
+                2 -> {
+                    ivRankGameType.visibility = View.GONE
+                    tvTutorialDesc.text = getString(R.string.rush_tutorial)
+                }
+                3 -> {
+                    ivRankGameType.visibility = View.GONE
+                    tvTutorialDesc.text = getString(R.string.alphaNum_tutorial)
+                }
+                4 ->{
+                    ivRankGameType.visibility = View.GONE
+                    tvTutorialDesc.text = getString(R.string.mix_tutorial)
+                }
+                5 ->{
+                    ivRankGameType.visibility = View.GONE
+                    tvTutorialDesc.text = getString(R.string.oddEven_tutorial)
+                }
             }
+            tvGameTypeInfo.visibility = View.GONE
             btnWatchTutorial.visibility = View.GONE
         }
 
@@ -592,11 +617,11 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             currentRank = dataSnapshot.value.toString()
 
             when(enumValueOf<Rank>(currentRank)){
-                Rank.Toddler -> tvRank.backgroundColorResource = R.color.fbutton_color_sun_flower
-                Rank.Beginner -> tvRank.backgroundColorResource = R.color.fbutton_color_emerald
-                Rank.Senior -> tvRank.backgroundColorResource = R.color.fbutton_color_carrot
-                Rank.Master -> tvRank.backgroundColorResource = R.color.fbutton_color_pomegranate
-                Rank.GrandMaster -> tvRank.backgroundColorResource = R.color.fbutton_color_asbestos
+                Rank.Toddler -> tvRank.textColorResource = R.color.fbutton_color_silver
+                Rank.Beginner -> tvRank.textColorResource = R.color.fbutton_color_sun_flower
+                Rank.Senior -> tvRank.textColorResource = R.color.fbutton_color_emerald
+                Rank.Master -> tvRank.textColorResource = R.color.fbutton_color_pomegranate
+                Rank.GrandMaster -> tvRank.textColorResource = R.color.fbutton_color_asbestos
             }
 
             loadTask()

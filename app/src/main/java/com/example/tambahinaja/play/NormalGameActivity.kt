@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Typeface
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.media.SoundPool
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -68,26 +72,28 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private lateinit var runnable: Runnable
     private var continueGame = false
     private lateinit var currentRank : String
-    var creditReward = 0
-    var pointReward = 0
-    var creatorFacebookId = ""
-    var creatorName = ""
-    var joinOnlineFacebookId = ""
-    var joinOnlineName = ""
-    var joinFriendFacebookId = ""
-    var joinFriendName = ""
-    var inviterFacebookId = ""
-    var inviterName = ""
-    var count = 4
-    var point = 0
-    var timer = 45
-    var defaultTimer = 45
-    var answer = 999
-    var highScore = 0
-    var opponentPoint = 0
-    var type = GameType.Normal
-    var mix = false
-    var player = StatusPlayer.Single
+    private lateinit var soundPool : SoundPool
+    private var soundCorrect = 0
+    private var creditReward = 0
+    private var pointReward = 0
+    private var creatorFacebookId = ""
+    private var creatorName = ""
+    private var joinOnlineFacebookId = ""
+    private var joinOnlineName = ""
+    private var joinFriendFacebookId = ""
+    private var joinFriendName = ""
+    private var inviterFacebookId = ""
+    private var inviterName = ""
+    private var count = 4
+    private var point = 0
+    private var timer = 45
+    private var defaultTimer = 45
+    private var answer = 999
+    private var highScore = 0
+    private var opponentPoint = 0
+    private var type = GameType.Normal
+    private var mix = false
+    private var player = StatusPlayer.Single
     private var tournamentEndDate = ""
     private lateinit var popupWindow : PopupWindow
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
@@ -122,9 +128,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             if (!continueGame){
                 progress_bar.visibility = View.GONE
                 toast("Failed to Continue")
-                updateRank(currentRank)
-                calculateReward()
-                matchPresenter.getTournamentType()
+                calculateRankReward()
             }
         }
 
@@ -419,8 +423,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 }
 
             }
-
-            if (answer == value){
+            soundPool.play(soundCorrect,3F,3F,0,0,1F)
+            if (answer == value){ // tambah bonus point
                 point += when(enumValueOf<Rank>(currentRank)){
                     Rank.Toddler -> 0
                     Rank.Beginner -> 1
@@ -430,7 +434,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 }
             }
 
-            if (player != StatusPlayer.Single){
+            if (player != StatusPlayer.Single){ // update value
                 when (player) {
                     StatusPlayer.Inviter -> matchPresenter.updateValue(true,point,opponentPoint,joinFriendFacebookId)
                     StatusPlayer.JoinFriend -> matchPresenter.updateValue(false,point,opponentPoint,inviterFacebookId)
@@ -458,7 +462,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     val animationFadeIn = AnimationUtils.loadAnimation(ctx, R.anim.fade_in)
                     cvTimer.startAnimation(animationFadeIn)
                 }
-                if (timer < 0){
+                if (timer <= 0){
                     tvTimer.text = "time : " + 0
                 }else{
                     timer--
@@ -537,10 +541,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                             if (reply)
                                 popUpMessage(1,"Do You Want to Continue?")
                             else{
-                                calculateReward()
-                                updateRank(currentRank)
-                                matchPresenter.getTournamentType()
-
+                                calculateRankReward()
                             }
                         }
                         StatusPlayer.Single->{
@@ -719,9 +720,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 btnClose.startAnimation(clickAnimation)
                 activity_normal_game.alpha = 1F
                 popupWindow.dismiss()
-                updateRank(currentRank)
-                calculateReward()
-                matchPresenter.getTournamentType()
+                calculateRankReward()
             }
 
             btnReject.onClick {
@@ -802,6 +801,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     }
 
     override fun onDestroy() {
+        soundPool.release()
         countDownTimer.cancel()
         matchPresenter.dismissListener()
         super.onDestroy()
@@ -843,6 +843,24 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         }else{
             finishRank()
         }
+    }
+
+    override fun onStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            soundPool = SoundPool.Builder()
+                    .setMaxStreams(100)
+                    .setAudioAttributes(audioAttributes)
+                    .build()
+        } else {
+            soundPool = SoundPool(100, AudioManager.STREAM_MUSIC, 0);
+        }
+        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
+
+        super.onStart()
     }
 
     override fun onResume() {
@@ -899,9 +917,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                         editor.putBoolean("continueRank",false)
                         editor.apply()
                     }else{
-                        updateRank(currentRank)
-                        calculateReward()
-                        matchPresenter.getTournamentType()
+                        calculateRankReward()
                     }
                 }
                 override fun onUserEarnedReward(@NonNull reward: RewardItem) {
@@ -919,9 +935,12 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 
     override fun loadData(dataSnapshot: DataSnapshot, message: String) {
         if(message == "fetchTournamentType"){
-            if (dataSnapshot.getValue(TournamentData::class.java)!!.type == type.toString()) {
-                addPointToTournament(dataSnapshot.getValue(TournamentData::class.java)!!.type.toString())
-            }else
+            if (dataSnapshot.exists()){
+                if (dataSnapshot.getValue(TournamentData::class.java)!!.type == type.toString()) {
+                    addPointToTournament(dataSnapshot.getValue(TournamentData::class.java)!!.type.toString())
+                }else
+                    finishRank()
+            }else if(!dataSnapshot.exists())
                 finishRank()
         }else if(message == "getTournamentEndDate"){
             for ((index,data) in dataSnapshot.children.withIndex()){
@@ -937,6 +956,12 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     finishRank()
             }
         }
+    }
+
+    fun calculateRankReward(){
+        updateRank(currentRank)
+        calculateReward()
+        matchPresenter.getTournamentType()
     }
 
     fun updateRank(currentRank: String){

@@ -15,4 +15,14 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title">Tambahin Aja</string>
+    <string name="oddEven_tutorial">Do Addition Based on Normal Mode Method. After that, Determine Whether the Result is Odd or Even</string>
+    <string name="rush_tutorial">You\'ll Have 5 Seconds to Answer Each Questions, the Timer will Reset Each Time if You Hit a Correct Answer</string>
+    <string name="alphaNum_tutorial">Convert the Alphabets Into the Corresponding Numbers. Example: 20EB = 2052, Then Do Additions Based on Normal Mode Methods</string>
+    <string name="mix_tutorial">This game will Consist of 3 Different Modes: Normal, Odd/Even, and AlphaNum Which will be Asked Randomly</string>
+    <string name="doubleAttack_tutorial">Do Addition to Itself First Before Sum to Other Digit. Example: 2244 = 4488, Then Do Additions Based on Normal Mode Methods</string>
+    <string name="privacy_url">https://tambahin-aja.flycricket.io/privacy.html</string>
+    <string name="terms_url">https://tambahin-aja.flycricket.io/terms.html</string>
+    <string name="admin1">Zq4L26QlWYbf8WRAa2Nm3A38pOr1</string>
+    <string name="admin2">lqg53p8FmihSVntXTnZG4bmYYDh2</string>
+    <string name="tambahin_aja_email">tambahinaja.helpdesk@gmail.com</string>
 </resources>

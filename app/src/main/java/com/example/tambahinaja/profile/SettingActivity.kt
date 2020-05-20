@@ -21,7 +21,7 @@ import org.jetbrains.anko.toast
 class SettingActivity : AppCompatActivity() {
 
     private lateinit var adapter: SettingRecyclerViewAdapter
-    val settingItems : MutableList<Setting> = mutableListOf()
+    private val settingItems : MutableList<Setting> = mutableListOf()
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,11 +40,13 @@ class SettingActivity : AppCompatActivity() {
         settingItems.add(Setting("Version", ""))
         settingItems.add(Setting("Contact Us", ""))
 
+        val version = packageManager.getPackageInfo(packageName,0).versionName
+
         adapter = SettingRecyclerViewAdapter(this, settingItems) {
             when (it) {
-                1 -> openWebsite("https://tambahin-aja.flycricket.io/privacy.html")
-                2 -> openWebsite("https://tambahin-aja.flycricket.io/terms.html")
-                4 -> toast("Current Version 1.0")
+                1 -> openWebsite(getString(R.string.privacy_url))
+                2 -> openWebsite(getString(R.string.terms_url))
+                4 -> toast("Current Version $version")
                 5 -> sendEmail()
             }
         }
@@ -58,7 +60,7 @@ class SettingActivity : AppCompatActivity() {
         }
 
         btnAdmin.onClick {
-            if (auth.currentUser!!.uid == "Zq4L26QlWYbf8WRAa2Nm3A38pOr1" || auth.currentUser!!.uid == "lqg53p8FmihSVntXTnZG4bmYYDh2")
+            if (auth.currentUser!!.uid == getString(R.string.admin1) || auth.currentUser!!.uid == getString(R.string.admin2))
                 startActivity<AdminActivity>()
         }
     }
@@ -75,7 +77,7 @@ class SettingActivity : AppCompatActivity() {
         and data type will be to text/plain using setType() method*/
         mIntent.data = Uri.parse("mailto:")
         mIntent.type = "text/plain"
-        mIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("tambahinaja.helpdesk@gmail.com"))
+        mIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.tambahin_aja_email)))
         //put the Subject in the intent
 //        mIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
 //        //put the message in the intent

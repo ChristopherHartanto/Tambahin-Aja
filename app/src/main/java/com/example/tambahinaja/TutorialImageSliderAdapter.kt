@@ -12,7 +12,7 @@ import androidx.viewpager.widget.ViewPager
 
 class TutorialImageSliderAdapter(private val context: Context) : PagerAdapter() {
     private var inflater: LayoutInflater? = null
-    private val images = arrayOf(R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher)
+    private val images = arrayOf(R.drawable.logo_transparent, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher)
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`
@@ -36,6 +36,7 @@ class TutorialImageSliderAdapter(private val context: Context) : PagerAdapter() 
         
         when(position){
             0->{
+                imageView.layoutParams.height = imageView.width
                 title.text = "Welcome"
                 info.text = "Welcome to Tambahin Aja, a fun challenging game which enhance your brain’s cognitive skills. Let’s find out!"
             }
