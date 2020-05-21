@@ -95,7 +95,7 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
 
         btnLogin.onClick {
             callbackManager = CallbackManager.Factory.create()
-
+            popup_window_button.text = "Please Wait"
 
             btnLogin.setReadPermissions("email", "public_profile")
             btnLogin.registerCallback(callbackManager, object :
@@ -110,7 +110,7 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
 
                 override fun onError(error: FacebookException) {
-                    // ...
+                    popup_window_button.text = "Please Try Again"
                 }
             })// ...
 

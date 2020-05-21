@@ -12,7 +12,7 @@ import androidx.viewpager.widget.ViewPager
 
 class TutorialImageSliderAdapter(private val context: Context) : PagerAdapter() {
     private var inflater: LayoutInflater? = null
-    private val images = arrayOf(R.drawable.logo_transparent, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher)
+    private val images = arrayOf(R.drawable.logo_transparent, R.drawable.task, R.drawable.rewards, R.drawable.leaderboard, R.drawable.tournament)
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`

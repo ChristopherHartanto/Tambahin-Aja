@@ -72,7 +72,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private lateinit var runnable: Runnable
     private var continueGame = false
     private lateinit var currentRank : String
-    private lateinit var soundPool : SoundPool
+    //private lateinit var soundPool : SoundPool
     private var soundCorrect = 0
     private var creditReward = 0
     private var pointReward = 0
@@ -249,7 +249,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 val choose = Random().nextInt(2)
 
                 if (choose == 1){
-                    value = Random().nextInt(10) + 65
+                    value = Random().nextInt(8) + 65
                     numberArr.add(value)
                     tvQuestion.text = tvQuestion.text.toString() + value.toChar()
                 }else{
@@ -423,7 +423,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 }
 
             }
-            soundPool.play(soundCorrect,3F,3F,0,0,1F)
+            //soundPool.play(soundCorrect,3F,3F,0,0,1F)
             if (answer == value){ // tambah bonus point
                 point += when(enumValueOf<Rank>(currentRank)){
                     Rank.Toddler -> 0
@@ -768,7 +768,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         }
     }
 
-    fun finishRank(){
+    private fun finishRank(){
         startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
         finish()
     }
@@ -776,23 +776,23 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     fun calculateReward(){
         when(currentRank){
             Rank.Toddler.toString()->{
-                pointReward = point * 3 / 100
+                pointReward = point * 4 / 100
                 creditReward = point * 5 / 100
             }
             Rank.Beginner.toString()->{
-                pointReward = point * 4 / 100
+                pointReward = point * 5 / 100
                 creditReward = point * 6 / 100
             }
             Rank.Senior.toString()->{
-                pointReward = point * 4 / 100
+                pointReward = point * 5 / 100
                 creditReward = point * 6 / 100
             }
             Rank.Master.toString()->{
-                pointReward = point * 5 / 100
+                pointReward = point * 6 / 100
                 creditReward = point * 7 / 100
             }
             Rank.GrandMaster.toString()->{
-                pointReward = point * 5 / 100
+                pointReward = point * 6 / 100
                 creditReward = point * 7 / 100
             }
         }
@@ -801,7 +801,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     }
 
     override fun onDestroy() {
-        soundPool.release()
+        //soundPool.release()
         countDownTimer.cancel()
         matchPresenter.dismissListener()
         super.onDestroy()
@@ -845,23 +845,23 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         }
     }
 
-    override fun onStart() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val audioAttributes = AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            soundPool = SoundPool.Builder()
-                    .setMaxStreams(100)
-                    .setAudioAttributes(audioAttributes)
-                    .build()
-        } else {
-            soundPool = SoundPool(100, AudioManager.STREAM_MUSIC, 0);
-        }
-        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
-
-        super.onStart()
-    }
+//    override fun onStart() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            val audioAttributes = AudioAttributes.Builder()
+//                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+//                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+//                    .build()
+//            soundPool = SoundPool.Builder()
+//                    .setMaxStreams(100)
+//                    .setAudioAttributes(audioAttributes)
+//                    .build()
+//        } else {
+//            soundPool = SoundPool(100, AudioManager.STREAM_MUSIC, 0);
+//        }
+//        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
+//
+//        super.onStart()
+//    }
 
     override fun onResume() {
        // database.child("onPlay").child(facebookId).child("pause").setValue(false)
@@ -901,7 +901,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
        highScore = score.toInt()
     }
 
-    fun loadRewardAd() : RewardedAd{
+    private fun loadRewardAd() : RewardedAd{
         if (rewardedAd.isLoaded) {
             val adCallback = object: RewardedAdCallback() {
                 var watched = false
@@ -943,22 +943,27 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }else if(!dataSnapshot.exists())
                 finishRank()
         }else if(message == "getTournamentEndDate"){
-            for ((index,data) in dataSnapshot.children.withIndex()){
-                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                val currentDate = Date().time
-                val tournamentDate = sdf.parse(data.key.toString()).time
-                val diff: Long = tournamentDate - currentDate
+            if (dataSnapshot.exists()){
+                for ((index,data) in dataSnapshot.children.withIndex()){
+                    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    val currentDate = Date().time
+                    val tournamentDate = sdf.parse(data.key.toString()).time
+                    val diff: Long = tournamentDate - currentDate
 
-                if(diff > 0){
-                    tournamentEndDate = data.key.toString()
-                    matchPresenter.loadTournamentType(tournamentEndDate)
-                }else
-                    finishRank()
+                    if(diff > 0){
+                        tournamentEndDate = data.key.toString()
+                        matchPresenter.loadTournamentType(tournamentEndDate)
+                    }else
+                        finishRank()
+                }
+            }else if(!dataSnapshot.exists()){
+                finishRank()
             }
         }
     }
 
     fun calculateRankReward(){
+        progress_bar.visibility = View.VISIBLE
         updateRank(currentRank)
         calculateReward()
         matchPresenter.getTournamentType()

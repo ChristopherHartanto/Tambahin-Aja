@@ -101,7 +101,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
 
         MobileAds.initialize(this)
         val adView = AdView(this)
-        adView.adSize = AdSize.SMART_BANNER
+        adView.adSize = AdSize.BANNER
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
         if (auth.currentUser != null)
@@ -122,10 +122,9 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
     }
 
     private fun popUpCreditHistory(){
-        val inflater: LayoutInflater = this!!.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater: LayoutInflater = this.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_credit_history,null)
-        val main_view = inflater.inflate(R.layout.activity_main,null)
 
         // Initialize a new instance of popup window
         popupWindow = PopupWindow(
@@ -212,7 +211,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
     }
 
     private fun popUpMessage(type: Message, message: String){
-        val inflater: LayoutInflater = ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater: LayoutInflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_message,null)
 
@@ -227,7 +226,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             popupWindow.elevation = 10.0F
         }
-        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        val typeface : Typeface? = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
 
         val basicLayout = view.findViewById<LinearLayout>(R.id.layout_message_basic)
         val invitationLayout = view.findViewById<LinearLayout>(R.id.layout_message_invitation)

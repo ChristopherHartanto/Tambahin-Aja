@@ -58,6 +58,7 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
 
         val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvAddFriendsTitle.typeface = typeface
+        btnSearch.typeface = typeface
 
         adapter = AddFriendRecyclerViewAdapter(this, items, statusItems) {
             index = it
@@ -118,7 +119,6 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
             }
         }
         refreshRvAddFriend()
-        toast("uid : " + uids)
     }
 
     fun checkStatusFriend(friendUid: String?, item: User) {
@@ -154,7 +154,6 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
 
         database.child("friends").child(auth.currentUser!!.uid).child(friendUid).child("date")
             .setValue(currentDate).addOnSuccessListener {
-            toast("add friend")
             retrieve(etSearch.text.toString())
             popUpMessage(Message.ReadOnly, "Success")
         }.addOnFailureListener {

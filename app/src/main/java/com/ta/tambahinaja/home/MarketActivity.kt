@@ -91,7 +91,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
 
         MobileAds.initialize(this)
         val adView = AdView(this)
-        adView.adSize = AdSize.SMART_BANNER
+        adView.adSize = AdSize.BANNER
         adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
         adapter = ShopRecyclerViewAdapter(this){

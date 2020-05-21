@@ -57,8 +57,8 @@ class PostGameActivity : AppCompatActivity() {
             layoutMultipleGame.visibility = View.GONE
             tvSinglePoint.visibility = View.VISIBLE
             tvSinglePoint.text = "" + score
-            tvGetCredit.text = intent.extras!!.getInt("rewardCredit",0).toString()
-            tvGetPoint.text = intent.extras!!.getInt("rewardPoint",0).toString()
+            tvGetCredit.text = "+ "+intent.extras!!.getInt("rewardCredit",0).toString()
+            tvGetPoint.text = "+ "+intent.extras!!.getInt("rewardPoint",0).toString()
         }else if (status == StatusPlayer.Single){
             layoutMultipleGame.visibility = View.GONE
             tvSinglePoint.visibility = View.VISIBLE

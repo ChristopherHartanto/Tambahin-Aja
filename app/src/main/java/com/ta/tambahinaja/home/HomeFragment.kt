@@ -137,6 +137,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         btnPlayFriend.typeface = typeface
         btnOnline.typeface = typeface
         btnLeaderboard.typeface = typeface
+        tvTitle.typeface = typeface
 
         if (auth.currentUser != null){
             homePresenter.checkDailyPuzzle()
@@ -285,7 +286,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             }
             Rank.Senior ->{
                 difficulty = 8
-                countPuzzle = 7
+                countPuzzle = 6
             }
             Rank.Master ->{
                 difficulty = 12
@@ -344,7 +345,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 result = temp[x]
 
         }
-        toast("${result}")
         return result
     }
 
@@ -400,7 +400,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
         val main_activity = main_view.findViewById<RelativeLayout>(R.id.activity_main)
         val dailyPuzzleTitle = view.findViewById<TextView>(R.id.tvDailyPuzzleTitle)
-        val layoutPuzzle = view.findViewById<LinearLayout>(R.id.layout_puzzle_pop_up)
 
         val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         dailyPuzzleTitle.typeface = typeface
@@ -526,7 +525,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         val sbTime = view.findViewById<SeekBar>(R.id.sbTime)
         val btnPlay = view.findViewById<Button>(R.id.btnStartCustomGame)
         val btnClose = view.findViewById<Button>(R.id.btnClose)
-        val layoutCustomGame = view.findViewById<LinearLayout>(R.id.layout_custom_game)
 
         val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvCustomGameName.typeface = typeface

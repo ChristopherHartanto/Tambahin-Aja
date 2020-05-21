@@ -57,6 +57,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
     private lateinit var currentRank : String
     private var diff: Long = 0
     private var price = 0
+    private lateinit var typeface: Typeface
     private lateinit var adapter: TournamentRecyclerViewAdapter
     private var tournamentEndDate = ""
     private var fragmentActive = false
@@ -76,6 +77,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         adapter = TournamentRecyclerViewAdapter(ctx,tournamentParticipants)
+        typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)!!
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         tournamentPresenter = TournamentPresenter(this,database)
         callback = activity as MainActivity
@@ -96,7 +98,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
         rvStanding.adapter = adapter
 
-        val typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
+        typeface = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)!!
         tvTournamentTitle.typeface = typeface
         tvStandingTitle.typeface = typeface
         tvTournamentProfile.typeface = typeface
@@ -116,7 +118,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         }
 
         btnJoinTournament.onClick {
-            if (auth.currentUser != null && dataTournament.price!!.toInt() != 0 && price != 0)
+            if (auth.currentUser != null && dataTournament.price!!.toInt() != 0 && price != 0 && diff > 0)
                 tournamentPresenter.checkPoint(auth,price.toLong())
             else
                 toast("Join Failed")
@@ -169,7 +171,6 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         val tvTournamentSecondReward = view.findViewById<TextView>(R.id.tvTournamentSecondReward)
         val tvTournamentThirdReward = view.findViewById<TextView>(R.id.tvTournamentThirdReward)
 
-        val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
         tvTournamentDetail.typeface = typeface
         tvTournamentFirstPosition.typeface = typeface
         tvTournamentSecondPosition.typeface = typeface
@@ -237,6 +238,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                         price = dataTournament.price!!.toInt()
                         tvTournamentTitle.text = dataTournament.title
                         btnJoinTournament.text = "Join ${dataTournament.price} Points"
+                        btnJoinTournament.typeface = typeface
                         tournamentEndDate = data.key.toString()
                         tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
                         val seconds = diff / 1000
@@ -302,7 +304,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
         }
     }
 
-    fun popUp(type: com.ta.tambahinaja.friends.Message, message: String){
+    private fun popUp(type: com.ta.tambahinaja.friends.Message, message: String){
         val inflater: LayoutInflater = ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = inflater.inflate(R.layout.pop_up_message,null)

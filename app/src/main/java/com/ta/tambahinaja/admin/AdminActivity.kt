@@ -170,9 +170,9 @@ class AdminActivity : AppCompatActivity() {
                         val values  = hashMapOf(
                                 "description" to etTournamentDescription.text.toString(),
                                 "price" to etTournamentPrice.text.toString().toLong(),
-                                "reward1" to etTournamentReward1.text.toString(),
-                                "reward2" to etTournamentReward2.text.toString(),
-                                "reward3" to etTournamentReward3.text.toString(),
+                                "reward1" to etTournamentReward1.text.toString().toLong(),
+                                "reward2" to etTournamentReward2.text.toString().toLong(),
+                                "reward3" to etTournamentReward3.text.toString().toLong(),
                                 "title" to etTournamentTitle.text.toString(),
                                 "type" to etTournamentType.text.toString()
                         )

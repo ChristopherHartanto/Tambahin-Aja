@@ -171,20 +171,8 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
     fun getTournamentType(){
         postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) { //get date first
-                if (dataSnapshot.exists()){
-                    for ((index,data) in dataSnapshot.children.withIndex()){
-                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        val currentDate = Date().time
-                        val tournamentDate = sdf.parse(data.key.toString()).time
-                        val diff: Long = tournamentDate - currentDate
 
-                        if(diff > 0){
-                            view.loadData(dataSnapshot,"getTournamentEndDate")
-                            return
-                        }
-                    }
-
-                }
+                view.loadData(dataSnapshot,"getTournamentEndDate")
             }
 
             override fun onCancelled(databaseError: DatabaseError) {

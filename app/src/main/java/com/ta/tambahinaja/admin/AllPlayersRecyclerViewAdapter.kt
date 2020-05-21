@@ -24,7 +24,7 @@ class AllPlayersRecyclerViewAdapter(private val context: Context, private val it
             ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_all_players, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position], position, listener)
+        holder.bindItem(items[position], listener)
     }
 
     override fun getItemCount(): Int = items.size
@@ -35,7 +35,7 @@ class AllPlayersRecyclerViewAdapter(private val context: Context, private val it
         private val name = view.findViewById<TextView>(R.id.tvPlayerName)
         private val image = view.findViewById<ImageView>(R.id.ivPlayer)
 
-        fun bindItem(allPlayer: AllPlayer, position: Int, listener: (id: String) -> Unit) {
+        fun bindItem(allPlayer: AllPlayer, listener: (id: String) -> Unit) {
 
             credit.text = "Rp ${allPlayer.credit.toString()}"
             name.text = allPlayer.name.toString()

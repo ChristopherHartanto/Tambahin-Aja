@@ -350,9 +350,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
         }
         val typeface : Typeface? = ResourcesCompat.getFont(ctx, R.font.fredokaone_regular)
 
-        val layoutMessageInvitation = view.findViewById<LinearLayout>(R.id.layout_message_invitation)
-        val layoutMessageBasic = view.findViewById<LinearLayout>(R.id.layout_message_basic)
-        val layoutMessageReward = view.findViewById<LinearLayout>(R.id.layout_message_reward)
         val btnClose = view.findViewById<Button>(R.id.btnMessageClose)
         val btnReject = view.findViewById<Button>(R.id.btnMessageReject)
         val tvMessageTitle = view.findViewById<TextView>(R.id.tvMessageTitle)

@@ -58,18 +58,21 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvLeaderboardInfo.typeface = typeface
         tvLeaderboardTitle.typeface = typeface
-        loadingTimer()
 
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         linearLayoutManager.stackFromEnd = true
         rvLeaderBoard.layoutManager = linearLayoutManager
-
-        Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivLeaderboard)
+        if (auth.currentUser != null && Profile.getCurrentProfile() != null)
+            Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivLeaderboard)
+        else{
+            ivLeaderboard.visibility = View.GONE
+            tvLeaderboardInfo.visibility = View.GONE
+        }
         ivLeaderboard.backgroundResource = R.drawable.button_bg_round
     }
 
-    fun retrieve(){
+    private fun retrieve(){
         items.clear()
         profileItems.clear()
         GlobalScope.launch {
@@ -79,8 +82,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
 
                 override fun onDataChange(p0: DataSnapshot) {
-                    //toast("" + p0.children)
-                    fetchData(p0)
+                    if (p0.exists())
+                        fetchData(p0)
                 }
 
             }
@@ -94,8 +97,6 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
             it.getValue(LeaderBoard::class.java)!!.total
         }
 
-        var count = 0
-
         for ((index,ds) in dataSnapshot.children.withIndex()) {
             Thread.sleep(5)
             val total = ds.getValue(Leaderboard::class.java)!!.total
@@ -103,7 +104,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
             id?.let { retrieveUser(it,total) }
         }
-        for ((index,ds) in dataSnapshot.children.withIndex()) {
+        var count = 0
+        for (ds in dataSnapshot.children) {
             if (auth.currentUser != null){
                 if (ds.key.equals(auth.currentUser!!.uid)){
                     tvLeaderboardInfo.text = "#${dataSnapshot.childrenCount - count} " + name +" "+ ds.getValue(Leaderboard::class.java)!!.total
@@ -113,7 +115,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         }
     }
 
-    fun retrieveUser(id : String,score: Int?){
+    private fun retrieveUser(id : String, score: Int?){
         GlobalScope.launch {
             val postListener = object :  ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
@@ -172,7 +174,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         tvLoadingTitle.typeface = typeface
 
 
-        loadingTimer = object: CountDownTimer(30000, 1000) {
+        loadingTimer = object: CountDownTimer(12000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 when (loadingCount) {
                     3 -> tvLoadingTitle.text = "Fetching Data ."
@@ -191,7 +193,9 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         loadingTimer.start()
     }
 
+
     override fun onStart() {
+        loadingTimer()
         retrieve()
         super.onStart()
     }

@@ -620,7 +620,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 Rank.Beginner -> tvRank.textColorResource = R.color.fbutton_color_emerald
                 Rank.Senior -> tvRank.textColorResource = R.color.fbutton_color_sun_flower
                 Rank.Master -> tvRank.textColorResource = R.color.fbutton_color_pomegranate
-                Rank.GrandMaster -> tvRank.textColorResource = R.color.fbutton_color_asbestos
+                Rank.GrandMaster -> tvRank.textColorResource = R.color.fbutton_color_silver
             }
 
             loadTask()
@@ -789,7 +789,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
     }
 
-    fun loadTask(){
+    private fun loadTask(){
         taskList.clear()
         taskProgressList.clear()
         when(enumValueOf<Rank>(currentRank)){

@@ -29,7 +29,8 @@ class CreditPresenter(private val view: MainView, private val database: Database
         val values: HashMap<String, Any>
         values  = hashMapOf(
                 "credit" to credit,
-                "date" to currentDate
+                "date" to currentDate,
+                "name" to name
         )
         database.child("exchange").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
             view.response("exchangeCredit")
