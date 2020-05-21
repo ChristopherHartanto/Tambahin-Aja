@@ -1,5 +1,7 @@
 package com.example.tambahinaja.leaderboard
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -35,7 +37,9 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     lateinit var data: Inviter
     private lateinit var typeface: Typeface
     private var loadingCount = 4
+    private var name = ""
     private lateinit var loadingTimer : CountDownTimer
+    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var adapter: LeaderBoardRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +51,10 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
-
+        sharedPreferences = this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+        name = sharedPreferences.getString("name","").toString()
+        if (name == "" && Profile.getCurrentProfile() != null)
+            name = Profile.getCurrentProfile().name
         typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvLeaderboardInfo.typeface = typeface
         tvLeaderboardTitle.typeface = typeface
@@ -99,7 +106,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         for ((index,ds) in dataSnapshot.children.withIndex()) {
             if (auth.currentUser != null){
                 if (ds.key.equals(auth.currentUser!!.uid)){
-                    tvLeaderboardInfo.text = "#${dataSnapshot.childrenCount - count} " + auth.currentUser!!.displayName +" "+ ds.getValue(Leaderboard::class.java)!!.total
+                    tvLeaderboardInfo.text = "#${dataSnapshot.childrenCount - count} " + name +" "+ ds.getValue(Leaderboard::class.java)!!.total
                 }
             }
             count++

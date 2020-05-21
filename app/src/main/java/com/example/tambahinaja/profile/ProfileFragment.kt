@@ -52,8 +52,8 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     private lateinit var callback: FragmentListener
     private lateinit var profilePresenter: ProfilePresenter
     private lateinit var popupWindow : PopupWindow
-    private lateinit var user: User
-    var name = ""
+    private var user: User = User()
+    private var name = ""
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private var historyItems: MutableList<History> = mutableListOf()
     private var fragmentActive = false
@@ -155,7 +155,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         popupWindow = PopupWindow(
                 view, // Custom view to show in popup window
                 LinearLayout.LayoutParams.MATCH_PARENT, // Width of popup window
-                LinearLayout.LayoutParams.MATCH_PARENT,// Window height
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 true
         )
 
@@ -242,10 +242,12 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (context != null && fragmentActive){
             if (response == "fetchHistory") {
-                historyItems.clear()
-                for (data in dataSnapshot.children) {
-                    val item = data.getValue(History::class.java)
-                    historyItems.add(item!!)
+                if (dataSnapshot.exists()){
+                    historyItems.clear()
+                    for (data in dataSnapshot.children) {
+                        val item = data.getValue(History::class.java)
+                        historyItems.add(item!!)
+                    }
                 }
                 profilePresenter.fetchUserProfile()
             }else if(response == "fetchName"){
@@ -276,13 +278,14 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     }
 
     override fun response(message: String) {
-        if (message == "Success Edit Profile"){
-            toast(message)
-        }else{
-            editor = sharedPreferences.edit()
-            editor.remove("name")
-            editor.apply()
-        }
+//        if (message == "Success Edit Profile"){
+//            toast(message)
+//        }else{
+//            editor = sharedPreferences.edit()
+//            editor.remove("name")
+//            editor.apply()
+//        }
+        toast(message)
     }
 
     override fun onPause() {

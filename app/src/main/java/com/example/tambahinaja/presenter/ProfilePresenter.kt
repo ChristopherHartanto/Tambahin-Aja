@@ -40,9 +40,7 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
             }
 
             override fun onDataChange(p0: DataSnapshot) {
-                if(p0.exists()){
-                    view.loadData(p0,"fetchHistory")
-                }
+                view.loadData(p0,"fetchHistory")
             }
 
         }
@@ -68,14 +66,14 @@ class ProfilePresenter(private val view: MainView, private val database: Databas
     }
 
     fun saveProfile(name: String, email: String, noHandphone: String){
-        val values  = hashMapOf(
-                "name" to name,
-                "email" to email,
-                "noHandphone" to noHandphone
-        )
-        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
-            view.response("Success Edit Profile")
-        }.addOnFailureListener {
+
+        database.child("users").child(auth.currentUser!!.uid).child("name").setValue(name).addOnFailureListener {
+            view.response(it.message.toString())
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("email").setValue(email).addOnFailureListener {
+            view.response(it.message.toString())
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("noHandphone").setValue(noHandphone).addOnFailureListener {
             view.response(it.message.toString())
         }
 

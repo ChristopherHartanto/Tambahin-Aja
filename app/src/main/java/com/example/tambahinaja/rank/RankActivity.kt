@@ -618,8 +618,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
             when(enumValueOf<Rank>(currentRank)){
                 Rank.Toddler -> tvRank.textColorResource = R.color.fbutton_color_silver
-                Rank.Beginner -> tvRank.textColorResource = R.color.fbutton_color_sun_flower
-                Rank.Senior -> tvRank.textColorResource = R.color.fbutton_color_emerald
+                Rank.Beginner -> tvRank.textColorResource = R.color.fbutton_color_emerald
+                Rank.Senior -> tvRank.textColorResource = R.color.fbutton_color_sun_flower
                 Rank.Master -> tvRank.textColorResource = R.color.fbutton_color_pomegranate
                 Rank.GrandMaster -> tvRank.textColorResource = R.color.fbutton_color_asbestos
             }

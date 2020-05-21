@@ -1,6 +1,7 @@
 package com.example.tambahinaja.home
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -22,6 +23,7 @@ import com.example.tambahinaja.presenter.CreditPresenter
 import com.example.tambahinaja.rank.Balance
 import com.example.tambahinaja.utils.showSnackBar
 import com.example.tambahinaja.view.MainView
+import com.facebook.Profile
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -48,6 +50,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
     private lateinit var auth: FirebaseAuth
     private lateinit var presenter: CreditPresenter
     private lateinit var database: DatabaseReference
+    private lateinit var sharedPreferences: SharedPreferences
     private var creditHistoryItems : MutableList<CreditHistory> = mutableListOf()
     private var creditShopItems : MutableList<CreditShop> = mutableListOf()
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
@@ -56,6 +59,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
     private var loadingCount = 4
     private lateinit var loadingTimer : CountDownTimer
     private var credit = 0
+    private var name = ""
     private var index = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +70,10 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
+        sharedPreferences = this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
+        name = sharedPreferences.getString("name","").toString()
+        if (name == "" && Profile.getCurrentProfile() != null)
+            name = Profile.getCurrentProfile().name
         tvCredit.typeface = typeface
         tvCreditTitle.typeface = typeface
         presenter = CreditPresenter(this,database)
@@ -73,7 +81,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
         loadingTimer()
 
         adapter = CreditRecyclerViewAdapter(this,creditShopItems){
-            if (auth.currentUser == null)
+            if (auth.currentUser == null || Profile.getCurrentProfile() == null)
                 popUpMessage(Message.ReadOnly,"You Must Sign In First")
             else{
                 index = it
@@ -188,7 +196,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
             if (dataSnapshot.getValue(User::class.java)!!.email == "" || dataSnapshot.getValue(User::class.java)!!.noHandphone == "")
                 popUpMessage(Message.ReadOnly,"Please Fill Your Profile First")
             else
-                presenter.exchangeCredit(creditShopItems[index].price!!.toInt() + 1)
+                presenter.exchangeCredit(creditShopItems[index].price!!.toInt(),name)
         }
     }
 

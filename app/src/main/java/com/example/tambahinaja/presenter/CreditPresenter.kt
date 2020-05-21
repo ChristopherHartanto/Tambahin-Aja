@@ -22,7 +22,7 @@ class CreditPresenter(private val view: MainView, private val database: Database
 
     }
 
-    fun exchangeCredit(credit: Int){
+    fun exchangeCredit(credit: Int,name: String){
         val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
         val currentDate = sdf.format(Date())
 
