@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.tambahinaja"
+        applicationId "com.ta.tambahinaja"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
