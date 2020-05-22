@@ -50,6 +50,7 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
                 .setContentTitle("Good Morning")
                 .setContentText("Start Playing Tambahin Aja")
                 .setSmallIcon(R.drawable.logo_transparent).setLargeIcon(bitmap)
+                .setVibrate(longArrayOf(200,200))
 
         notificationManager.notify(1, notification.build())
     }

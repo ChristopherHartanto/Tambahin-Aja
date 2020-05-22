@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.billingclient.api.*
+import com.facebook.Profile
 import com.ta.tambahinaja.R
 import com.ta.tambahinaja.friends.Message
 import com.ta.tambahinaja.presenter.ShopPresenter
@@ -30,6 +31,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -41,11 +43,14 @@ import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_market.*
 import kotlinx.android.synthetic.main.activity_market.tvEnergy
 import kotlinx.android.synthetic.main.activity_market.tvPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView, PurchasesUpdatedListener {
 
@@ -57,9 +62,11 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
     private lateinit var database: DatabaseReference
     private lateinit var billingClient: BillingClient
     private lateinit var countDownTimer : CountDownTimer
+    private lateinit var auth: FirebaseAuth
     private lateinit var currentRank : String
     private var skuList: MutableList<String> = mutableListOf("coin_500","coin_1000","coin_2000","energy_limit_300","energy_limit_200","energy_to_limit")
     private var items: MutableList<SkuDetails> = mutableListOf()
+    private lateinit var buyItem : SkuDetails
     private var energyTime = 300
     private var point = 0
     private var energy = 0
@@ -76,6 +83,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         setContentView(R.layout.activity_market)
 
         supportActionBar?.hide()
+        auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         sharedPreferences =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
@@ -97,12 +105,14 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         adView.adUnitId = "ca-app-pub-1388436725980010/4892909155"
 
         adapter = ShopRecyclerViewAdapter(this,items){
+            buyItem = it
             val billingFlowParams = BillingFlowParams
                     .newBuilder()
                     .setSkuDetails(it)
                     .build()
             billingClient.launchBillingFlow(this, billingFlowParams)
         }
+
         rvMarket.layoutManager = LinearLayoutManager(this)
         rvMarket.adapter = adapter
 
@@ -116,8 +126,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                 }
             }
             override fun onBillingServiceDisconnected() {
-                // Try to restart the connection on the next request to
-                // Google Play by calling the startConnection() method.
+                toast("Oops Try Again")
             }
         })
     }
@@ -127,11 +136,9 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                 .setType(BillingClient.SkuType.INAPP).build()
 
         billingClient.querySkuDetailsAsync(params) {billingResult, skuDetailsList ->
-            toast(skuDetailsList.toString())
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && skuDetailsList.isNotEmpty()) {
                 items.clear()
                 for (skuDetails in skuDetailsList ) {
-                    toast(skuDetails.toString())
                     items.add(skuDetails)
 
                 }
@@ -176,12 +183,6 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
             diff = currentDate - lastCountEnergy
             remainTime = (remainingEnergyToFull - (diff / 1000) - counted).toInt()
 
-            val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
-            Log.d("testcurrent date : ",sdf.format(currentDate))
-            Log.d("testlast date : ",sdf.format(lastCountEnergy))
-            Log.d("testdiff : ",diff.toString())
-            Log.d("testReaminingEnergy : ",remainingEnergyToFull.toString())
-            Log.d("testremainTime : ",remainTime.toString())
             energyTimer()
         }
     }
@@ -208,8 +209,6 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                 timerMin = timerSec / 60
                 timerSec %= 60
             }
-            Log.d("remainTime : ",remainTime.toString())
-            Log.d("timer seconds",timerSec.toString())
             var seconds = timerSec
             countDownTimer = object : CountDownTimer((timerSec.toLong()+2) * 1000,1000){
                 override fun onFinish() {
@@ -217,7 +216,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                     seconds--
                     if (seconds <= 0)
                         seconds = 0
-                    tvEnergyTimer.text = "${timerMin}:${seconds}"
+                    tvEnergyTimer.text = "${String.format("%02d", timerMin)}:${String.format("%02d", seconds)}"
                     remainTime--
                     energyTimer()
                     if (timerMin == 0){
@@ -228,10 +227,10 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                 }
 
                 override fun onTick(millisUntilFinished: Long) {
-                    Log.d("tick",timerSec.toString())
                     if (seconds <= 0)
                         seconds = 0
-                    tvEnergyTimer.text = "${timerMin}:${seconds}"
+
+                    tvEnergyTimer.text = "${String.format("%02d", timerMin)}:${String.format("%02d", seconds)}"
                     seconds--
                     counted += 1
                     remainTime--
@@ -368,24 +367,63 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
     override fun onPurchasesUpdated(billingResult: BillingResult?, purchases: MutableList<Purchase>?) {
         if (billingResult?.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
-                acknowledgePurchase(purchase.purchaseToken)
+                if (purchase.purchaseState === Purchase.PurchaseState.PURCHASED) {
+                    acknowledgePurchase(purchase)
+                }
 
             }
         } else if (billingResult?.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
-            // Handle an error caused by a user cancelling the purchase flow.
 
         } else {
-            // Handle any other error codes.
+            toast("Error when Purchase")
         }
     }
 
-    private fun acknowledgePurchase(purchaseToken: String) {
+    private fun acknowledgePurchase(purchase: Purchase) {
         val params = AcknowledgePurchaseParams.newBuilder()
-                .setPurchaseToken(purchaseToken)
+                .setPurchaseToken(purchase.purchaseToken)
                 .build()
         billingClient.acknowledgePurchase(params) { billingResult ->
-            val responseCode = billingResult.responseCode
-            val debugMessage = billingResult.debugMessage
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+
+//                if (!purchase.isAcknowledged) {
+//                    val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+//                            .setPurchaseToken(purchase.purchaseToken)
+//                    val ackPurchaseResult = withContext(Dispatchers.IO) {
+//                        billingClient.acknowledgePurchase(acknowledgePurchaseParams.build())
+//                    }
+//                }
+
+                val sdf = SimpleDateFormat("dd MMM yyyy")
+                val currentDate = sdf.format(Date())
+                var name = sharedPreferences.getString("name","")
+                if (name == "" && auth.currentUser != null)
+                    name = Profile.getCurrentProfile().name
+
+                val values: HashMap<String, Any>
+                values  = hashMapOf(
+                        "date" to currentDate,
+                        "buyItem" to buyItem.title,
+                        "name" to name!!,
+                        "purchaseToken" to purchase.purchaseToken
+                )
+                when (buyItem.title) {
+                    "500 Coin" -> shopPresenter.updatePoint((point+500).toLong())
+                    "1000 Coin" -> shopPresenter.updatePoint((point+1000).toLong())
+                    "2000 Coin" -> shopPresenter.updatePoint((point+2000).toLong())
+                    "Energy Limit 300" -> shopPresenter.updateEnergyLimit(300)
+                    "Energy Limit 200" -> shopPresenter.updateEnergyLimit(300)
+                    "Fulling Energy to Limit" -> shopPresenter.updateEnergyLimit(energyLimit.toLong())
+                }
+                if (auth.currentUser != null)
+                    database.child("payment").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+                        toast("Success Purchase")
+                        countDownTimer.cancel()
+                        shopPresenter.fetchBalance()
+                    }
+
+
+            }
 
         }
     }

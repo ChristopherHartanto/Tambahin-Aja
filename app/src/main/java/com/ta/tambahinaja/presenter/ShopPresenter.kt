@@ -32,7 +32,6 @@ class ShopPresenter(private val view: MainView, private val database: DatabaseRe
     }
 
     fun updateEnergy(energy: Long){
-        Log.d("energy from shop", energy.toString())
         database.child("users").child(auth.currentUser!!.uid).child("balance")
                 .child("energy").setValue(energy).addOnSuccessListener {
                     view.response("updateEnergy")

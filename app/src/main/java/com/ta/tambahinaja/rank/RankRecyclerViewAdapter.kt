@@ -70,6 +70,14 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
                     background.setBackgroundResource(R.color.colorAlphaNum)
                     image.setImageResource(R.drawable.alpha_num_game)
                 }
+                4 -> {
+                    background.setBackgroundResource(R.color.colorMix)
+                    image.setImageResource(R.drawable.mix_game)
+                }
+                5 -> {
+                    background.setBackgroundResource(R.color.colorDoubleAttack)
+                    image.setImageResource(R.drawable.double_attack_game)
+                }
             }
             if (position > 0){
                 if (!availableGame) {

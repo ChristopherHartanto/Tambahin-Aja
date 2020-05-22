@@ -45,10 +45,14 @@ class ShopRecyclerViewAdapter(
             desc.text = item.title
             buy.text = item.price
 
-            if (item.title.contains("energy"))
-                image.backgroundResource = R.drawable.lightning
-            else
-                image.backgroundResource = R.drawable.coin
+            when (item.title) {
+                "500 Coin" -> image.backgroundResource = R.drawable.coin
+                "1000 Coin" -> image.backgroundResource = R.drawable.money_bag
+                "2000 Coin" -> image.backgroundResource = R.drawable.treasure_box
+                "Energy Limit 300" -> image.backgroundResource = R.drawable.lightning2
+                "Energy Limit 200" -> image.backgroundResource = R.drawable.lightning1
+                "Fulling Energy to Limit" -> image.backgroundResource = R.drawable.lightning
+            }
 //            when (position) {
 //                0 -> {
 //                    desc.text = "Fulling Energy to Limit"
@@ -83,10 +87,11 @@ class ShopRecyclerViewAdapter(
 //            }
 
             buy.onClick {
-                context.toast("on development")
+                itemClicked(item)
             }
 
             itemView.onClick {
+                itemClicked(item)
             }
 
         }

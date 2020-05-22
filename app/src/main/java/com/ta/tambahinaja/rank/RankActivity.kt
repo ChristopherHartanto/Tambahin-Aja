@@ -504,9 +504,11 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 tvGameTypeInfo.text = "If Plan 'A' Didn't Work, the Alphabet has More 25 Letters"
             }
             4 ->{
+                ivRankGameType.setImageResource(R.drawable.mix_game)
                 tvGameTypeInfo.text = "Never Mix Business with Pleasure"
             }
             5 ->{
+                ivRankGameType.setImageResource(R.drawable.double_attack_game)
                 tvGameTypeInfo.text = "Do Good and The Good Life will Follow"
             }
         }
@@ -752,7 +754,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         rankDetailAdapter.notifyDataSetChanged()
     }
 
-    fun setUpEnergyTimer(){
+    private fun setUpEnergyTimer(){
         if (energy <= energyLimit) {
 
             currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString()

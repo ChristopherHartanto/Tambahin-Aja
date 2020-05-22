@@ -52,7 +52,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
         rvLeaderBoard.adapter = adapter
-        
+
         sharedPreferences = this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
         name = sharedPreferences.getString("name","").toString()
         if (name == "" && Profile.getCurrentProfile() != null)
@@ -99,7 +99,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
             }
             database.child("leaderboards").orderByChild("total").limitToFirst(50).addValueEventListener(postListener)
-
+            database.keepSynced(true)
         }
     }
 
@@ -109,16 +109,10 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         dataSnapshot.children.sortedBy {
             it.getValue(LeaderBoard::class.java)!!.total
         }
-
-        for ((index,ds) in dataSnapshot.children.withIndex()) {
-            Thread.sleep(5)
-            val total = ds.getValue(Leaderboard::class.java)!!.total
-            val id = ds.key
-
-            id?.let { retrieveUser(it,total) }
-        }
         var count = 0
-        for (ds in dataSnapshot.children) {
+        for ((index,ds) in dataSnapshot.children.withIndex()) {
+            val total = ds.getValue(Leaderboard::class.java)!!.total
+            items.add(HighScore(total))
             if (auth.currentUser != null){
                 if (ds.key.equals(auth.currentUser!!.uid)){
                     tvLeaderboardInfo.text = "#${dataSnapshot.childrenCount - count} " + name +" "+ ds.getValue(Leaderboard::class.java)!!.total
@@ -126,9 +120,15 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
             }
             count++
         }
+
+        for (ds in dataSnapshot.children) {
+            Thread.sleep(20)
+            val id = ds.key
+            id?.let { retrieveUser(it) }
+        }
     }
 
-    private fun retrieveUser(id : String, score: Int?){
+    private fun retrieveUser(id : String){
         GlobalScope.launch {
             val postListener = object :  ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
@@ -136,7 +136,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
 
                 override fun onDataChange(p0: DataSnapshot) {
-                    items.add(HighScore(score))
+
                     //toast("" + p0.children)
                     fetchDataUser(p0)
                 }
@@ -175,7 +175,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         return "https://graph.facebook.com/$userID/picture?type=large"
     }
 
-    fun loadingTimer(){
+    private fun loadingTimer(){
         val view = findViewById<View>(R.id.layout_loading)
 
         val tvLoadingTitle = view.findViewById<TextView>(R.id.tvLoadingTitle)

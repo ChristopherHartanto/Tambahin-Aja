@@ -359,6 +359,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             if (type == GameType.Normal){
                 if (answer == value){
                     point += 10
+                    if (mix)
+                        point += 2
                     generate()
                 }else{
                     if(point > 3)
@@ -370,6 +372,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }else if (type == GameType.OddEven){
                 if (answer == value){
                     point += 10
+                    if (mix)
+                        point += 2
                     generate()
                 }else{
                     if(point > 9)
@@ -380,6 +384,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }else if (type == GameType.AlphaNum){
                 if (answer == value){
                     point += 15
+                    if (mix)
+                        point += 2
                     generate()
                 }else{
                     if(point > 7)
@@ -401,17 +407,18 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                         point = 0
                 }
             }
-            else if(type == GameType.AlphaNum){
-                if (answer == value){
-                    point += 12
-                    generate()
-                }else{
-                    if(point > 5)
-                        point -= 5
-                    else
-                        point = 0
-                }
-            }else if (type == GameType.DoubleAttack){
+//            else if(type == GameType.AlphaNum){
+//                if (answer == value){
+//                    point += 12
+//                    generate()
+//                }else{
+//                    if(point > 5)
+//                        point -= 5
+//                    else
+//                        point = 0
+//                }
+//            }
+            else if (type == GameType.DoubleAttack){
                 if (answer == value){
                     point += 14
                     generate()
@@ -475,6 +482,10 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 if (auth.currentUser != null){
                     if (player == StatusPlayer.Rank){
                         if(highScore < point){
+                            if(mix)
+                                matchPresenter.sumHighScore(auth,
+                                        GameType.Mix,point,highScore)
+                            else
                                 matchPresenter.sumHighScore(auth,
                                     type,point,highScore)
                         }
@@ -802,17 +813,12 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 
     override fun onDestroy() {
         //soundPool.release()
-        countDownTimer.cancel()
-        matchPresenter.dismissListener()
         super.onDestroy()
-    }
-
-    override fun onPause() {
+        matchPresenter.dismissListener()
         progress_bar.visibility = View.GONE
         handler.removeCallbacks(runnable)
         countDownTimer.cancel()
-        matchPresenter.dismissListener()
-        super.onPause()
+
     }
 
     override fun onBackPressed() {

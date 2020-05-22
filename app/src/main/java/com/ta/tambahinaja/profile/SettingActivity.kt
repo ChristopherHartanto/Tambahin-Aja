@@ -31,20 +31,20 @@ class SettingActivity : AppCompatActivity() {
         supportActionBar?.hide()
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         tvSettingTitle.typeface = typeface
+        val version = packageManager.getPackageInfo(packageName,0).versionName
 
         settingItems.add(Setting("Review Us!", ""))
         settingItems.add(Setting("Privacy Policy", ""))
         settingItems.add(Setting("Terms and Condition", ""))
         settingItems.add(Setting("About Us", ""))
-        settingItems.add(Setting("Version", ""))
+        settingItems.add(Setting("Version", version))
         settingItems.add(Setting("Contact Us", ""))
-
-        val version = packageManager.getPackageInfo(packageName,0).versionName
 
         adapter = SettingRecyclerViewAdapter(this, settingItems) {
             when (it) {
                 1 -> openWebsite(getString(R.string.privacy_url))
                 2 -> openWebsite(getString(R.string.terms_url))
+                3 -> openWebsite(getString(R.string.about_us))
                 4 -> toast("Current Version $version")
                 5 -> sendEmail()
             }

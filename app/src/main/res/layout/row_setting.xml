@@ -32,6 +32,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/tvSettingDesc"
                 android:textSize="16sp"
+                android:layout_marginTop="3sp"
                 android:textColor="@color/colorPrimaryDark"
                 android:text="Setting Description"/>
         </LinearLayout>

@@ -37,6 +37,8 @@ class CustomGameRecyclerViewAdapter(private val context: Context,
                 1 -> image.setImageResource(R.drawable.odd_even_game)
                 2 -> image.setImageResource(R.drawable.rush_game)
                 3 -> image.setImageResource(R.drawable.alpha_num_game)
+                4 -> image.setImageResource(R.drawable.mix_game)
+                5 -> image.setImageResource(R.drawable.double_attack_game)
             }
 
             if (!availableGame)

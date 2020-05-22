@@ -1,4 +1,6 @@
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/colorGrey">
     <item>
         <shape android:shape="oval">
             <stroke android:color="@color/fbutton_color_silver" android:width="5dp" />
@@ -6,4 +8,4 @@
             <size android:width="100dp" android:height="100dp"/>
         </shape>
     </item>
-</selector>
+</ripple>
