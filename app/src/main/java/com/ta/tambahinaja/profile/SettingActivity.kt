@@ -14,9 +14,8 @@ import com.facebook.Profile
 import com.facebook.login.LoginManager
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_setting.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
 
 class SettingActivity : AppCompatActivity() {
 
@@ -54,9 +53,17 @@ class SettingActivity : AppCompatActivity() {
         rvSetting.adapter = adapter
 
         btnLogOut.onClick {
-            auth.signOut()
-            LoginManager.getInstance().logOut()
-            finish()
+            alert ("Do You Want to Log Out?"){
+                title = "Log Out"
+                yesButton {
+                    auth.signOut()
+                    LoginManager.getInstance().logOut()
+                    finish()
+                }
+                noButton {
+
+                }
+            }.show()
         }
 
         btnAdmin.onClick {

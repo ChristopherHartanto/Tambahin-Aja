@@ -228,10 +228,10 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
     }
 
-    fun isValidEmail(target: CharSequence): Boolean {
+    private fun isValidEmail(target: CharSequence): Boolean {
         return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches()
     }
-    fun isValidMobile(phone: String) : Boolean {
+    private fun isValidMobile(phone: String) : Boolean {
         if(!Pattern.matches("[a-zA-Z]+", phone)) {
             return phone.length in 7..13;
         }
@@ -268,7 +268,7 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
         }
     }
 
-    fun initRv(){
+    private fun initRv(){
         historyAdapter = HistoryRecyclerViewAdapter(ctx,historyItems, User(name,Profile.getCurrentProfile().id,"",""))
         val linearLayoutManager = LinearLayoutManager(ctx)
         linearLayoutManager.reverseLayout = true

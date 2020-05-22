@@ -16,7 +16,7 @@
         android:layout_margin="5dp"
         android:id="@+id/adView"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
+        ads:adUnitId="ca-app-pub-1388436725980010/5926503810"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"

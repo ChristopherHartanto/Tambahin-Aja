@@ -167,7 +167,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         btnRank.onClick {
             bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "rank");
             bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
             if(auth.currentUser == null)
                 popUpLogin()

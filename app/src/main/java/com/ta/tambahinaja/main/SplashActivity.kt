@@ -30,7 +30,6 @@ class SplashActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         val rotate = ObjectAnimator.ofFloat(ivLogo, "rotation", 180f, 0f)
-//        rotate.setRepeatCount(10);
         rotate.duration = 500
         rotate.start()
 

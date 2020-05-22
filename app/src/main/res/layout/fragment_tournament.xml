@@ -96,6 +96,7 @@
         android:id="@+id/btnJoinTournament"
         android:text="Join"
         android:textColor="@color/colorWhite"
+        android:visibility="gone"
         android:layout_margin="5dp"/>
 
 

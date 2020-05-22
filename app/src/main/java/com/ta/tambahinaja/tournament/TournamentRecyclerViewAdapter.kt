@@ -10,6 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ta.tambahinaja.R
 import com.squareup.picasso.Picasso
+import com.ta.tambahinaja.utils.getFacebookProfilePicture
 import org.jetbrains.anko.backgroundResource
 
 class TournamentRecyclerViewAdapter(private val context: Context, private val tournamentParticipants: List<TournamentParticipant>)
@@ -50,10 +51,6 @@ class TournamentRecyclerViewAdapter(private val context: Context, private val to
             name.text = tournamentParticipants.name
             score.text = "" + tournamentParticipants.point
             tournamentParticipants.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(tournamentParticipants.facebookId!!)).fit().into(image) }
-        }
-
-        fun getFacebookProfilePicture(userID: String): String {
-            return "https://graph.facebook.com/$userID/picture?type=large"
         }
     }
 }

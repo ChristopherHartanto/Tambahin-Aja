@@ -18,7 +18,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.*
 import com.ta.tambahinaja.R
 import com.ta.tambahinaja.friends.Message
 import com.ta.tambahinaja.presenter.ShopPresenter
@@ -47,7 +47,7 @@ import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView {
+class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView, PurchasesUpdatedListener {
 
     private lateinit var shopPresenter: ShopPresenter
     private lateinit var sharedPreferences : SharedPreferences
@@ -55,9 +55,11 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
     private lateinit var adapter: ShopRecyclerViewAdapter
     private lateinit var mAdView : AdView
     private lateinit var database: DatabaseReference
-    lateinit private var billingClient: BillingClient
+    private lateinit var billingClient: BillingClient
     private lateinit var countDownTimer : CountDownTimer
     private lateinit var currentRank : String
+    private var skuList: MutableList<String> = mutableListOf("coin_500","coin_1000","coin_2000","energy_limit_300","energy_limit_200","energy_to_limit")
+    private var items: MutableList<SkuDetails> = mutableListOf()
     private var energyTime = 300
     private var point = 0
     private var energy = 0
@@ -92,30 +94,50 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         MobileAds.initialize(this)
         val adView = AdView(this)
         adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
+        adView.adUnitId = "ca-app-pub-1388436725980010/4892909155"
 
-        adapter = ShopRecyclerViewAdapter(this){
-            toast("on Development")
+        adapter = ShopRecyclerViewAdapter(this,items){
+            val billingFlowParams = BillingFlowParams
+                    .newBuilder()
+                    .setSkuDetails(it)
+                    .build()
+            billingClient.launchBillingFlow(this, billingFlowParams)
         }
         rvMarket.layoutManager = LinearLayoutManager(this)
         rvMarket.adapter = adapter
 
-//
-//        billingClient = BillingClient.newBuilder(this).setListener(this).build()
-//        billingClient.startConnection(object : BillingClientStateListener {
-//            override fun onBillingSetupFinished(billingResult: BillingResult) {
-//                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
-//                    // The BillingClient is ready. You can query purchases here.
-//                    val b = BillingFlowParams
-//                            .newBuilder()
-//                            .setSkuDetails()
-//                }
-//            }
-//            override fun onBillingServiceDisconnected() {
-//                // Try to restart the connection on the next request to
-//                // Google Play by calling the startConnection() method.
-//            }
-//        })
+
+        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
+                    // The BillingClient is ready. You can query purchases here
+                    loadAllSKUs()
+                }
+            }
+            override fun onBillingServiceDisconnected() {
+                // Try to restart the connection on the next request to
+                // Google Play by calling the startConnection() method.
+            }
+        })
+    }
+
+    fun loadAllSKUs(){
+        val params = SkuDetailsParams.newBuilder().setSkusList(skuList)
+                .setType(BillingClient.SkuType.INAPP).build()
+
+        billingClient.querySkuDetailsAsync(params) {billingResult, skuDetailsList ->
+            toast(skuDetailsList.toString())
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && skuDetailsList.isNotEmpty()) {
+                items.clear()
+                for (skuDetails in skuDetailsList ) {
+                    toast(skuDetails.toString())
+                    items.add(skuDetails)
+
+                }
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onStart() {
@@ -340,6 +362,31 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                     showSnackBar(activity_market, "There is no more network", "INFINITE")
                 }
             }
+        }
+    }
+
+    override fun onPurchasesUpdated(billingResult: BillingResult?, purchases: MutableList<Purchase>?) {
+        if (billingResult?.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
+            for (purchase in purchases) {
+                acknowledgePurchase(purchase.purchaseToken)
+
+            }
+        } else if (billingResult?.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
+            // Handle an error caused by a user cancelling the purchase flow.
+
+        } else {
+            // Handle any other error codes.
+        }
+    }
+
+    private fun acknowledgePurchase(purchaseToken: String) {
+        val params = AcknowledgePurchaseParams.newBuilder()
+                .setPurchaseToken(purchaseToken)
+                .build()
+        billingClient.acknowledgePurchase(params) { billingResult ->
+            val responseCode = billingResult.responseCode
+            val debugMessage = billingResult.debugMessage
+
         }
     }
 }

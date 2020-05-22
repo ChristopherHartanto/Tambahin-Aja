@@ -42,11 +42,11 @@ class TutorialImageSliderAdapter(private val context: Context) : PagerAdapter() 
             }
             1->{
                 title.text = "Rank"
-                info.text = "You will have different privileges based on your current rank status. Finish the task and get more rewards!"
+                info.text = "You will have different privileges based on your current Rank status. Finish those tasks and get more rewards!"
             }
             2->{
                 title.text = "Reward"
-                info.text = "You will receive rewards each time you finish a game. Use coins to unlock new games whereas credits to redeem with phone credit(pulsa)!"
+                info.text = "You will receive rewards each time you finish a Rank Game. Use coins to unlock new games whereas credits to redeem with phone credit(pulsa)!"
             }
             3->{
                 title.text = "Leaderboards"

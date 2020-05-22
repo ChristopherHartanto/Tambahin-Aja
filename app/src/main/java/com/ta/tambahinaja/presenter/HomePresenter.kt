@@ -82,7 +82,7 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
             }
 
         }
-        database.child("users").child(auth.currentUser!!.uid).child("reward").limitToFirst(1).addValueEventListener(postListener)
+        database.child("users").child(auth.currentUser!!.uid).child("reward").addListenerForSingleValueEvent(postListener)
 
     }
 

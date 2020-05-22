@@ -38,16 +38,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val bitmap = BitmapFactory.decodeResource(this.resources,R.drawable.logo_transparent)
         val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val notificationBuilder = NotificationCompat.Builder(this)
-               // .setSmallIcon(R.drawable.logo_transparent)
-                .setLargeIcon(bitmap)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setAutoCancel(true)
-                .setSound(soundUri)
-                .setContentIntent(pendingIntent)
-                .setVibrate(longArrayOf(200,200))
-                .setLights(Color.YELLOW, 3000, 3000)
+        val notificationBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            NotificationCompat.Builder(this,"")
+        else
+            NotificationCompat.Builder(this)
+                    .setLargeIcon(bitmap)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setAutoCancel(true)
+                    .setSound(soundUri)
+                    .setContentIntent(pendingIntent)
+                    .setVibrate(longArrayOf(200,200))
+                    .setLights(Color.YELLOW, 3000, 3000)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder.setSmallIcon(R.drawable.logo_transparent)

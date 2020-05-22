@@ -87,7 +87,7 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
             //itemView.layoutParams = layoutParams
         }
 
-        fun calculateSizeOfView(context: Context): Int {
+        private fun calculateSizeOfView(context: Context): Int {
 
 
             val displayMetrics = context.resources.displayMetrics

@@ -41,16 +41,18 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     private lateinit var loadingTimer : CountDownTimer
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var adapter: LeaderBoardRecyclerViewAdapter
+    private lateinit var postListener : ValueEventListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_leader_board)
 
-
         supportActionBar?.hide()
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
         adapter = LeaderBoardRecyclerViewAdapter(this,items,profileItems)
+        rvLeaderBoard.adapter = adapter
+        
         sharedPreferences = this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
         name = sharedPreferences.getString("name","").toString()
         if (name == "" && Profile.getCurrentProfile() != null)
@@ -58,6 +60,17 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvLeaderboardInfo.typeface = typeface
         tvLeaderboardTitle.typeface = typeface
+
+        postListener = object :  ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+
+            }
+
+        }
 
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
@@ -73,10 +86,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     }
 
     private fun retrieve(){
-        items.clear()
-        profileItems.clear()
         GlobalScope.launch {
-            val postListener = object :  ValueEventListener{
+            postListener = object :  ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
@@ -87,12 +98,14 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
 
             }
-            database.child("leaderboards").orderByChild("total").limitToFirst(50).addListenerForSingleValueEvent(postListener)
+            database.child("leaderboards").orderByChild("total").limitToFirst(50).addValueEventListener(postListener)
 
         }
     }
 
     fun fetchData(dataSnapshot: DataSnapshot){
+        items.clear()
+        profileItems.clear()
         dataSnapshot.children.sortedBy {
             it.getValue(LeaderBoard::class.java)!!.total
         }
@@ -140,7 +153,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         profileItems.add(item)
 
         if (profileItems.size == items.size){
-            rvLeaderBoard.adapter = adapter
+            adapter.notifyDataSetChanged()
             loadingTimer.cancel()
             layout_loading.visibility = View.GONE
         }
@@ -204,6 +217,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         items.clear()
         profileItems.clear()
         adapter.notifyDataSetChanged()
+        database.removeEventListener(postListener)
         loadingTimer.cancel()
         super.onPause()
     }

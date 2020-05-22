@@ -112,9 +112,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         MobileAds.initialize(this)
         val adView = AdView(this)
         adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
+        adView.adUnitId = "ca-app-pub-1388436725980010/5926503810"
 
-        rewardedAd = RewardedAd(this, "ca-app-pub-3940256099942544/5224354917")
+        rewardedAd = RewardedAd(this, "ca-app-pub-1388436725980010/8744238848")
         val adLoadCallback = object: RewardedAdLoadCallback() {
             override fun onRewardedAdLoaded() {
                 // Ad successfully loaded.
@@ -773,7 +773,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         finish()
     }
 
-    fun calculateReward(){
+    private fun calculateReward(){
         when(currentRank){
             Rank.Toddler.toString()->{
                 pointReward = point * 4 / 100

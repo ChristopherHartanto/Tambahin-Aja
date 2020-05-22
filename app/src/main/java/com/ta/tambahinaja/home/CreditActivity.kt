@@ -102,7 +102,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
         MobileAds.initialize(this)
         val adView = AdView(this)
         adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
+        adView.adUnitId = "ca-app-pub-1388436725980010/8361095467"
 
         if (auth.currentUser != null)
             presenter.fetchCredit()

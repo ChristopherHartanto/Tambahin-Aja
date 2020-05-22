@@ -163,12 +163,6 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
         prevState = networkState.isConnected
     }
 
-
-
-    fun getFacebookProfilePicture(userID: String): String {
-        return "https://graph.facebook.com/$userID/picture?type=large"
-    }
-
     override fun onStart() {
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()

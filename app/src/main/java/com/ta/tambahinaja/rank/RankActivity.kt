@@ -40,6 +40,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
@@ -79,6 +80,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     private lateinit var database: DatabaseReference
     lateinit var rankPresenter: RankPresenter
     private lateinit var auth: FirebaseAuth
+    private lateinit var mFirebaseAnalytics: FirebaseAnalytics
+    private var bundle: Bundle = Bundle()
     lateinit var data: Inviter
     private var loadingCount = 4
     private lateinit var loadingTimer : CountDownTimer
@@ -108,6 +111,13 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         setContentView(R.layout.activity_rank)
 
         supportActionBar?.hide()
+
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
+        database = FirebaseDatabase.getInstance().reference
+        rankPresenter = RankPresenter(this,database)
+        auth = FirebaseAuth.getInstance()
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        rankDetailAdapter = RankDetailRecyclerViewAdapter(this, rankDetailItems)
 
         typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvRank.typeface = typeface
@@ -181,7 +191,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
     }
 
-    fun loadBestScore(dataSnapshot: DataSnapshot){
+    private fun loadBestScore(dataSnapshot: DataSnapshot){
 
         if (dataSnapshot.exists()){
             tvTotalScore.text = "" + dataSnapshot.getValue(LeaderBoard::class.java)!!.total
@@ -558,19 +568,20 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
     }
 
-    override fun onStart() {
-        sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
-        database = FirebaseDatabase.getInstance().reference
-        rankPresenter = RankPresenter(this,database)
-        auth = FirebaseAuth.getInstance()
-        rankDetailAdapter = RankDetailRecyclerViewAdapter(this, rankDetailItems)
-        Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
-        loadingTimer()
+    override fun onResume() {
+        super.onResume()
+
         if (auth.currentUser != null){
             rankPresenter.fetchRank()
             rankPresenter.fetchGameAvailable()
             rankPresenter.fetchBalance()
         }
+    }
+
+    override fun onStart() {
+        if (auth.currentUser != null && Profile.getCurrentProfile() != null)
+        Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
+        loadingTimer()
 
         super.onStart()
     }
@@ -645,31 +656,55 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         else if(response === "updateEnergy"){
             when (position) {
                 0 -> {
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "normal");
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.Normal))
                     finish()
                 }
                 1 -> {
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "odd_even");
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.OddEven))
                     finish()
                 }
                 2 -> {
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "rush");
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.Rush))
                     finish()
                 }
                 3 -> {
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "alpha_num");
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.AlphaNum))
                     finish()
                 }
                 4 ->{
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "mix");
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.Mix))
                     finish()
                 }
                 5 ->{
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "double_attack");
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+
                     startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
                             "type" to GameType.DoubleAttack))
                     finish()
@@ -682,7 +717,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
     }
 
-    fun loadRankInfo(currentRank: String){
+    private fun loadRankInfo(currentRank: String){
         when(enumValueOf<Rank>(currentRank)){
             Rank.Toddler -> {
                 rankDetailItems.clear()

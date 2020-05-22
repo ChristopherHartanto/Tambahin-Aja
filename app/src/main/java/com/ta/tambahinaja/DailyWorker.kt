@@ -3,6 +3,7 @@ package com.ta.tambahinaja
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -18,7 +19,7 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
         val currentDate = Calendar.getInstance()
         val dueDate = Calendar.getInstance()
         // Set Execution around 05:00:00 AM
-        dueDate.set(Calendar.HOUR_OF_DAY, 5)
+        dueDate.set(Calendar.HOUR_OF_DAY, 8)
         dueDate.set(Calendar.MINUTE, 0)
         dueDate.set(Calendar.SECOND, 0)
         if (dueDate.before(currentDate)) {
@@ -34,7 +35,7 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
         return Result.success()
     }
 
-    fun sendNotification() {
+    private fun sendNotification() {
         val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "WorkManager_00"
         //If on Oreo then notification required a notification channel.
@@ -43,10 +44,12 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
             notificationManager.createNotificationChannel(channel)
         }
 
+        val bitmap = BitmapFactory.decodeResource(applicationContext.resources,R.drawable.logo_transparent)
+
         val notification = NotificationCompat.Builder(mContext, channelId)
                 .setContentTitle("Good Morning")
                 .setContentText("Start Playing Tambahin Aja")
-                .setSmallIcon(R.drawable.money_bag)
+                .setSmallIcon(R.drawable.logo_transparent).setLargeIcon(bitmap)
 
         notificationManager.notify(1, notification.build())
     }
