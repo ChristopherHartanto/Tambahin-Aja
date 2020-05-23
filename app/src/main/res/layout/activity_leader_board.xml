@@ -49,9 +49,16 @@
         layout="@layout/layout_loading"
         android:id="@+id/layout_loading"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_height="match_parent"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srLeaderboard"
         android:layout_width="match_parent"
-        android:id="@+id/rvLeaderBoard"/>
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:id="@+id/rvLeaderBoard"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </LinearLayout>

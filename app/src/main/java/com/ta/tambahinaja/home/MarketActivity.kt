@@ -39,7 +39,6 @@ import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.quantumhiggs.network.NetworkStateHolder
 import kotlinx.android.synthetic.main.activity_add_friends.*
-import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_market.*
 import kotlinx.android.synthetic.main.activity_market.tvEnergy
 import kotlinx.android.synthetic.main.activity_market.tvPoint
@@ -74,6 +73,9 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
     private var remainTime = 0
     private var counted = 0
     private var diff: Long = 0
+    private lateinit var typeface: Typeface
+    private var loadingCount = 4
+    private lateinit var loadingTimer : CountDownTimer
     private var checkUpdateEnergy = false
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
@@ -86,7 +88,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
         sharedPreferences =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
-        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
+        typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
         tvShopTitle.typeface = typeface
         tvEnergy.typeface = typeface
         tvPoint.typeface = typeface
@@ -116,6 +118,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         rvMarket.layoutManager = LinearLayoutManager(this)
         rvMarket.adapter = adapter
 
+        loadingTimer()
 
         billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
         billingClient.startConnection(object : BillingClientStateListener {
@@ -142,6 +145,8 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                     items.add(skuDetails)
 
                 }
+                loadingTimer.cancel()
+                layout_loading.visibility = View.GONE
                 adapter.notifyDataSetChanged()
             }
         }
@@ -362,6 +367,38 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                 }
             }
         }
+    }
+
+    private fun loadingTimer(){
+        val view = findViewById<View>(R.id.layout_loading)
+
+        val tvLoadingTitle = view.findViewById<TextView>(R.id.tvLoadingTitle)
+        val tvLoadingInfo = view.findViewById<TextView>(R.id.tvLoadingInfo)
+
+        tvLoadingInfo.text = "Setting Up Best Price for You!"
+
+        tvLoadingInfo.typeface = typeface
+        tvLoadingTitle.typeface = typeface
+
+
+        loadingTimer = object: CountDownTimer(12000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                when (loadingCount) {
+                    3 -> tvLoadingTitle.text = "Fetching Data ."
+                    2 -> tvLoadingTitle.text = "Fetching Data . ."
+                    1 -> tvLoadingTitle.text = "Fetching Data . . ."
+                    else -> loadingCount = 4
+                }
+                loadingCount--
+            }
+
+            override fun onFinish() {
+                tvLoadingInfo.text = ""
+                tvLoadingTitle.text = "No Data"
+                toast("Try Again Later!")
+            }
+        }
+        loadingTimer.start()
     }
 
     override fun onPurchasesUpdated(billingResult: BillingResult?, purchases: MutableList<Purchase>?) {

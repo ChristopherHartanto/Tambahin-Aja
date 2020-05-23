@@ -217,8 +217,10 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
                         if (diff > 0)
                             btnJoinTournament.visibility = View.VISIBLE
-                        else
+                        else{
+                            srTournament.isRefreshing = false
                             btnJoinTournament.visibility = View.GONE
+                        }
 
                         val joinTournament = sharedPreference.getString("joinTournament", "")
                         if (data.key.toString() == joinTournament) {
@@ -230,7 +232,9 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                             editor.remove("joinTournament")
                             editor.apply()
 
-                            btnJoinTournament.visibility = View.VISIBLE
+                            if (diff>0)
+                                btnJoinTournament.visibility = View.VISIBLE
+
                             ivTournamentProfile.visibility = View.GONE
                             tvTournamentProfile.visibility = View.GONE
                         }
@@ -260,9 +264,8 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
                 } else {
                     btnJoinTournament.visibility = View.GONE
+                    srTournament.isRefreshing = false
                 }
-            }else if(!dataSnapshot.exists()){
-                srTournament.isRefreshing = false
             }
         }else if(response == "fetchTournamentParticipants"){
             if (context != null && fragmentActive){

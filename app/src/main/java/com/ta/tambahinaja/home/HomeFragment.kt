@@ -612,6 +612,22 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                             sbTime.max = 90
                         }
                     }
+                    4 -> {
+                        tvCustomGameName.text = "Mix"
+                        ivCustomGame.setImageResource(R.drawable.mix_game)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            sbTime.min = 30
+                            sbTime.max = 90
+                        }
+                    }
+                    5 -> {
+                        tvCustomGameName.text = "Double Attack"
+                        ivCustomGame.setImageResource(R.drawable.double_attack_game)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            sbTime.min = 30
+                            sbTime.max = 90
+                        }
+                    }
                 }
                 rvCustomGame.visibility = View.GONE
                 tvCustomGameName.visibility = View.VISIBLE

@@ -27,6 +27,7 @@ import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.onRefresh
 
 class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
@@ -72,6 +73,12 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
 
         }
 
+        srLeaderboard.onRefresh {
+            loadingTimer()
+            layout_loading.visibility = View.VISIBLE
+            retrieve()
+        }
+
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         linearLayoutManager.stackFromEnd = true
@@ -106,6 +113,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     fun fetchData(dataSnapshot: DataSnapshot){
         items.clear()
         profileItems.clear()
+
         dataSnapshot.children.sortedBy {
             it.getValue(LeaderBoard::class.java)!!.total
         }
@@ -129,22 +137,18 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
     }
 
     private fun retrieveUser(id : String){
-        GlobalScope.launch {
-            val postListener = object :  ValueEventListener{
-                override fun onCancelled(p0: DatabaseError) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-
-                    //toast("" + p0.children)
-                    fetchDataUser(p0)
-                }
-
+        val postListener = object :  ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
-            database.child("users").child(id).addListenerForSingleValueEvent(postListener)
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists())
+                    fetchDataUser(p0)
+            }
 
         }
+        database.child("users").child(id).addListenerForSingleValueEvent(postListener)
     }
 
     fun fetchDataUser(dataSnapshot: DataSnapshot){
@@ -153,6 +157,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
         profileItems.add(item)
 
         if (profileItems.size == items.size){
+            srLeaderboard.isRefreshing = false
             adapter.notifyDataSetChanged()
             loadingTimer.cancel()
             layout_loading.visibility = View.GONE

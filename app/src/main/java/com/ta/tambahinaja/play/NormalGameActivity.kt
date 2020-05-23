@@ -65,6 +65,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private lateinit var auth: FirebaseAuth
     lateinit var matchPresenter: MatchPresenter
     private lateinit var countDownTimer : CountDownTimer
+    private var isRunningCountDownTimer = false
     lateinit var data: Inviter
     lateinit var editor: SharedPreferences.Editor
     private lateinit var rewardedAd: RewardedAd
@@ -72,7 +73,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private lateinit var runnable: Runnable
     private var continueGame = false
     private lateinit var currentRank : String
-    //private lateinit var soundPool : SoundPool
+    private lateinit var soundPool : SoundPool
     private var soundCorrect = 0
     private var creditReward = 0
     private var pointReward = 0
@@ -98,7 +99,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private lateinit var popupWindow : PopupWindow
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var mAdView : AdView
-
     private var numberArr : MutableList<Int> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -361,7 +361,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     point += 10
                     if (mix)
                         point += 2
-                    generate()
                 }else{
                     if(point > 3)
                         point -= 3
@@ -374,7 +373,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     point += 10
                     if (mix)
                         point += 2
-                    generate()
                 }else{
                     if(point > 9)
                         point -= 9
@@ -386,7 +384,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     point += 15
                     if (mix)
                         point += 2
-                    generate()
                 }else{
                     if(point > 7)
                         point -= 7
@@ -396,7 +393,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }else if (type == GameType.Rush){
                 if (answer == value){
                     point += 13
-                    generate()
                     countDownTimer.cancel()
                     timer = defaultTimer
                     control(true)
@@ -421,7 +417,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             else if (type == GameType.DoubleAttack){
                 if (answer == value){
                     point += 14
-                    generate()
                 }else{
                     if(point > 4)
                         point -= 4
@@ -430,8 +425,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 }
 
             }
-            //soundPool.play(soundCorrect,3F,3F,0,0,1F)
+
             if (answer == value){ // tambah bonus point
+                soundPool.play(soundCorrect,1.0F,1.0F,1,0,1.0F)
                 point += when(enumValueOf<Rank>(currentRank)){
                     Rank.Toddler -> 0
                     Rank.Beginner -> 1
@@ -439,6 +435,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     Rank.Master -> 3
                     Rank.GrandMaster -> 5
                 }
+                generate()
             }
 
             if (player != StatusPlayer.Single){ // update value
@@ -465,6 +462,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private fun control(status : Boolean){
         countDownTimer = object: CountDownTimer(timer.toLong()*1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
+                isRunningCountDownTimer = true
                 if (timer < 4){
                     val animationFadeIn = AnimationUtils.loadAnimation(ctx, R.anim.fade_in)
                     cvTimer.startAnimation(animationFadeIn)
@@ -478,6 +476,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 
             }
             override fun onFinish() {
+                isRunningCountDownTimer = false
                 var text = ""
                 if (auth.currentUser != null){
                     if (player == StatusPlayer.Rank){
@@ -490,7 +489,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                                     type,point,highScore)
                         }
 
-                    }else{
+                    }else if(player != StatusPlayer.Single && player != StatusPlayer.Rank){
                         text = when {
                             point > opponentPoint -> {
                                 matchPresenter.getStats(auth,true)
@@ -780,7 +779,14 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     }
 
     private fun finishRank(){
-        startActivity(intentFor<PostGameActivity>("score" to point, "rewardCredit" to creditReward, "rewardPoint" to pointReward))
+        var newHighScore = false
+        if (point > highScore)
+             newHighScore = true
+
+        startActivity(intentFor<PostGameActivity>("score" to point,
+                "rewardCredit" to creditReward,
+                "rewardPoint" to pointReward,
+                "highScore" to newHighScore))
         finish()
     }
 
@@ -812,8 +818,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     }
 
     override fun onDestroy() {
-        //soundPool.release()
         super.onDestroy()
+        soundPool.release()
         matchPresenter.dismissListener()
         progress_bar.visibility = View.GONE
         handler.removeCallbacks(runnable)
@@ -840,7 +846,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 
     }
 
-    fun addPointToTournament(tournamentType: String){
+    private fun addPointToTournament(tournamentType: String){
         val joinTournamentEndDate = sharedPreference.getString("joinTournament","")
         if (joinTournamentEndDate == tournamentEndDate){
             if (tournamentType == type.toString()){
@@ -851,27 +857,28 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         }
     }
 
-//    override fun onStart() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            val audioAttributes = AudioAttributes.Builder()
-//                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-//                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-//                    .build()
-//            soundPool = SoundPool.Builder()
-//                    .setMaxStreams(100)
-//                    .setAudioAttributes(audioAttributes)
-//                    .build()
-//        } else {
-//            soundPool = SoundPool(100, AudioManager.STREAM_MUSIC, 0);
-//        }
-//        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
-//
-//        super.onStart()
-//    }
+    override fun onStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            soundPool = SoundPool.Builder()
+                    .setMaxStreams(1)
+                    .setAudioAttributes(audioAttributes)
+                    .build()
+        } else {
+            soundPool = SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        }
+        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
+
+        super.onStart()
+    }
 
     override fun onResume() {
        // database.child("onPlay").child(facebookId).child("pause").setValue(false)
-        control(true)
+        if (!isRunningCountDownTimer)
+            control(true)
 
         super.onResume()
     }

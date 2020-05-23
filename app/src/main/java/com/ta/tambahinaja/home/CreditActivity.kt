@@ -37,7 +37,6 @@ import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_add_friends.*
 import kotlinx.android.synthetic.main.activity_credit.*
 import kotlinx.android.synthetic.main.activity_credit.tvCredit
-import kotlinx.android.synthetic.main.activity_market.*
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
