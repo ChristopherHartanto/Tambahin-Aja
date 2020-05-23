@@ -204,8 +204,9 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
             }
 
             override fun onFinish() {
-                finish()
-                toast("Oops Something Wrongs!")
+                tvLoadingTitle.text = "No Data"
+                tvLoadingInfo.text = ""
+                toast("Try Again Later")
             }
         }
         loadingTimer.start()

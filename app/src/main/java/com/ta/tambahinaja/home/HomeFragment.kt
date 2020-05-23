@@ -71,7 +71,6 @@ import java.util.*
 class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
     private lateinit var callback: FragmentListener
-    private lateinit var mFirebaseAnalytics: FirebaseAnalytics
     private lateinit var homePresenter: HomePresenter
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -81,7 +80,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private lateinit var reward: Reward
     private var countPuzzle = 0
     private lateinit var customGameAdapter: CustomGameRecyclerViewAdapter
-    private var bundle: Bundle = Bundle()
     private lateinit var currentRank : String
     private var puzzleType = 1
     private var puzzleAnswer = 0
@@ -115,12 +113,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         fragmentActive = true
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(ctx)
         homePresenter = HomePresenter(this,database)
         callback = activity as MainActivity
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString()
-        bundle = Bundle()
 
         val sdf = SimpleDateFormat("dd MMM yyyy")
         currentDate = sdf.format(Date())
@@ -165,9 +161,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnRank.onClick {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "rank");
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
             if(auth.currentUser == null)
                 popUpLogin()
@@ -179,9 +172,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnPlayFriend.onClick {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "play friend");
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
 
             if(auth.currentUser == null)
                 popUpLogin()
@@ -190,9 +180,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnOnline.onClick {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "online");
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
 
             if(auth.currentUser == null)
                 popUpLogin()
@@ -202,9 +189,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnLeaderboard.onClick {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "leaderBoard");
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
 
             startActivity(intentFor<LeaderBoardActivity>().clearTask())
         }
@@ -214,18 +198,12 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         ivShop.onClick {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "shop");
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
 
             ivShop.startAnimation(clickAnimation)
             startActivity<MarketActivity>()
         }
 
         cvCredit.onClick {
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "credit");
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle);
 
             cvCredit.startAnimation(clickAnimation)
             startActivity<CreditActivity>()

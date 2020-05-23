@@ -145,14 +145,12 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
         when {
             message === "accepted" -> intent.extras!!.getString("joinFriendFacebookId")?.let { waitingPresenter.createGame(it,false) }
             message === "createGame" -> {
-                toast("create game")
-                finish()
                 startActivity(intentFor<CountdownActivity>("joinFriendFacebookId" to intent.extras!!.getString("joinFriendFacebookId"),
                         "joinFriendName" to intent.extras!!.getString("joinFriendName"),
                         "status" to StatusPlayer.Inviter, "type" to type, "timer" to timer))
+                finish()
             }
             message === "invitationSent" -> {
-                toast("invitation sent")
                 intent.extras!!.getString("joinFriendFacebookId")?.let { it1 -> waitingPresenter.getResponse(it1) }
             }
             message === "registerToWaitingList" -> {
@@ -178,12 +176,14 @@ class WaitingActivity : AppCompatActivity(), NetworkConnectivityListener, MainVi
     }
 
     override fun onDestroy() {
+        countDownTimer.cancel()
         dismissWaiting()
 
         super.onDestroy()
     }
 
     override fun onBackPressed() {
+        countDownTimer.cancel()
         dismissWaiting()
 
         super.onBackPressed()

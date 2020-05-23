@@ -42,6 +42,7 @@ import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdCallback
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
@@ -60,6 +61,8 @@ import java.util.*
 
 class NormalGameActivity : AppCompatActivity(), MatchView {
 
+    private lateinit var mFirebaseAnalytics: FirebaseAnalytics
+    private var bundle: Bundle = Bundle()
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
@@ -133,7 +136,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         }
 
         supportActionBar?.hide()
-
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
         database = FirebaseDatabase.getInstance().reference
         matchPresenter = MatchPresenter(this,database)
@@ -381,7 +384,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 }
             }else if (type == GameType.AlphaNum){
                 if (answer == value){
-                    point += 15
+                    point += 14
                     if (mix)
                         point += 2
                 }else{
@@ -416,7 +419,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 //            }
             else if (type == GameType.DoubleAttack){
                 if (answer == value){
-                    point += 14
+                    point += 15
                 }else{
                     if(point > 4)
                         point -= 4
@@ -535,7 +538,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                                     joinOnlineName,"online"
                             )
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
-                                    "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineName, "gameResult" to text))
+                                    "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineFacebookId, "gameResult" to text))
                             finish()
                         }
                         StatusPlayer.JoinOnline -> {
@@ -543,7 +546,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                                     creatorName,"online"
                             )
                             startActivity(intentFor<PostGameActivity>("scorePlayer" to point,
-                                    "scoreOpponent" to opponentPoint, "opponentName" to joinOnlineName, "opponentFacebookId" to joinOnlineFacebookId, "gameResult" to text))
+                                    "scoreOpponent" to opponentPoint, "opponentName" to creatorName, "opponentFacebookId" to creatorFacebookId, "gameResult" to text))
                             finish()
                         }
                         StatusPlayer.Rank ->{
@@ -734,6 +737,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
 
             btnReject.onClick {
+
                 btnReject.startAnimation(clickAnimation)
                 activity_normal_game.alpha = 1F
                 popupWindow.dismiss()
@@ -782,6 +786,10 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         var newHighScore = false
         if (point > highScore)
              newHighScore = true
+
+        bundle.putString(FirebaseAnalytics.Param.SCORE, point.toString())
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, type.toString())
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.EARN_VIRTUAL_CURRENCY, bundle)
 
         startActivity(intentFor<PostGameActivity>("score" to point,
                 "rewardCredit" to creditReward,

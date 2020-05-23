@@ -55,7 +55,7 @@ class PostGameActivity : AppCompatActivity() {
         val status = intent.extras!!.getSerializable("status")
         if (score != 0){
             if (intent.extras!!.getBoolean("highScore"))
-                tvPostGameTitle.text = "New High Score"
+                tvPostGameTitle.text = "New High Score!"
 
             layoutMultipleGame.visibility = View.GONE
             tvSinglePoint.visibility = View.VISIBLE

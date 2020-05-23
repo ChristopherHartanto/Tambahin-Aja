@@ -107,31 +107,33 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         adView.adUnitId = "ca-app-pub-1388436725980010/4892909155"
 
         adapter = ShopRecyclerViewAdapter(this,items){
+            toast("On Development")
             buyItem = it
-            val billingFlowParams = BillingFlowParams
-                    .newBuilder()
-                    .setSkuDetails(it)
-                    .build()
-            billingClient.launchBillingFlow(this, billingFlowParams)
+//            val billingFlowParams = BillingFlowParams
+//                    .newBuilder()
+//                    .setSkuDetails(it)
+//                    .build()
+//            billingClient.launchBillingFlow(this, billingFlowParams)
         }
 
         rvMarket.layoutManager = LinearLayoutManager(this)
         rvMarket.adapter = adapter
 
-        loadingTimer()
+        layout_loading.visibility = View.GONE
+        //loadingTimer()
 
-        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
-                    // The BillingClient is ready. You can query purchases here
-                    loadAllSKUs()
-                }
-            }
-            override fun onBillingServiceDisconnected() {
-                toast("Oops Try Again")
-            }
-        })
+//        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
+//        billingClient.startConnection(object : BillingClientStateListener {
+//            override fun onBillingSetupFinished(billingResult: BillingResult) {
+//                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
+//                    // The BillingClient is ready. You can query purchases here
+//                    loadAllSKUs()
+//                }
+//            }
+//            override fun onBillingServiceDisconnected() {
+//                toast("Oops Try Again")
+//            }
+//        })
     }
 
     fun loadAllSKUs(){
@@ -177,7 +179,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         super.onStart()
     }
 
-    fun setUpEnergyTimer(){
+    private fun setUpEnergyTimer(){
         if (energy <= energyLimit) {
             val remainingEnergyToFull = (energyLimit - energy) * energyTime
             val currentDate = Date().time
@@ -200,7 +202,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
                 energy = energyLimit // else energy += energyget
             else
                 energy += energyGet.toInt()
-            if (energyGet.toInt() != 0){
+            if (energyGet.toInt() > 0){
                 shopPresenter.updateEnergy(energy.toLong())
                 counted = 0
             }
@@ -217,18 +219,17 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
             var seconds = timerSec
             countDownTimer = object : CountDownTimer((timerSec.toLong()+2) * 1000,1000){
                 override fun onFinish() {
-                    Log.d("finish tick",timerSec.toString())
                     seconds--
                     if (seconds <= 0)
                         seconds = 0
                     tvEnergyTimer.text = "${String.format("%02d", timerMin)}:${String.format("%02d", seconds)}"
                     remainTime--
-                    energyTimer()
                     if (timerMin == 0){
                         energy++
                         shopPresenter.updateEnergy(energy.toLong())
                         counted = 0
                     }
+                    energyTimer()
                 }
 
                 override fun onTick(millisUntilFinished: Long) {
@@ -328,7 +329,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         editor.apply()
 
         Log.d("save last count", sharedPreferences.getLong("lastCountEnergy",0).toString())
-
+        //loadingTimer.cancel()
         countDownTimer.cancel()
         super.onPause()
     }
@@ -394,7 +395,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
 
             override fun onFinish() {
                 tvLoadingInfo.text = ""
-                tvLoadingTitle.text = "No Data"
+                tvLoadingTitle.text = "Coming Soon . . ."
                 toast("Try Again Later!")
             }
         }

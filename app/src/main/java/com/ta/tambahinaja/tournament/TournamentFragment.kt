@@ -53,7 +53,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
     private lateinit var popupWindow : PopupWindow
     private lateinit var tournamentPresenter: TournamentPresenter
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
-    private lateinit var dataTournament: TournamentData
+    private var dataTournament = TournamentData()
     private lateinit var currentRank : String
     private var diff: Long = 0
     private var price = 0
@@ -303,6 +303,8 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                     srTournament.isRefreshing = false
                     adapter.notifyDataSetChanged()
                 }
+                else if(!dataSnapshot.exists())
+                    srTournament.isRefreshing = false
             }
         }
     }

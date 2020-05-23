@@ -195,20 +195,20 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             }
 
             items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal,0))
-            items.add(ChooseGame("Odd Even", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
-            items.add(ChooseGame("Rush", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
-            items.add(ChooseGame("AlphaNum", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum,500))
-            items.add(ChooseGame("Mix", 28,dataSnapshot.getValue(LeaderBoard::class.java)!!.mix,800))
-            items.add(ChooseGame("Double Attack", 25,dataSnapshot.getValue(LeaderBoard::class.java)!!.doubleAttack,1000))
+            items.add(ChooseGame("Odd Even", 13,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
+            items.add(ChooseGame("Rush", 16,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
+            items.add(ChooseGame("AlphaNum", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum,500))
+            items.add(ChooseGame("Mix", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.mix,800))
+            items.add(ChooseGame("Double Attack", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.doubleAttack,1000))
         }else{
             tvTotalScore.text = "" + 0
 
             items.add(ChooseGame("Normal", 15,0,0))
-            items.add(ChooseGame("Odd Even", 20,0,100))
-            items.add(ChooseGame("Rush", 25,0,300))
-            items.add(ChooseGame("AlphaNum", 30,0,500))
-            items.add(ChooseGame("Mix", 28,0,800))
-            items.add(ChooseGame("Double Attack", 25,0,1000))
+            items.add(ChooseGame("Odd Even", 13,0,100))
+            items.add(ChooseGame("Rush", 16,0,300))
+            items.add(ChooseGame("AlphaNum", 18,0,500))
+            items.add(ChooseGame("Mix", 20,0,800))
+            items.add(ChooseGame("Double Attack", 18,0,1000))
         }
         adapter.notifyDataSetChanged()
 
@@ -777,7 +777,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 energy = energyLimit // else energy += energyget
             else
                 energy += energyGet.toInt()
-            if (energyGet.toInt() != 0){
+            if (energyGet.toInt() > 0){
                 rankPresenter.updateEnergy(energy.toLong(),false)
                 counted = 0
             }
@@ -801,6 +801,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                         energyTimer()
                         counted = 0
                     }
+
                 }
 
                 override fun onTick(millisUntilFinished: Long) {

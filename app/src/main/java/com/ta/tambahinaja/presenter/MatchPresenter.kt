@@ -54,7 +54,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             GameType.Normal -> "normal"
             GameType.OddEven -> "oddEven"
             GameType.Rush -> "rush"
-            GameType.AlphaNum -> "alpaNum"
+            GameType.AlphaNum -> "alphaNum"
             GameType.DoubleAttack -> "doubleAttack"
             GameType.Mix -> "mix"
         }
@@ -62,7 +62,7 @@ class MatchPresenter (private val view: MatchView, private val database: Databas
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
                 if (dataSnapshot.exists())
-                    newHighScore(auth,dataSnapshot.value as Long - oldScore.toLong(),gameType,highScore,oldScore)
+                    newHighScore(auth,dataSnapshot.value as Long,gameType,highScore,oldScore)
                 else
                     newHighScore(auth,0,gameType,highScore,oldScore)
 
