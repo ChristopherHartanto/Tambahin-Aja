@@ -5,6 +5,7 @@
     android:layout_margin="5dp"
     android:layout_height="wrap_content"
     app:cardCornerRadius="10dp"
+    app:cardBackgroundColor="@color/colorPrimary"
     android:elevation="5dp">
 
     <LinearLayout
@@ -15,8 +16,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/layout_rank_background"
-            android:background="@color/colorPrimary">
+            android:id="@+id/layout_rank_background">
 
         <ImageView
             android:layout_width="match_parent"
@@ -57,6 +57,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
             android:orientation="horizontal">
 
         <TextView

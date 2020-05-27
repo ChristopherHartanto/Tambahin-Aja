@@ -105,7 +105,7 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
                 }
 
             }
-            database.child("leaderboards").orderByChild("total").limitToFirst(50).addValueEventListener(postListener)
+            database.child("leaderboards").orderByChild("total").limitToLast(50).addValueEventListener(postListener)
             database.keepSynced(true)
         }
     }
@@ -118,6 +118,8 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
             it.getValue(LeaderBoard::class.java)!!.total
         }
         var count = 0
+        tvLeaderboardInfo.text = ""
+
         for ((index,ds) in dataSnapshot.children.withIndex()) {
             val total = ds.getValue(Leaderboard::class.java)!!.total
             items.add(HighScore(total))
@@ -128,6 +130,23 @@ class LeaderBoardActivity : AppCompatActivity(), NetworkConnectivityListener {
             }
             count++
         }
+
+        if (tvLeaderboardInfo.text == "" && auth.currentUser != null)
+            GlobalScope.launch {
+                postListener = object :  ValueEventListener{
+                    override fun onCancelled(p0: DatabaseError) {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists())
+                            tvLeaderboardInfo.text = "#50++ " + name +" "+ p0.getValue(Leaderboard::class.java)!!.total
+                    }
+
+                }
+                database.child("leaderboards").child(auth.currentUser!!.uid).addListenerForSingleValueEvent(postListener)
+                database.keepSynced(true)
+            }
 
         for (ds in dataSnapshot.children) {
             Thread.sleep(20)

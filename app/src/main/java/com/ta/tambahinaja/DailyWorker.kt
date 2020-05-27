@@ -2,13 +2,16 @@ package com.ta.tambahinaja
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.ta.tambahinaja.main.MainActivity
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -49,7 +52,8 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
         val notification = NotificationCompat.Builder(mContext, channelId)
                 .setContentTitle("Good Morning")
                 .setContentText("Start Playing Tambahin Aja")
-                .setSmallIcon(R.drawable.logo_transparent).setLargeIcon(bitmap)
+                .setSmallIcon(R.drawable.logo_transparent)
+                .setLargeIcon(bitmap)
                 .setVibrate(longArrayOf(200,200))
 
         notificationManager.notify(1, notification.build())

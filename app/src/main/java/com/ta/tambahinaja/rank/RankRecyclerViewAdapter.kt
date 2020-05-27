@@ -79,14 +79,11 @@ class RankRecyclerViewAdapter(private val context: Context, private val items: L
                     image.setImageResource(R.drawable.double_attack_game)
                 }
             }
-            if (position > 0){
-                if (!availableGame) {
-                    payGame.text = "${chooseGame.priceGame}"
-                    llPayGame.visibility = View.VISIBLE
-                }else
-                    llPayGame.visibility = View.GONE
-            }
-
+            if (!availableGame) {
+                payGame.text = "${chooseGame.priceGame}"
+                llPayGame.visibility = View.VISIBLE
+            }else
+                llPayGame.visibility = View.GONE
 
             itemView.setOnClickListener{
                 listener(position)

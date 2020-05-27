@@ -105,7 +105,6 @@ class RankPresenter(private val view: RankView, private val database: DatabaseRe
     }
 
     fun updateEnergy(energyRemaining: Long, response: Boolean){
-        Log.d("energy from rank", energyRemaining.toString())
         database.child("users").child(auth.currentUser!!.uid).child("balance").child("energy").setValue(energyRemaining).addOnFailureListener {
             view.response(it.message!!,"error")
         }.addOnSuccessListener {
@@ -120,7 +119,8 @@ class RankPresenter(private val view: RankView, private val database: DatabaseRe
         database.child("users").child(auth.currentUser!!.uid).child("currentRank").setValue(nextRank).addOnSuccessListener {
             view.response("Level Up to ${nextRank}","levelUp")
         }
-        database.child("users").child(auth.currentUser!!.uid).child("balance").child("energyLimit").setValue(energyLimit)
+        if (energyLimit < 200) // validasti agar untuk user beli energy limit tidak terupdate
+            database.child("users").child(auth.currentUser!!.uid).child("balance").child("energyLimit").setValue(energyLimit)
     }
 
     fun dismissListener(){

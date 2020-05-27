@@ -44,6 +44,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.startActivity
 
 class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
                 }
                 R.id.profile -> {
                     if (auth.currentUser == null)
-                        toast("Login First")
+                        startActivity<LoginActivity>()
                     else
                         loadProfileFragment(savedInstanceState)
                 }

@@ -241,7 +241,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                         dataTournament = data.getValue(TournamentData::class.java)!!
                         price = dataTournament.price!!.toInt()
                         tvTournamentTitle.text = dataTournament.title
-                        btnJoinTournament.text = "Join ${dataTournament.price} Points"
+                        btnJoinTournament.text = "Join ${dataTournament.price} Coins"
                         btnJoinTournament.typeface = typeface
                         tournamentEndDate = data.key.toString()
                         tournamentPresenter.fetchTournamentParticipants(tournamentEndDate)
@@ -398,7 +398,7 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                 editor.apply()
             }
         }else if(message == "continueJoinTournament"){
-            popUp(Message.Reply,"Do You Want to Join this Tournament \n price ${dataTournament.price} points?")
+            popUp(Message.Reply,"Do You Want to Join this Tournament \n price ${dataTournament.price} coins?")
         }else if(message == "notEnoughPoint"){
             popUp(Message.ReadOnly,"Not Enough Point")
         }else{

@@ -44,6 +44,7 @@ import kotlinx.android.synthetic.main.activity_market.tvEnergy
 import kotlinx.android.synthetic.main.activity_market.tvPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.backgroundResource
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
@@ -107,33 +108,33 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
         adView.adUnitId = "ca-app-pub-1388436725980010/4892909155"
 
         adapter = ShopRecyclerViewAdapter(this,items){
-            toast("On Development")
+            //toast("On Development")
             buyItem = it
-//            val billingFlowParams = BillingFlowParams
-//                    .newBuilder()
-//                    .setSkuDetails(it)
-//                    .build()
-//            billingClient.launchBillingFlow(this, billingFlowParams)
+            val billingFlowParams = BillingFlowParams
+                    .newBuilder()
+                    .setSkuDetails(it)
+                    .build()
+            billingClient.launchBillingFlow(this, billingFlowParams)
         }
 
         rvMarket.layoutManager = LinearLayoutManager(this)
         rvMarket.adapter = adapter
 
         layout_loading.visibility = View.GONE
-        //loadingTimer()
+        loadingTimer()
 
-//        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
-//        billingClient.startConnection(object : BillingClientStateListener {
-//            override fun onBillingSetupFinished(billingResult: BillingResult) {
-//                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
-//                    // The BillingClient is ready. You can query purchases here
-//                    loadAllSKUs()
-//                }
-//            }
-//            override fun onBillingServiceDisconnected() {
-//                toast("Oops Try Again")
-//            }
-//        })
+        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
+                    // The BillingClient is ready. You can query purchases here
+                    loadAllSKUs()
+                }
+            }
+            override fun onBillingServiceDisconnected() {
+                toast("Oops Try Again")
+            }
+        })
     }
 
     fun loadAllSKUs(){
@@ -432,7 +433,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
 //                    }
 //                }
 
-                val sdf = SimpleDateFormat("dd MMM yyyy")
+                val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
                 val currentDate = sdf.format(Date())
                 var name = sharedPreferences.getString("name","")
                 if (name == "" && auth.currentUser != null)
@@ -440,21 +441,22 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
 
                 val values: HashMap<String, Any>
                 values  = hashMapOf(
-                        "date" to currentDate,
                         "buyItem" to buyItem.title,
                         "name" to name!!,
+                        "uid" to auth.currentUser!!.uid,
                         "purchaseToken" to purchase.purchaseToken
                 )
-                when (buyItem.title) {
-                    "500 Coin" -> shopPresenter.updatePoint((point+500).toLong())
-                    "1000 Coin" -> shopPresenter.updatePoint((point+1000).toLong())
-                    "2000 Coin" -> shopPresenter.updatePoint((point+2000).toLong())
-                    "Energy Limit 300" -> shopPresenter.updateEnergyLimit(300)
-                    "Energy Limit 200" -> shopPresenter.updateEnergyLimit(300)
-                    "Fulling Energy to Limit" -> shopPresenter.updateEnergyLimit(energyLimit.toLong())
+                when {
+                    buyItem.title.contains("500 Coin") -> shopPresenter.updatePoint((point+500).toLong())
+                    buyItem.title.contains("1000 Coin") -> shopPresenter.updatePoint((point+1000).toLong())
+                    buyItem.title.contains("2000 Coin") -> shopPresenter.updatePoint((point+2000).toLong())
+                    buyItem.title.contains("Energy Limit to 300") -> shopPresenter.updateEnergyLimit(300)
+                    buyItem.title.contains("Energy Limit to 200") -> shopPresenter.updateEnergyLimit(200)
+                    buyItem.title.contains("Fulling Energy to Limit") -> shopPresenter.updateEnergyLimit(energyLimit.toLong())
+
                 }
                 if (auth.currentUser != null)
-                    database.child("payment").child(auth.currentUser!!.uid).setValue(values).addOnSuccessListener {
+                    database.child("payment").child(currentDate).setValue(values).addOnSuccessListener {
                         toast("Success Purchase")
                         countDownTimer.cancel()
                         shopPresenter.fetchBalance()

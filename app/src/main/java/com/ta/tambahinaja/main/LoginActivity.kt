@@ -268,6 +268,7 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         database.child("users").child(auth.currentUser!!.uid).child("stats").setValue(values).addOnFailureListener {
             toast(""+ it.message)
         }
+
     }
 
     fun getFacebookProfilePicture(userID: String): String {

@@ -46,7 +46,7 @@
         android:gravity="center"
         android:text="Rp 0"
         android:layout_marginBottom="20sp"
-        android:textColor="@color/colorWhite"
+        android:textColor="@color/fbutton_color_sun_flower"
         android:textSize="28sp"
         android:id="@+id/tvCredit"/>
 

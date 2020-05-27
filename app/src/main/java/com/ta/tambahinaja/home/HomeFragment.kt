@@ -1,5 +1,6 @@
 package com.ta.tambahinaja.home
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -84,6 +85,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private var puzzleType = 1
     private var puzzleAnswer = 0
     private var credit = 0
+    private var coin = 0
     private var playedPuzzleToday = false
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var popupWindow : PopupWindow
@@ -134,11 +136,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         btnOnline.typeface = typeface
         btnLeaderboard.typeface = typeface
         tvTitle.typeface = typeface
+        tvCoin.typeface = typeface
 
         if (auth.currentUser != null){
             homePresenter.checkDailyPuzzle()
             homePresenter.fetchCredit()
+            homePresenter.fetchCoin()
         }
+
 
         ivTutorial.onClick {
             startActivity<TutorialActivity>()
@@ -161,14 +166,12 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnRank.onClick {
-
+            btnRank.startAnimation(clickAnimation)
             if(auth.currentUser == null)
                 popUpLogin()
             else{
-                btnRank.startAnimation(clickAnimation)
                 startActivity<RankActivity>()
             }
-
         }
 
         btnPlayFriend.onClick {
@@ -180,16 +183,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         btnOnline.onClick {
-
             if(auth.currentUser == null)
                 popUpLogin()
-            else
+            else {
                 startActivity(intentFor<WaitingActivity>("playOnline" to true))
-
+            }
         }
 
         btnLeaderboard.onClick {
-
             startActivity(intentFor<LeaderBoardActivity>().clearTask())
         }
 
@@ -204,9 +205,13 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         }
 
         cvCredit.onClick {
-
             cvCredit.startAnimation(clickAnimation)
             startActivity<CreditActivity>()
+        }
+
+        cvCoin.onClick {
+            cvCoin.startAnimation(clickAnimation)
+            startActivity<MarketActivity>()
         }
 
         if(AccessToken.getCurrentAccessToken() == null)
@@ -255,11 +260,11 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
         when(enumValueOf<Rank>(currentRank)){
             Rank.Toddler ->{
-                difficulty = 3
+                difficulty = 0
                 countPuzzle = 5
             }
             Rank.Beginner ->{
-                difficulty = 5
+                difficulty = 0
                 countPuzzle = 6
             }
             Rank.Senior ->{
@@ -281,7 +286,10 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         for(x in 0 until countPuzzle)
         {
             var value = 0
-            val choose = Random().nextInt(2)
+            var choose = 0
+
+            if (difficulty != 0)
+                choose = Random().nextInt(2)
 
             if (choose == 1){
                 value = Random().nextInt(difficulty) + 65
@@ -362,7 +370,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         val view = inflater.inflate(R.layout.puzzle_pop_up,null)
         val main_view = inflater.inflate(R.layout.activity_main,null)
 
-
         // Initialize a new instance of popup window
         popupWindow = PopupWindow(
             view, // Custom view to show in popup window
@@ -407,14 +414,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         val btn0 = keyboardView.findViewById<Button>(R.id.btn0)
 
         btnAnswerPuzzle.onClick {
-            if (tvAnswerPuzzle.text == "")
+            if (tvAnswerPuzzle.text.toString() == "")
                 toast("Please Select Your Answer")
-            else
+            else{
                 checkAnswer(tvAnswerPuzzle.text.toString())
-
-            ivDailyPuzzle.visibility = View.GONE
-            tvPuzzleInfo.text = ""
-            homePresenter.updatePuzzle()
+                ivDailyPuzzle.visibility = View.GONE
+                tvPuzzleInfo.text = ""
+                homePresenter.updatePuzzle()
+            }
 
         }
 
@@ -771,6 +778,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             }else if(response == "fetchCredit"){
                 credit = dataSnapshot.value.toString().toInt()
                 tvCredit.text = "${credit}"
+            }else if(response == "fetchCoin"){
+                coin = dataSnapshot.value.toString().toInt()
+                tvCoin.text = "${coin}"
             }else if(response == "updateCredit"){
                 homePresenter.fetchCredit()
             }else if(response == "availableGame"){
@@ -795,7 +805,6 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 customGameAdapter.notifyDataSetChanged()
 
             }else if(response == "reward"){
-                Log.d("reward","masuk sini")
                 reward = dataSnapshot.getValue(Reward::class.java)!!
                 popUpMessage(com.ta.tambahinaja.friends.Message.ReadOnly,reward.description.toString())
             }else{
@@ -879,6 +888,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                     fragment_home.alpha = 1F
                     popupWindow.dismiss()
                     homePresenter.removePopUpReward()
+                    animateTextView(credit,credit + reward.quantity!!.toInt(),tvCredit)
                 }
             }
 
@@ -941,6 +951,16 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             minutes >= 0 -> tvSeason.text = "Season End : Less Than 1 Minute"
             else -> tvSeason.text = "End"
         }
+
+    }
+
+    private fun animateTextView(initialValue : Int,finalValue : Int,textView : TextView) {
+
+        val valueAnimator = ValueAnimator.ofInt(initialValue, finalValue);
+        valueAnimator.duration = 1500
+
+        valueAnimator.addUpdateListener { textView.text = valueAnimator.animatedValue.toString() }
+        valueAnimator.start()
 
     }
 

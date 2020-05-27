@@ -88,6 +88,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     private var checkUpdateEnergy = false
     lateinit var editor: SharedPreferences.Editor
     private lateinit var popupWindow : PopupWindow
+    private var isClicked = false
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private val items : MutableList<ChooseGame> = mutableListOf()
     private val taskList : MutableList<String> = mutableListOf()
@@ -125,9 +126,13 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             popUpRankDetail()
         }
 
-        layout_point_energy.onClick {
-            startActivity<MarketActivity>()
-            finish()
+        cvPointEnergy.onClick {
+            if (!isClicked){
+                isClicked = true
+                cvPointEnergy.startAnimation(clickAnimation)
+                startActivity<MarketActivity>()
+                finish()
+            }
         }
 
         countDownTimer = object : CountDownTimer(1000,1000){
@@ -140,18 +145,16 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
         }
 
-        taskAdapter = TaskRecyclerViewAdapter(this,taskList,taskProgressList)
-
         adapter = RankRecyclerViewAdapter(this,items,availableGameList){
             if (auth.currentUser == null)
                 popUpMessage(2,"You Must Sign In First")
             else{
                 position = it
                 if (!availableGameList[it]){
-                    if (items[it].priceGame!! <= tvPoint.text.toString().toInt())
+                    if (items[it].priceGame!! <= point)
                         popUpMessage(1,"Do You Want to Buy?")
                     else
-                        popUpMessage(2,"Not Enough Money")
+                        popUpMessage(2,"Not Enough Coins")
                 }else{
                     if (items[it].energy!! > energy)
                         popUpMessage(2,"Not Enough Energy")
@@ -166,6 +169,10 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
 
         rvRank.layoutManager = LinearLayoutManager(this)
         rvRank.adapter = adapter
+
+        taskAdapter = TaskRecyclerViewAdapter(this,taskList,taskProgressList)
+
+
     }
 
     override fun networkConnectivityChanged(event: Event) {
@@ -193,9 +200,9 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                     editor.apply()
                 }
             }
-
+            items.clear()
             items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal,0))
-            items.add(ChooseGame("Odd Even", 13,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
+            items.add(ChooseGame("Odd Even", 14,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
             items.add(ChooseGame("Rush", 16,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
             items.add(ChooseGame("AlphaNum", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum,500))
             items.add(ChooseGame("Mix", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.mix,800))
@@ -562,22 +569,26 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     override fun onResume() {
         super.onResume()
 
+
+        loadingTimer()
+
         if (auth.currentUser != null){
             rankPresenter.fetchRank()
-            rankPresenter.fetchGameAvailable()
             rankPresenter.fetchBalance()
+            rankPresenter.fetchGameAvailable()
         }
     }
 
     override fun onStart() {
         if (auth.currentUser != null && Profile.getCurrentProfile() != null)
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
-        loadingTimer()
+
 
         super.onStart()
     }
 
     override fun onPause() {
+        isClicked = false
         editor = sharedPreference.edit()
         editor.putLong("lastCountEnergy",Date().time)
         editor.putLong("countedEnergy",counted.toLong())
@@ -597,8 +608,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             energyLimit = dataSnapshot.getValue(Balance::class.java)!!.energyLimit!!
             point = dataSnapshot.getValue(Balance::class.java)!!.point!!
             setUpEnergyTimer()
-            tvEnergy.text = "${energy}/${energyLimit}"
-            tvPoint.text = "${point}"
+            tvEnergy.text = "e:${energy}/${energyLimit}"
+            tvPoint.text = "c:${point}"
         }else if(response == "fetchGameAvailable"){
             availableGameList.clear()
             availableGameList.add(dataSnapshot.getValue(AvailableGame::class.java)?.normal!!)
@@ -645,60 +656,63 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         if (response === "buyGame")
             popUpMessage(2, message)
         else if(response === "updateEnergy"){
-            when (position) {
-                0 -> {
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "normal");
-                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
-                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+            if (!isClicked){
+                isClicked = true
+                when (position) {
+                    0 -> {
+                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "normal");
+                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
-                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                            "type" to GameType.Normal))
-                    finish()
-                }
-                1 -> {
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "odd_even");
-                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
-                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.Normal))
+                        finish()
+                    }
+                    1 -> {
+                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "odd_even");
+                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
-                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                            "type" to GameType.OddEven))
-                    finish()
-                }
-                2 -> {
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "rush");
-                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
-                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.OddEven))
+                        finish()
+                    }
+                    2 -> {
+                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "rush");
+                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
-                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                            "type" to GameType.Rush))
-                    finish()
-                }
-                3 -> {
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "alpha_num");
-                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
-                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.Rush))
+                        finish()
+                    }
+                    3 -> {
+                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "alpha_num");
+                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
-                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                            "type" to GameType.AlphaNum))
-                    finish()
-                }
-                4 ->{
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "mix");
-                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
-                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.AlphaNum))
+                        finish()
+                    }
+                    4 ->{
+                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "mix");
+                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
-                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                            "type" to GameType.Mix))
-                    finish()
-                }
-                5 ->{
-                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "double_attack");
-                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
-                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.Mix))
+                        finish()
+                    }
+                    5 ->{
+                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "double_attack");
+                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "game_type");
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
 
-                    startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
-                            "type" to GameType.DoubleAttack))
-                    finish()
+                        startActivity(intentFor<CountdownActivity>("status" to StatusPlayer.Rank,
+                                "type" to GameType.DoubleAttack))
+                        finish()
+                    }
                 }
             }
         }else if(response == "error"){
@@ -794,7 +808,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             countDownTimer = object : CountDownTimer((timerSec.toLong()+1) * 1000,1000){
                 override fun onFinish() {
                     remainTime--
-                    tvEnergy.text = "${energy}/${energyLimit}"
+                    tvEnergy.text = "e:${energy}/${energyLimit}"
                     if (timerMin == 0){
                         energy++
                         rankPresenter.updateEnergy(energy.toLong(),false)

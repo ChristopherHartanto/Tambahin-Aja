@@ -42,6 +42,7 @@ class SettingActivity : AppCompatActivity() {
 
         adapter = SettingRecyclerViewAdapter(this, settingItems) {
             when (it) {
+                0 -> reviewApp()
                 1 -> openWebsite(getString(R.string.privacy_url))
                 2 -> openWebsite(getString(R.string.terms_url))
                 3 -> openWebsite(getString(R.string.about_us))
@@ -74,6 +75,11 @@ class SettingActivity : AppCompatActivity() {
 
     private fun openWebsite(url: String){
         val i = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(i)
+    }
+
+    private fun reviewApp(){
+        val i = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${packageName}"))
         startActivity(i)
     }
 

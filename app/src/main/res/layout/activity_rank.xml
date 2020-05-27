@@ -14,39 +14,47 @@
         android:background="@color/colorPrimary"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="right |center"
-            android:id="@+id/layout_point_energy"
-            android:padding="5dp">
-
-            <TextView
+            <androidx.cardview.widget.CardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/tvPoint"
-                android:text="100"/>
+                app:cardBackgroundColor="@color/fbutton_color_clouds"
+                android:elevation="5dp"
+                app:cardCornerRadius="10dp"
+                android:layout_margin="3dp"
+                android:id="@+id/cvPointEnergy"
+                android:layout_gravity="end">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/tvPoint"
+                        android:text="100"/>
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/coin"
-                android:layout_marginHorizontal="8dp"/>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/coin"
+                        android:layout_marginHorizontal="8dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/tvEnergy"
-                android:text="0/100"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/tvEnergy"
+                        android:text="0/100"/>
 
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:src="@drawable/lightning"
-                android:background="@color/colorTransparent"/>
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/lightning"
+                        android:background="@color/colorTransparent"/>
 
-        </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -124,10 +132,11 @@
                         android:textColor="#ff0000"/>
 
                     <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:src="@drawable/task_list"
-                        android:padding="5dp"
+                        android:padding="12dp"
+                        android:background="@drawable/button_bg_round"
                         android:layout_marginHorizontal="15dp"
                         android:layout_gravity="center_vertical"
                         android:id="@+id/ivTask"/>

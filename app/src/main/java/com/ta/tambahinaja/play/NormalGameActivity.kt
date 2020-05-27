@@ -75,6 +75,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private var handler: Handler = Handler()
     private lateinit var runnable: Runnable
     private var continueGame = false
+    private var countContinueGame = 0
     private lateinit var currentRank : String
     private lateinit var soundPool : SoundPool
     private var soundCorrect = 0
@@ -90,8 +91,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private var inviterName = ""
     private var count = 4
     private var point = 0
-    private var timer = 45
-    private var defaultTimer = 45
+    private var timer = 40
+    private var defaultTimer = 40
     private var answer = 999
     private var highScore = 0
     private var opponentPoint = 0
@@ -115,9 +116,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         MobileAds.initialize(this)
         val adView = AdView(this)
         adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-1388436725980010/5926503810"
+        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
 
-        rewardedAd = RewardedAd(this, "ca-app-pub-1388436725980010/8744238848")
+        rewardedAd = RewardedAd(this, "ca-app-pub-3940256099942544/5224354917")
         val adLoadCallback = object: RewardedAdLoadCallback() {
             override fun onRewardedAdLoaded() {
                 // Ad successfully loaded.
@@ -361,7 +362,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         if (timer > 0){
             if (type == GameType.Normal){
                 if (answer == value){
-                    point += 10
+                    point += 8
                     if (mix)
                         point += 2
                 }else{
@@ -373,35 +374,35 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 
             }else if (type == GameType.OddEven){
                 if (answer == value){
-                    point += 10
+                    point += 7
                     if (mix)
                         point += 2
                 }else{
-                    if(point > 9)
-                        point -= 9
+                    if(point > 6)
+                        point -= 6
                     else
                         point = 0
                 }
             }else if (type == GameType.AlphaNum){
                 if (answer == value){
-                    point += 14
+                    point += 10
                     if (mix)
                         point += 2
                 }else{
-                    if(point > 7)
-                        point -= 7
+                    if(point > 5)
+                        point -= 5
                     else
                         point = 0
                 }
             }else if (type == GameType.Rush){
                 if (answer == value){
-                    point += 13
+                    point += 9
                     countDownTimer.cancel()
                     timer = defaultTimer
                     control(true)
                 }else{
-                    if(point > 4)
-                        point -= 4
+                    if(point > 3)
+                        point -= 3
                     else
                         point = 0
                 }
@@ -419,7 +420,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 //            }
             else if (type == GameType.DoubleAttack){
                 if (answer == value){
-                    point += 15
+                    point += 12
                 }else{
                     if(point > 4)
                         point -= 4
@@ -482,17 +483,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                 isRunningCountDownTimer = false
                 var text = ""
                 if (auth.currentUser != null){
-                    if (player == StatusPlayer.Rank){
-                        if(highScore < point){
-                            if(mix)
-                                matchPresenter.sumHighScore(auth,
-                                        GameType.Mix,point,highScore)
-                            else
-                                matchPresenter.sumHighScore(auth,
-                                    type,point,highScore)
-                        }
-
-                    }else if(player != StatusPlayer.Single && player != StatusPlayer.Rank){
+                    if(player != StatusPlayer.Single && player != StatusPlayer.Rank){
                         text = when {
                             point > opponentPoint -> {
                                 matchPresenter.getStats(auth,true)
@@ -550,8 +541,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                             finish()
                         }
                         StatusPlayer.Rank ->{
-                            val reply = sharedPreference.getBoolean("continueRank",false)
-                            if (reply)
+                            if (countContinueGame == 0 || countContinueGame == 1)
                                 popUpMessage(1,"Do You Want to Continue?")
                             else{
                                 calculateRankReward()
@@ -725,7 +715,11 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             layoutMessageBasic.visibility = View.VISIBLE
             layoutMessageReward.visibility = View.GONE
 
-            btnReject.text = "Continue"
+            if (countContinueGame == 0)
+                btnReject.text = "Continue\n(1)"
+            else if (countContinueGame == 1)
+                btnReject.text = "Continue\nWatch Ad"
+
             btnClose.text = "No"
             tvMessageInfo.text = message
 
@@ -737,13 +731,23 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
 
             btnReject.onClick {
-
-                btnReject.startAnimation(clickAnimation)
-                activity_normal_game.alpha = 1F
-                popupWindow.dismiss()
-                progress_bar.visibility = View.VISIBLE
-                loadRewardAd()
-                handler.postDelayed(runnable,5000)
+                if (countContinueGame == 0){
+                    timer = defaultTimer
+                    btnReject.startAnimation(clickAnimation)
+                    activity_normal_game.alpha = 1F
+                    popupWindow.dismiss()
+                    countContinueGame += 1
+                    if (!isRunningCountDownTimer)
+                        control(true)
+                }
+                else if(countContinueGame == 1){
+                    btnReject.startAnimation(clickAnimation)
+                    activity_normal_game.alpha = 1F
+                    popupWindow.dismiss()
+                    progress_bar.visibility = View.VISIBLE
+                    loadRewardAd()
+                    handler.postDelayed(runnable,5000)
+                }
             }
 
         }
@@ -783,6 +787,15 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     }
 
     private fun finishRank(){
+        if(highScore < point){
+            if(mix)
+                matchPresenter.sumHighScore(auth,
+                        GameType.Mix,point,highScore)
+            else
+                matchPresenter.sumHighScore(auth,
+                        type,point,highScore)
+        }
+
         var newHighScore = false
         if (point > highScore)
              newHighScore = true
@@ -934,9 +947,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     if (watched){
                         timer = defaultTimer
                         activity_normal_game.alpha = 1F
-                        editor = sharedPreference.edit()
-                        editor.putBoolean("continueRank",false)
-                        editor.apply()
+                        countContinueGame += 1
                     }else{
                         calculateRankReward()
                     }

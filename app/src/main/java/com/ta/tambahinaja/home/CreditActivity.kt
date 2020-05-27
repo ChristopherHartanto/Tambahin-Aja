@@ -172,7 +172,7 @@ class CreditActivity : AppCompatActivity(), MainView, NetworkConnectivityListene
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == "fetchCredit"){
             credit = dataSnapshot.getValue(Balance::class.java)?.credit.toString().toInt()
-            tvCredit.text = "${credit}"
+            tvCredit.text = "Rp ${credit}"
         }else if(response == "fetchCreditHistory"){
             for (data in dataSnapshot.children){
                 val item = data.getValue(CreditHistory::class.java)

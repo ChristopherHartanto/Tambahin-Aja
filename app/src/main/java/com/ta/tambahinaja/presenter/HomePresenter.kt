@@ -125,6 +125,23 @@ class HomePresenter(private val view: MainView, private val database: DatabaseRe
 
     }
 
+    fun fetchCoin(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.exists()){
+                    view.loadData(p0,"fetchCoin")
+                }
+            }
+
+        }
+        database.child("users").child(auth.currentUser!!.uid).child("balance").child("point").addListenerForSingleValueEvent(postListener)
+
+    }
+
     fun fetchAvailableGame(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
