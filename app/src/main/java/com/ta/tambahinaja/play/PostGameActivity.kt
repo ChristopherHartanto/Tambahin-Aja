@@ -47,7 +47,7 @@ class PostGameActivity : AppCompatActivity() {
         MobileAds.initialize(this)
         val adView = AdView(this)
         adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-1388436725980010/8488130112"
+        adView.adUnitId = "ca-app-pub-1388436725980010/8488130112" //ca-app-pub-1388436725980010/1805265713
 
         Thread.sleep(100)
 

@@ -48,7 +48,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     .setAutoCancel(true)
                     .setSound(soundUri)
                     .setContentIntent(pendingIntent)
-                    .setVibrate(longArrayOf(200,200))
+                    .setVibrate(longArrayOf(400,400))
                     .setLights(Color.YELLOW, 3000, 3000)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

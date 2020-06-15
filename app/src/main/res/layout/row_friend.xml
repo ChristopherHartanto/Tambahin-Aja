@@ -20,16 +20,33 @@
             android:layout_height="60dp"
             android:layout_margin="5dp"
             android:id="@+id/ivFriendProfile"
-            android:src="@mipmap/ic_launcher_round"/>
+            android:src="@drawable/default_profile"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/tvFriendName"
-            android:gravity="center"
-            android:textColor="@color/colorBrown"
-            android:text="Unknown"/>
+            android:orientation="vertical"
+            android:padding="5dp"
+            android:weightSum="3">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:id="@+id/tvFriendName"
+                android:gravity="center"
+                android:textColor="@color/colorBrown"
+                android:layout_weight="2"
+                android:text="Unknown"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:id="@+id/tvFriendLastOnline"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/colorBrown"
+                android:text=""/>
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"

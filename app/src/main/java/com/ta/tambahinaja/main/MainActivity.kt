@@ -3,6 +3,7 @@ package com.ta.tambahinaja.main
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.transition.TransitionManager
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.ta.tambahinaja.home.HomeFragment
 import com.ta.tambahinaja.R
 import com.ta.tambahinaja.TutorialActivity
@@ -40,16 +43,21 @@ import com.quantumhiggs.network.NetworkEvents
 import com.quantumhiggs.network.NetworkState
 import com.quantumhiggs.network.NetworkStateHolder
 import com.squareup.picasso.Picasso
+import com.ta.tambahinaja.NewUpdateActivity
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.startActivity
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
     private lateinit var sharedPreference: SharedPreferences
+    private lateinit var editor : SharedPreferences.Editor
     private lateinit var database: DatabaseReference
+    private lateinit var presenter: Presenter
     private lateinit var auth: FirebaseAuth
     var data : Inviter = Inviter()
     private lateinit var reward: Reward
@@ -64,33 +72,81 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
         setContentView(R.layout.activity_main)
         this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
-        bottom_navigation.itemIconTintList = null
+        //bottom_navigation.itemIconTintList = null
         supportActionBar?.hide()
 
         savedInstanceState?.let {
             prevState = it.getBoolean(UtilsConstants.LOST_CONNECTION)
         }
 
+//        bottom_navigation.setOnNavigationItemSelectedListener { item ->
+//            when (item.itemId) {
+//                R.id.home -> {
+//                    loadHomeFragment(savedInstanceState)
+//                }
+//                R.id.tournament -> {
+//                    loadTournamentFragment(savedInstanceState)
+//                }
+//                R.id.profile -> {
+//                    if (auth.currentUser == null)
+//                        startActivity<LoginActivity>()
+//                    else
+//                        loadProfileFragment(savedInstanceState)
+//                }
+//
+//            }
+//            true
+//        }
+//        bottom_navigation.selectedItemId = R.id.home
 
-        bottom_navigation.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.home -> {
-                    loadHomeFragment(savedInstanceState)
-                }
-                R.id.tournament -> {
-                    loadTournamentFragment(savedInstanceState)
-                }
-                R.id.profile -> {
-                    if (auth.currentUser == null)
-                        startActivity<LoginActivity>()
-                    else
-                        loadProfileFragment(savedInstanceState)
-                }
+        val item1 = AHBottomNavigationItem("home",R.drawable.home,R.color.colorPrimary)
+        val item2 = AHBottomNavigationItem("tournament",R.drawable.award,R.color.colorPrimary)
+        val item3 = AHBottomNavigationItem("profile",R.drawable.user,R.color.colorPrimary)
+        bottom_navigation.addItem(item1)
+        bottom_navigation.addItem(item2)
+        bottom_navigation.addItem(item3)
 
+        bottom_navigation.setDefaultBackgroundResource(R.color.colorWhite)
+        bottom_navigation.titleState = AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE
+        val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)!!
+        bottom_navigation.setTitleTypeface(typeface)
+        //bottom_navigation.defaultBackgroundColor = Color.parseColor("#FFFFFF");
+       //bottom_navigation.isColored = true
+        bottom_navigation.isTranslucentNavigationEnabled = true
+        bottom_navigation.isForceTint = true
+
+        bottom_navigation.backgroundResource = R.color.colorWhite
+
+        bottom_navigation.setOnTabSelectedListener(object : AHBottomNavigation.OnTabSelectedListener{
+            override fun onTabSelected(position: Int, wasSelected: Boolean): Boolean {
+                when (position) {
+                    0 -> {
+                        //bottom_navigation.defaultBackgroundColor = Color.parseColor("#2ecc71")
+                        bottom_navigation.accentColor = Color.parseColor("#2ecc71")
+                        loadHomeFragment(savedInstanceState)
+                    }
+                    1 -> {
+                        bottom_navigation.accentColor = Color.parseColor("#f1c40f")
+                        //bottom_navigation.defaultBackgroundColor = Color.parseColor("#f1c40f")
+                        loadTournamentFragment(savedInstanceState)
+
+                    }
+                    2 -> {
+                        bottom_navigation.accentColor = Color.parseColor("#3498db")
+                        if (auth.currentUser == null)
+                            startActivity<LoginActivity>()
+                        else
+                            loadProfileFragment(savedInstanceState)
+                    }
+
+                }
+                return true
             }
-            true
-        }
-        bottom_navigation.selectedItemId = R.id.home
+
+        })
+
+        bottom_navigation.currentItem = 0
+
     }
 
 
@@ -142,7 +198,29 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == "fetchTournament"){
+            if (dataSnapshot.exists()) {
+                for ((index, data) in dataSnapshot.children.withIndex()) {
+                    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    val currentDate = Date().time
+                    val tournamentDate = sdf.parse(data.key.toString()).time
+                    val diff = tournamentDate - currentDate
 
+                    if (diff > 0){
+                        val watchTournamentDate = sharedPreference.getString(tournamentDate.toString(),"")
+                        if (watchTournamentDate != tournamentDate.toString()){
+                            bottom_navigation.setNotificationBackgroundColor(Color.parseColor("#F63D2B"));
+                            bottom_navigation.setNotification("!", 1)
+
+                            editor = sharedPreference.edit()
+                            editor.putString(tournamentDate.toString(),tournamentDate.toString())
+                            editor.apply()
+                        }
+
+                    }
+                }
+            }
+        }
 
     }
 
@@ -167,9 +245,16 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
     override fun onStart() {
         database = FirebaseDatabase.getInstance().reference
         auth = FirebaseAuth.getInstance()
+        presenter = Presenter(this,database)
+        presenter.fetchTournament()
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
 
         val watchTutorial = sharedPreference.getBoolean("tutorial",false)
+        val checkVersionUpdate = sharedPreference.getString("versionUpdate","")
+        var watchNewUpdates = false
+
+        if (checkVersionUpdate == packageManager.getPackageInfo(packageName,0).versionName)
+            watchNewUpdates = true
 
         if (!watchTutorial){
             val editor = sharedPreference.edit()
@@ -177,6 +262,12 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
             editor.apply()
 
             startActivity<TutorialActivity>()
+        }else if(!watchNewUpdates){
+            editor = sharedPreference.edit()
+            editor.putString("versionUpdate",packageManager.getPackageInfo(packageName,0).versionName)
+            editor.apply()
+
+            startActivity<NewUpdateActivity>()
         }
 
         NetworkEvents.observe(this, Observer {
@@ -210,6 +301,7 @@ class MainActivity : AppCompatActivity(), MainView, FragmentListener {
     override fun backToHome() {
         loadHomeFragment(null)
     }
+
 
 }
 

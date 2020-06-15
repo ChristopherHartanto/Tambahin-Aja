@@ -9,15 +9,15 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/colorPrimary"
         android:layout_margin="20sp"
         app:cardCornerRadius="10dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
             android:padding="20dp"
             android:orientation="vertical">
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -43,12 +43,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_margin="5dp"
                     android:textColor="@color/colorWhite"
                     android:textSize="18sp"
-                    android:text="1."
+                    android:background="@drawable/first_medal"
                     android:id="@+id/tvTournamentFirstPosition"/>
 
                 <ImageView
@@ -60,7 +60,8 @@
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/credit"/>
+                    android:src="@drawable/credit"
+                    android:visibility="gone"/>
 
                 <ImageView
                     android:layout_width="30dp"
@@ -86,12 +87,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_margin="5dp"
                     android:textColor="@color/colorWhite"
                     android:textSize="18sp"
-                    android:text="2."
+                    android:background="@drawable/second_medal"
                     android:id="@+id/tvTournamentSecondPosition"/>
 
                 <ImageView
@@ -103,7 +104,8 @@
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/credit"/>
+                    android:src="@drawable/credit"
+                    android:visibility="gone"/>
 
                 <ImageView
                     android:layout_width="30dp"
@@ -129,12 +131,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_margin="5dp"
                     android:textColor="@color/colorWhite"
                     android:textSize="18sp"
-                    android:text="3."
+                    android:background="@drawable/third_medal"
                     android:id="@+id/tvTournamentThirdPosition"/>
 
                 <ImageView
@@ -146,13 +148,16 @@
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/credit"/>
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/credit"
+                    android:visibility="gone"/>
 
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:src="@drawable/lightning"
                     android:visibility="gone"/>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -161,7 +166,6 @@
                     android:textSize="18sp"
                     android:text="500"
                     android:id="@+id/tvTournamentThirdReward"/>
-
 
             </LinearLayout>
 
@@ -176,7 +180,7 @@
                 android:id="@+id/btnClose"/>
 
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
 
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

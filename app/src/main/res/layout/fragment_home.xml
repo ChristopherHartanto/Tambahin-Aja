@@ -148,21 +148,20 @@
             android:id="@+id/ivDailyPuzzle"
             android:elevation="5dp"
             android:padding="15dp"
-            android:visibility="gone"
             android:background="@drawable/button_bg_round"
             android:layout_margin="10dp"/>
 
-        <TextView
+        <Button
             android:layout_width="20dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="60dp"
-            android:textSize="25sp"
+            android:layout_height="20dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="50dp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:text="!"
-            android:visibility="gone"
             android:id="@+id/tvPuzzleInfo"
-            android:src="@drawable/lightning"
-            android:textColor="#ff0000"/>
+            android:background="@drawable/button_info"
+            android:textColor="@color/colorWhite"/>
     </FrameLayout>
 
     <TextView
@@ -179,16 +178,51 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="bottom">
-    <Button
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_gravity="center"
-        android:id="@+id/btnRank"
-        android:text="Play"
-        android:background="@drawable/button_rank"
-        android:textColor="@color/colorWhite"
-        android:layout_marginBottom="20dp"
-        android:textSize="32sp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:id="@+id/btnPrev"
+                android:layout_marginHorizontal="10dp"
+                android:background="@drawable/prev_button"/>
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:id="@+id/btnRank"
+                android:text="Rank"
+                android:background="@drawable/button_rank"
+                android:textColor="@color/colorWhite"
+                android:textSize="26sp"/>
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:id="@+id/btnPractice"
+                android:text="Practice"
+                android:background="@drawable/button_practice"
+                android:textColor="@color/colorWhite"
+                android:visibility="gone"
+                android:textSize="20sp"/>
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:id="@+id/btnNext"
+                android:layout_marginHorizontal="10dp"
+                android:background="@drawable/next_button"/>
+
+        </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

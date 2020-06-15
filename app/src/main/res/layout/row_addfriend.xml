@@ -11,31 +11,42 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:alpha="0.9"
-        android:layout_height="match_parent">
+        android:weightSum="10"
+        android:layout_height="80dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_margin="5dp"
+            android:layout_gravity="center_vertical"
             android:id="@+id/ivAddFriendProfile"
-            android:src="@mipmap/ic_launcher_round"/>
+            android:src="@drawable/default_profile"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:id="@+id/tvAddFriendName"
-            android:gravity="center"
+            android:gravity="start |center_vertical"
+            android:layout_marginStart="5dp"
+            android:layout_weight="8"
             android:textColor="@color/colorBrown"
             android:text="Unknown"/>
 
-        <TextView
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:gravity="center |end"
-            android:id="@+id/tvAddFriendStatus"
-            android:text="Friend"
-            android:textColor="@color/colorBrown"
-            android:layout_margin="20dp"/>
+            android:layout_weight="2"
+            android:layout_margin="10dp"
+            android:gravity="center">
+
+            <info.hoang8f.widget.FButton
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:id="@+id/btnAddFriend"
+                android:text="Add"
+                android:textColor="@color/colorWhite"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

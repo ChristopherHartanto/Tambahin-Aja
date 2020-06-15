@@ -16,12 +16,20 @@ import kotlinx.android.synthetic.main.fragment_no_friend.*
  */
 class NoFriendFragment : Fragment(), NetworkConnectivityListener {
 
+    private var mLayout = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_no_friend, container, false)
+
+        mLayout = savedInstanceState?.getInt("layoutId") ?: R.layout.fragment_no_friend
+        return inflater.inflate(mLayout, container, false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("layoutId",mLayout)
+        super.onSaveInstanceState(outState)
     }
 
     override fun networkConnectivityChanged(event: Event) {

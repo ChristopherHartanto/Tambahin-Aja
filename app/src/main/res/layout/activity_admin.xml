@@ -32,6 +32,19 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/tvViewData"
+        android:visibility="gone"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/etViewData"
+        android:hint="credit,tournament,leaderboards,exchange,payments"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/tvExchangeCredit"
         android:visibility="gone"/>
 
@@ -137,6 +150,14 @@
             android:text="Delete Specific Data"
             android:layout_margin="5dp"
             android:id="@+id/btnDeleteSpecific"/>
+
+        <info.hoang8f.widget.FButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:text="View Data"
+            android:layout_margin="5dp"
+            android:id="@+id/btnViewData"/>
 
     </LinearLayout>
 

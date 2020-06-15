@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.github.thunder413.datetimeutils.DateTimeUtils
 import com.ta.tambahinaja.R
 import com.ta.tambahinaja.model.HighScore
 import com.ta.tambahinaja.model.User
@@ -33,12 +34,15 @@ class AllPlayersRecyclerViewAdapter(private val context: Context, private val it
 
         private val credit = view.findViewById<TextView>(R.id.tvPlayerCredit)
         private val name = view.findViewById<TextView>(R.id.tvPlayerName)
+        private val lastOnline = view.findViewById<TextView>(R.id.tvPlayerLastOnline)
         private val image = view.findViewById<ImageView>(R.id.ivPlayer)
 
         fun bindItem(allPlayer: AllPlayer, listener: (id: String) -> Unit) {
 
             credit.text = "Rp ${allPlayer.credit.toString()}"
             name.text = allPlayer.name.toString()
+            val a = DateTimeUtils.formatDate(allPlayer.lastOnline!! + 7 * 3600 * 1000)
+            lastOnline.text = "last online : ${DateTimeUtils.formatWithPattern(a,"dd MMM hh:mm:ss a")}"
 
             Picasso.get().load(getFacebookProfilePicture(allPlayer.facebookId.toString())).into(image)
 

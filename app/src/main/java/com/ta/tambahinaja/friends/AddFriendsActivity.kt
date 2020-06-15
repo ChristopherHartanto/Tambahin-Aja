@@ -32,6 +32,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.onRefresh
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -69,9 +70,9 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
         rvAddFriends.layoutManager = LinearLayoutManager(this)
         rvAddFriends.adapter = adapter
 
-//        srAddFriend.onRefresh {
-//            retrieve("")
-//        }
+        srAddFriend.onRefresh {
+            retrieve(etSearch.text.toString())
+        }
 
         btnSearch.setOnClickListener {
             retrieve(etSearch.text.toString())
@@ -121,7 +122,7 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
         refreshRvAddFriend()
     }
 
-    fun checkStatusFriend(friendUid: String?, item: User) {
+    private fun checkStatusFriend(friendUid: String?, item: User) {
         GlobalScope.launch {
             val postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -147,14 +148,13 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
 
     }
 
-    fun addFriend(friendUid: String) {
+    private fun addFriend(friendUid: String) {
 
         val sdf = SimpleDateFormat("dd/M/yyyy hh:mm:ss")
         val currentDate = sdf.format(Date())
 
         database.child("friends").child(auth.currentUser!!.uid).child(friendUid).child("date")
             .setValue(currentDate).addOnSuccessListener {
-            retrieve(etSearch.text.toString())
             popUpMessage(Message.ReadOnly, "Success")
         }.addOnFailureListener {
             toast("" + it.message)
@@ -217,6 +217,9 @@ class AddFriendsActivity : AppCompatActivity(), NetworkConnectivityListener{
             btnReject.visibility = View.GONE
 
             btnClose.onClick {
+                if (message == "Success")
+                    retrieve(etSearch.text.toString())
+
                 btnClose.startAnimation(clickAnimation)
                 activity_add_friends.alpha = 1F
                 popupWindow.dismiss()

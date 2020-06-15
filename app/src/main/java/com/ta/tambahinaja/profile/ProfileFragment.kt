@@ -57,13 +57,15 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private var historyItems: MutableList<History> = mutableListOf()
     private var fragmentActive = false
+    private var mLayout = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        mLayout = savedInstanceState?.getInt("layoutId") ?: R.layout.fragment_profile
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        return inflater.inflate(mLayout, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +78,11 @@ class ProfileFragment : Fragment(), NetworkConnectivityListener, MainView {
 
         profilePresenter = ProfilePresenter(this,database)
 
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("layoutId",mLayout)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStart() {

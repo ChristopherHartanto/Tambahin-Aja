@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="120dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="10dp"
+    android:layout_margin="3dp"
+    android:id="@+id/cvPractice"
+    android:elevation="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvPracticeTitle"
+            android:text="Level"
+            android:gravity="center"
+            android:layout_margin="5dp"
+            android:textSize="18sp"
+            android:textColor="@color/colorPrimary"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvPracticeLevelNumber"
+            android:text="1"
+            android:gravity="center"
+            android:textSize="40sp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            android:layout_marginHorizontal="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="20sp"
+                android:id="@+id/tvPracticePrice"
+                android:layout_gravity="end"
+                android:text="Cost:"
+                android:paddingEnd="7dp"
+                android:layout_weight="5"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="20sp"
+                android:id="@+id/tvPracticePriceContent"
+                android:layout_gravity="end"
+                android:layout_weight="3"
+                android:text="1"
+                android:gravity="end"
+                android:textSize="13sp"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:src="@drawable/coin"
+                android:layout_gravity="end"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="2"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            android:layout_margin="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="20sp"
+                android:id="@+id/tvPracticeReward"
+                android:layout_gravity="end"
+                android:text="Prize:"
+                android:paddingEnd="7dp"
+                android:layout_weight="5"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="20sp"
+                android:id="@+id/tvPracticeRewardContent"
+                android:layout_gravity="end"
+                android:layout_weight="3"
+                android:text="100"
+                android:gravity="end"
+                android:textSize="13sp"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="25dp"
+                android:src="@drawable/credit"
+                android:layout_gravity="end"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="2"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

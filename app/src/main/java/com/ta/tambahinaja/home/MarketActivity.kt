@@ -20,6 +20,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.billingclient.api.*
 import com.facebook.Profile
+import com.github.thunder413.datetimeutils.DateTimeUnits
+import com.github.thunder413.datetimeutils.DateTimeUtils
 import com.ta.tambahinaja.R
 import com.ta.tambahinaja.friends.Message
 import com.ta.tambahinaja.presenter.ShopPresenter
@@ -32,9 +34,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.quantumhiggs.network.NetworkStateHolder
@@ -48,6 +48,7 @@ import org.jetbrains.anko.backgroundResource
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
@@ -201,7 +202,7 @@ class MarketActivity : AppCompatActivity(),NetworkConnectivityListener, MainView
             val energyGet = diff / 1000 / energyTime
             if (energyGet + energy >= energyLimit) // energy get + energy >= energy limit, energy = energy limit
                 energy = energyLimit // else energy += energyget
-            else
+            else if (energyGet > 0)
                 energy += energyGet.toInt()
             if (energyGet.toInt() > 0){
                 shopPresenter.updateEnergy(energy.toLong())

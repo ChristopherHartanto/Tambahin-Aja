@@ -22,15 +22,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No Data"
+                android:text="No Tournament Right Now"
                 android:textColor="@color/colorWhite"
-                android:textSize="24sp"
+                android:textSize="21sp"
                 android:id="@+id/tvTournamentTitle"/>
 
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:background="@drawable/round_yellow"
                 android:src="@drawable/info"
+                android:padding="4dp"
                 android:layout_marginVertical="5dp"
                 android:layout_marginHorizontal="15dp"
                 android:id="@+id/btnInfo"/>
@@ -39,7 +41,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No Data"
+            android:text="End In -"
             android:id="@+id/tvTournamentTimeLeft"
             android:textSize="18sp"/>
 

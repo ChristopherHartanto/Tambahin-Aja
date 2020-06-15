@@ -52,6 +52,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
+import com.ta.tambahinaja.play.practice.PracticeActivity
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_rank.*
@@ -80,6 +81,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private var dataInviter : Inviter = Inviter()
     private lateinit var reward: Reward
     private var countPuzzle = 0
+    private var showPopup = false
     private lateinit var customGameAdapter: CustomGameRecyclerViewAdapter
     private lateinit var currentRank : String
     private var puzzleType = 1
@@ -95,6 +97,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
     private var fragmentActive = false
     private var numberArr : MutableList<Int> = mutableListOf()
     private val availableGameList : MutableList<Boolean> = mutableListOf()
+    private var mLayout = 0
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreateView(
@@ -102,13 +105,20 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         savedInstanceState: Bundle?
     ): View? {
 
+        mLayout = savedInstanceState?.getInt("layoutId") ?: R.layout.fragment_home
+
         runnable = Runnable {
             setSeasonTimer()
             firebaseSingleListenerRepeat()
         }
 
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(mLayout, container, false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("layoutId",mLayout)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStart() {
@@ -132,6 +142,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         tvCredit.typeface = typeface
         btnCustomPlay.typeface = typeface
         btnRank.typeface = typeface
+        btnPractice.typeface = typeface
         btnPlayFriend.typeface = typeface
         btnOnline.typeface = typeface
         btnLeaderboard.typeface = typeface
@@ -165,12 +176,35 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
             popUpCustomGame()
         }
 
+        btnNext.onClick {
+            btnRank.visibility = View.GONE
+            btnPractice.visibility = View.VISIBLE
+            btnNext.startAnimation(clickAnimation)
+            btnPractice.startAnimation(animationBounce)
+        }
+
+        btnPrev.onClick {
+            btnRank.visibility = View.VISIBLE
+            btnPractice.visibility = View.GONE
+            btnPrev.startAnimation(clickAnimation)
+            btnRank.startAnimation(animationBounce)
+        }
+
         btnRank.onClick {
             btnRank.startAnimation(clickAnimation)
             if(auth.currentUser == null)
                 popUpLogin()
             else{
                 startActivity<RankActivity>()
+            }
+        }
+
+        btnPractice.onClick {
+            btnPractice.startAnimation(clickAnimation)
+            if(auth.currentUser == null)
+                popUpLogin()
+            else{
+                startActivity<PracticeActivity>()
             }
         }
 
@@ -806,10 +840,16 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
 
             }else if(response == "reward"){
                 reward = dataSnapshot.getValue(Reward::class.java)!!
-                popUpMessage(com.ta.tambahinaja.friends.Message.ReadOnly,reward.description.toString())
+                if (!showPopup){
+                    showPopup = true
+                    popUpMessage(com.ta.tambahinaja.friends.Message.ReadOnly,reward.description.toString())
+                }
             }else{
                 dataInviter = dataSnapshot.getValue(Inviter::class.java)!!
-                popUpMessage(com.ta.tambahinaja.friends.Message.Reply,"${dataInviter.name} invited you to play")
+                if (!showPopup){
+                    showPopup = true
+                    popUpMessage(com.ta.tambahinaja.friends.Message.Reply,"${dataInviter.name} invited you to play")
+                }
             }
         }
 
@@ -850,6 +890,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 layoutMessageReward.visibility = View.GONE
 
                 btnClose.onClick {
+                    showPopup = false
                     homePresenter.replyInvitation(true)
                     btnClose.startAnimation(clickAnimation)
                     fragment_home.alpha = 1F
@@ -857,6 +898,7 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                 }
 
                 btnReject.onClick {
+                    showPopup = false
                     homePresenter.replyInvitation(false)
                     btnReject.startAnimation(clickAnimation)
                     fragment_home.alpha = 1F
@@ -884,11 +926,14 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
                     ivMessageReward.setImageResource(R.drawable.money_bag)
 
                 btnClose.onClick {
+                    showPopup = false
                     btnClose.startAnimation(clickAnimation)
                     fragment_home.alpha = 1F
                     popupWindow.dismiss()
                     homePresenter.removePopUpReward()
-                    animateTextView(credit,credit + reward.quantity!!.toInt(),tvCredit)
+
+                    val lastCredit = sharedPreference.getInt("lastCredit",0)
+                    animateTextView(lastCredit,lastCredit + reward.quantity!!.toInt(),tvCredit)
                 }
             }
 
@@ -962,6 +1007,9 @@ class HomeFragment : Fragment(), NetworkConnectivityListener,MainView {
         valueAnimator.addUpdateListener { textView.text = valueAnimator.animatedValue.toString() }
         valueAnimator.start()
 
+        editor = sharedPreference.edit()
+        editor.putInt("lastCredit",credit)
+        editor.apply()
     }
 
     private fun firebaseSingleListenerRepeat(){

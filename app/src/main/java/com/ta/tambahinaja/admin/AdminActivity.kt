@@ -56,7 +56,7 @@ class AdminActivity : AppCompatActivity() {
         clearSpecificData()
         addTournament()
         showExchangeCredit()
-
+        viewSpecificData()
     }
 
     fun clearData(){
@@ -122,6 +122,41 @@ class AdminActivity : AppCompatActivity() {
         }
     }
 
+    fun viewSpecificData(){
+        btnViewData.onClick {
+            if (etViewData.visibility == View.GONE)
+                etViewData.visibility = View.VISIBLE
+            else if (tvViewData.visibility == View.VISIBLE)
+                tvViewData.visibility = View.GONE
+            else if(etViewData.visibility == View.VISIBLE){
+                alert ("confirm"){
+                    yesButton {
+                        GlobalScope.launch {
+                            val  postListener = object : ValueEventListener {
+                                override fun onCancelled(p0: DatabaseError) {
+                                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                                }
+
+                                override fun onDataChange(p0: DataSnapshot) {
+                                    if (p0.exists()){
+                                        tvViewData.visibility = View.VISIBLE
+                                        tvViewData.text = p0.value.toString()
+                                    }
+                                }
+
+                            }
+                            database.child(etViewData.text.toString()).addListenerForSingleValueEvent(postListener)
+                        }
+                        etViewData.visibility = View.GONE
+                    }
+                    noButton {
+                        etViewData.visibility = View.GONE
+                    }
+                }.show()
+            }
+        }
+    }
+
     fun allPlayers(){
         playerItems.clear()
         GlobalScope.launch {
@@ -143,7 +178,7 @@ class AdminActivity : AppCompatActivity() {
                                     if (p0.exists()){
 
                                         playerItems.add(AllPlayer(data.key,data.getValue(AllPlayer::class.java)!!.facebookId, data.getValue(AllPlayer::class.java)!!.name,
-                                                p0.getValue(AllPlayer::class.java)!!.credit))
+                                                p0.getValue(AllPlayer::class.java)!!.credit,data.getValue(AllPlayer::class.java)!!.lastOnline))
                                         allPlayersRecyclerViewAdapter.notifyDataSetChanged()
                                     }
                                 }
@@ -197,6 +232,7 @@ data class AllPlayer(
     var facebookId: String? = "",
     var name: String? = "",
     var credit: Long? = 0,
+    var lastOnline: Long? = 0,
     var point: Long? = 0,
     var energy: Long? = 0,
     var energyLimit: Long? = 0,

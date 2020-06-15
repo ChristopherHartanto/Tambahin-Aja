@@ -5,5 +5,6 @@ data class User (
     var facebookId: String? = "",
     var email: String? = "",
     var noHandphone: String? = "",
+    var lastOnline: Long? = 0,
     var online: HashMap<String,Boolean>? = null
 )

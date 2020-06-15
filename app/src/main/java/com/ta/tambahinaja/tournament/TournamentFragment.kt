@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -33,6 +34,9 @@ import com.quantumhiggs.network.NetworkConnectivityListener
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_list_friends.*
 import kotlinx.android.synthetic.main.fragment_tournament.*
+import kotlinx.android.synthetic.main.fragment_tournament.tvTournamentTitle
+import kotlinx.android.synthetic.main.pop_up_tournament_info.*
+import org.jetbrains.anko.ctx
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
@@ -61,14 +65,16 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
     private lateinit var adapter: TournamentRecyclerViewAdapter
     private var tournamentEndDate = ""
     private var fragmentActive = false
+    private var mLayout = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_tournament, container, false)
+
+        mLayout = savedInstanceState?.getInt("layoutId") ?: R.layout.fragment_tournament
+        return inflater.inflate(mLayout, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,6 +91,11 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
         tournamentParticipants.clear()
         tournamentPresenter.fetchTournament()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("layoutId",mLayout)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStart() {
@@ -189,9 +200,9 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
 
         tvTournamentTitle.text = dataTournament.title
         tvTournamentDetail.text = dataTournament.description
-        tvTournamentFirstReward.text = dataTournament.reward1.toString()
-        tvTournamentSecondReward.text = dataTournament.reward2.toString()
-        tvTournamentThirdReward.text = dataTournament.reward3.toString()
+        tvTournamentFirstReward.text = "Rp ${dataTournament.reward1}"
+        tvTournamentSecondReward.text = "Rp ${dataTournament.reward2}"
+        tvTournamentThirdReward.text = "Rp ${dataTournament.reward3}"
 
         fragment_tournament.alpha = 0.1F
 
@@ -232,8 +243,12 @@ class Tournament : Fragment(), NetworkConnectivityListener, MainView {
                             editor.remove("joinTournament")
                             editor.apply()
 
-                            if (diff>0)
+                            if (diff>0){
+                                val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+                                btnInfo.startAnimation(animationBounce)
                                 btnJoinTournament.visibility = View.VISIBLE
+                            }
+
 
                             ivTournamentProfile.visibility = View.GONE
                             tvTournamentProfile.visibility = View.GONE

@@ -11,13 +11,13 @@
         android:layout_height="wrap_content"
         android:layout_margin="20sp"
         android:elevation="10dp"
+        app:cardBackgroundColor="@color/colorPrimary"
         app:cardCornerRadius="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/colorPrimary"
             android:padding="10dp">
 
             <TextView

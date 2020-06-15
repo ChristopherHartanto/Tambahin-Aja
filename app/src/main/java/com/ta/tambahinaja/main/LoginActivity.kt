@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
@@ -21,14 +22,21 @@ import com.ta.tambahinaja.rank.Rank
 import com.ta.tambahinaja.utils.showSnackBar
 import com.facebook.*
 import com.facebook.login.LoginResult
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.*
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
@@ -38,8 +46,15 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
     private lateinit var auth: FirebaseAuth
     private var darkStatusBar = true
     private lateinit var callbackManager : CallbackManager
-
     private lateinit var database: DatabaseReference
+
+    //Google Login Request Code
+    private val RC_SIGN_IN = 7
+    //Google Sign In Client
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    //Firebase Auth
+    private lateinit var gso : GoogleSignInOptions
+    private var loginType = 0 // 1 fb 2 google
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +65,9 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         val typeface = ResourcesCompat.getFont(this, R.font.fredokaone_regular)
         popup_window_button.typeface = typeface
         popup_window_title.typeface = typeface
+
+        initGoogle()
+
         if (auth.currentUser != null){
             popup_window_button.visibility = View.GONE
             popup_window_title.text = "Log Out"
@@ -93,12 +111,14 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
             onBackPressed()
         }
 
-        btnLogin.onClick {
+        btnFacebookLogin.onClick {
+            loginType = 1
+
             callbackManager = CallbackManager.Factory.create()
             popup_window_button.text = "Please Wait"
 
-            btnLogin.setReadPermissions("email", "public_profile")
-            btnLogin.registerCallback(callbackManager, object :
+            btnFacebookLogin.setReadPermissions("email", "public_profile")
+            btnFacebookLogin.registerCallback(callbackManager, object :
                 FacebookCallback<LoginResult> {
                 override fun onSuccess(loginResult: LoginResult) {
                     handleFacebookAccessToken(loginResult.accessToken)
@@ -158,8 +178,25 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        // Pass the activity result back to the Facebook SDK
-        callbackManager.onActivityResult(requestCode, resultCode, data)
+        if (loginType == 1)
+            callbackManager.onActivityResult(requestCode, resultCode, data)
+        else if(loginType == 2){
+            // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+            if (requestCode == RC_SIGN_IN) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                try {
+                    // Google Sign In was successful, authenticate with Firebase
+                    val account = task.getResult(ApiException::class.java)
+                    if (account != null) {
+                        firebaseAuthWithGoogle(account)
+                    }
+                } catch (e: ApiException) {
+                    // Google Sign In failed, update UI appropriately
+                    toast("Google sign in failed")
+                }
+
+            }
+        }
     }
 
 //    public override fun onStart() { // untuk cek apakah udah login
@@ -188,13 +225,15 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
             }
     }
 
-    fun checkExist(){
-        GlobalScope.async {
+    private fun checkExist(){
+        GlobalScope.launch {
             val postListener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
                     if(!dataSnapshot.exists())
-                        Init()
+                        Init(0)
+                    else
+                        Init(loginType)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -207,22 +246,80 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
         }
     }
 
-    fun Init(){
-        val sdf = SimpleDateFormat("dd MMM yyyy")
-        val currentDate = sdf.format(Date())
-        var values: HashMap<String, Any>
+    private fun initGoogle(){
+        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
 
-        values  = hashMapOf(
-            "name" to auth.currentUser!!.displayName.toString(),
-            "facebookId" to Profile.getCurrentProfile().id,
-            "registerDate" to currentDate,
-            "dailyPuzzle" to "FreeFirstTime",
-            "currentRank" to Rank.Toddler
-        )
+        mGoogleSignInClient = GoogleSignIn.getClient(this,gso)
 
-        database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {
-            toast(""+ it.message)
+        btnGoogleLogin.onClick {
+            loginType = 2
+            loginGoogle()
         }
+    }
+
+    private fun loginGoogle(){
+        val signInIntent = mGoogleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
+
+    private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
+        Log.d("Login", "firebaseAuthWithGoogle:" + acct.id!!)
+
+        val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        toast("success")
+                        checkExist()
+                        popup_window_button.text = "Let's Go"
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w("Login", "signInWithCredential:failure", task.exception)
+                        Toast.makeText(this,"Auth Failed",Toast.LENGTH_LONG).show()
+                    }
+                }
+    }
+
+    fun Init(loginType : Int){
+        if (loginType == 0){
+            val sdf = SimpleDateFormat("dd MMM yyyy")
+            val currentDate = sdf.format(Date())
+            var values: HashMap<String, Any> = hashMapOf()
+
+            if (Profile.getCurrentProfile() != null)
+                values  = hashMapOf(
+                        "name" to auth.currentUser!!.displayName.toString(),
+                        "facebookId" to Profile.getCurrentProfile().id,
+                        "registerDate" to currentDate,
+                        "dailyPuzzle" to "FreeFirstTime",
+                        "currentRank" to Rank.Toddler
+                )
+            else if (GoogleSignIn.getLastSignedInAccount(this) != null){
+                val acct = GoogleSignIn.getLastSignedInAccount(this)
+//            if (acct != null) {
+//                String personName = acct.getDisplayName();
+//                String personGivenName = acct.getGivenName();
+//                String personFamilyName = acct.getFamilyName();
+//                String personEmail = acct.getEmail();
+//                String personId = acct.getId();
+//                Uri personPhoto = acct.getPhotoUrl();
+//            }
+                values  = hashMapOf(
+                        "name" to auth.currentUser!!.displayName.toString(),
+                        "googleUrl" to acct!!.photoUrl.toString(),
+                        "registerDate" to currentDate,
+                        "dailyPuzzle" to "FreeFirstTime",
+                        "currentRank" to Rank.Toddler
+                )
+            }
+
+            database.child("users").child(auth.currentUser!!.uid).setValue(values).addOnFailureListener {
+                toast(""+ it.message)
+            }
 
         values  = hashMapOf(
                 "description" to "You Got 200 Credit",
@@ -234,46 +331,49 @@ class LoginActivity : AppCompatActivity(), NetworkConnectivityListener {
             toast(""+ it.message)
         }
 
-        values = hashMapOf(
-            "credit" to 200,
-            "energy" to 100,
-            "energyLimit" to 100,
-            "point" to 200
-        )
+            values = hashMapOf(
+                    "credit" to 200,
+                    "energy" to 100,
+                    "energyLimit" to 100,
+                    "point" to 200
+            )
 
-        database.child("users").child(auth.currentUser!!.uid).child("balance").setValue(values).addOnFailureListener {
-            toast(""+ it.message)
+            database.child("users").child(auth.currentUser!!.uid).child("balance").setValue(values).addOnFailureListener {
+                toast(""+ it.message)
+            }
+
+            values = hashMapOf(
+                    "normal" to true,
+                    "rush" to false,
+                    "oddEven" to false,
+                    "alphaNum" to false,
+                    "mix" to false,
+                    "doubleAttack" to false
+            )
+
+            database.child("users").child(auth.currentUser!!.uid).child("availableGame").setValue(values).addOnFailureListener {
+                toast(""+ it.message)
+            }
+
+            values = hashMapOf(
+                    "win" to 0,
+                    "lose" to 0,
+                    "tournamentWin" to 0,
+                    "tournamentJoined" to 0
+            )
+
+            database.child("users").child(auth.currentUser!!.uid).child("stats").setValue(values).addOnFailureListener {
+                toast(""+ it.message)
+            }
+        }else if (loginType == 1){
+            database.child("users").child(auth.currentUser!!.uid).child("facebookId").setValue(Profile.getCurrentProfile().id)
+        }else if(loginType == 2){
+            val acct = GoogleSignIn.getLastSignedInAccount(this)
+            database.child("users").child(auth.currentUser!!.uid).child("googleUrl").setValue(acct?.photoUrl.toString())
         }
-
-        values = hashMapOf(
-                "normal" to true,
-                "rush" to false,
-                "oddEven" to false,
-                "alphaNum" to false,
-                "mix" to false,
-                "doubleAttack" to false
-        )
-
-        database.child("users").child(auth.currentUser!!.uid).child("availableGame").setValue(values).addOnFailureListener {
-            toast(""+ it.message)
-        }
-
-        values = hashMapOf(
-            "win" to 0,
-            "lose" to 0,
-            "tournamentWin" to 0,
-            "tournamentJoined" to 0
-        )
-
-        database.child("users").child(auth.currentUser!!.uid).child("stats").setValue(values).addOnFailureListener {
-            toast(""+ it.message)
-        }
-
+        finish()
     }
 
-    fun getFacebookProfilePicture(userID: String): String {
-        return "https://graph.facebook.com/$userID/picture?type=large"
-    }
 
     override fun networkConnectivityChanged(event: Event) {
         when (event) {

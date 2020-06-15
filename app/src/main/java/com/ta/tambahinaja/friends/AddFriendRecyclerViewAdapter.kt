@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
@@ -29,7 +30,7 @@ class AddFriendRecyclerViewAdapter(private val context: Context, private val ite
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
         private val name = view.findViewById<TextView>(R.id.tvAddFriendName)
-        private val status = view.findViewById<TextView>(R.id.tvAddFriendStatus)
+        private val status = view.findViewById<Button>(R.id.btnAddFriend)
         private val image = view.findViewById<ImageView>(R.id.ivAddFriendProfile)
 
         fun bindItem(items: User, statusFriend: Boolean ,listener: (position: Int) -> Unit, position: Int, context: Context) {
@@ -41,10 +42,8 @@ class AddFriendRecyclerViewAdapter(private val context: Context, private val ite
             name.text = items.name
             items.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(items.facebookId!!)).fit().into(image) }
 
-            if (statusFriend){
-                status.text = "Friend"
-            }else
-                status.text = ""
+            if (statusFriend)
+                status.visibility = View.INVISIBLE
 //            else {
 //                status.text = "Add Friend +"
 //                status.textColor = R.color.colorPrimary

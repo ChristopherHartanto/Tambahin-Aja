@@ -73,7 +73,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     lateinit var editor: SharedPreferences.Editor
     private lateinit var rewardedAd: RewardedAd
     private var handler: Handler = Handler()
+    private var handlerWinStreak: Handler = Handler()
     private lateinit var runnable: Runnable
+    private lateinit var runnableWinStreak: Runnable
     private var continueGame = false
     private var countContinueGame = 0
     private lateinit var currentRank : String
@@ -100,7 +102,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
     private var mix = false
     private var player = StatusPlayer.Single
     private var tournamentEndDate = ""
+    private var winStreak = 0
     private lateinit var popupWindow : PopupWindow
+    private var showPopUp = false
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private lateinit var mAdView : AdView
     private var numberArr : MutableList<Int> = mutableListOf()
@@ -116,9 +120,9 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         MobileAds.initialize(this)
         val adView = AdView(this)
         adView.adSize = AdSize.BANNER
-        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111"
+        adView.adUnitId = "ca-app-pub-1388436725980010/5926503810"
 
-        rewardedAd = RewardedAd(this, "ca-app-pub-3940256099942544/5224354917")
+        rewardedAd = RewardedAd(this, "ca-app-pub-1388436725980010/8744238848")
         val adLoadCallback = object: RewardedAdLoadCallback() {
             override fun onRewardedAdLoaded() {
                 // Ad successfully loaded.
@@ -136,6 +140,10 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
         }
 
+        runnableWinStreak = Runnable {
+            endWinStreak()
+        }
+
         supportActionBar?.hide()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA",Context.MODE_PRIVATE)
@@ -151,6 +159,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         tvQuestion.typeface = typeface
         tvPlayerPoint.typeface = typeface
         tvOpponentPoint.typeface = typeface
+        tvWinStreak.typeface = typeface
 
         creatorFacebookId = intent.extras!!.getString("creatorFacebookId").toString()
         creatorName = intent.extras!!.getString("creatorName").toString()
@@ -206,7 +215,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         currentRank = sharedPreference.getString("currentRank", Rank.Toddler.toString()).toString() // untuk reward dan update rank
         if (type == GameType.Rush){
             if (player == StatusPlayer.Rank || player == StatusPlayer.Creator || player == StatusPlayer.JoinOnline){
-                defaultTimer = 5
+                defaultTimer = 6
                 timer = defaultTimer
             }
         }
@@ -219,6 +228,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         defaultTimer =  timer
     }
 
+    //region PointGenerator
     @SuppressLint("SetTextI18n")
     private fun generate(){
         count = if (point > 200)
@@ -362,7 +372,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         if (timer > 0){
             if (type == GameType.Normal){
                 if (answer == value){
-                    point += 8
+                    point += 7
                     if (mix)
                         point += 2
                 }else{
@@ -374,12 +384,12 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
 
             }else if (type == GameType.OddEven){
                 if (answer == value){
-                    point += 7
+                    point += 6
                     if (mix)
                         point += 2
                 }else{
-                    if(point > 6)
-                        point -= 6
+                    if(point > 5)
+                        point -= 5
                     else
                         point = 0
                 }
@@ -431,6 +441,13 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
 
             if (answer == value){ // tambah bonus point
+                handlerWinStreak.removeCallbacks(runnableWinStreak)
+                handlerWinStreak.postDelayed(runnableWinStreak, 2500)
+
+                winStreak ++
+                point += winStreak
+                tvWinStreak.text = "x${winStreak}"
+
                 soundPool.play(soundCorrect,1.0F,1.0F,1,0,1.0F)
                 point += when(enumValueOf<Rank>(currentRank)){
                     Rank.Toddler -> 0
@@ -440,6 +457,8 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                     Rank.GrandMaster -> 5
                 }
                 generate()
+            }else if(answer != value){
+                endWinStreak()
             }
 
             if (player != StatusPlayer.Single){ // update value
@@ -462,6 +481,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
         }
     }
+    //endregion
 
     private fun control(status : Boolean){
         countDownTimer = object: CountDownTimer(timer.toLong()*1000, 1000) {
@@ -541,8 +561,10 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
                             finish()
                         }
                         StatusPlayer.Rank ->{
-                            if (countContinueGame == 0 || countContinueGame == 1)
+                            if (countContinueGame == 0 || countContinueGame == 1 && !showPopUp){
+                                showPopUp = true
                                 popUpMessage(1,"Do You Want to Continue?")
+                            }
                             else{
                                 calculateRankReward()
                             }
@@ -716,7 +738,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             layoutMessageReward.visibility = View.GONE
 
             if (countContinueGame == 0)
-                btnReject.text = "Continue\n(1)"
+                btnReject.text = "Continue\n(Free)"
             else if (countContinueGame == 1)
                 btnReject.text = "Continue\nWatch Ad"
 
@@ -731,6 +753,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
 
             btnReject.onClick {
+                showPopUp = false
                 if (countContinueGame == 0){
                     timer = defaultTimer
                     btnReject.startAnimation(clickAnimation)
@@ -838,32 +861,7 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         matchPresenter.updatePoint(pointReward.toLong(),auth)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        soundPool.release()
-        matchPresenter.dismissListener()
-        progress_bar.visibility = View.GONE
-        handler.removeCallbacks(runnable)
-        countDownTimer.cancel()
-
-    }
-
-    override fun onBackPressed() {
-//        database.child("onPlay").child(facebookId).child("pause").setValue(true)
-//        if (player == StatusPlayer.JoinOnline || player == StatusPlayer.Creator)
-//            toast("Cannot Exist in the Middle Game")
-//        else{
-//            countDownTimer.cancel()
-
-        alert ("You'll be Leave on This Game"){
-            title = "Exit"
-            yesButton {
-                // di isi
-                finish()
-            }
-            noButton {
-            }
-        }.show()
+    private fun setTime(){
 
     }
 
@@ -876,32 +874,6 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
         }else{
             finishRank()
         }
-    }
-
-    override fun onStart() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val audioAttributes = AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_GAME)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-            soundPool = SoundPool.Builder()
-                    .setMaxStreams(1)
-                    .setAudioAttributes(audioAttributes)
-                    .build()
-        } else {
-            soundPool = SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-        }
-        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
-
-        super.onStart()
-    }
-
-    override fun onResume() {
-       // database.child("onPlay").child(facebookId).child("pause").setValue(false)
-        if (!isRunningCountDownTimer)
-            control(true)
-
-        super.onResume()
     }
 
     override fun fetchOpponentData(dataSnapshot: DataSnapshot, inviter: Boolean) {
@@ -1106,6 +1078,69 @@ class NormalGameActivity : AppCompatActivity(), MatchView {
             }
         }
     }
+
+    private fun endWinStreak(){
+        winStreak = 0
+        tvWinStreak.text = ""
+    }
+
+// -------------------------   Android LifeCycle Method  ----------------------------
+
+    override fun onStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            soundPool = SoundPool.Builder()
+                    .setMaxStreams(1)
+                    .setAudioAttributes(audioAttributes)
+                    .build()
+        } else {
+            soundPool = SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        }
+        soundCorrect = soundPool.load(this,R.raw.answer_true,1)
+
+        super.onStart()
+    }
+
+    override fun onResume() {
+        // database.child("onPlay").child(facebookId).child("pause").setValue(false)
+        if (!isRunningCountDownTimer)
+            control(true)
+
+        super.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        soundPool.release()
+        matchPresenter.dismissListener()
+        progress_bar.visibility = View.GONE
+        handler.removeCallbacks(runnable)
+        countDownTimer.cancel()
+
+    }
+
+    override fun onBackPressed() {
+//        database.child("onPlay").child(facebookId).child("pause").setValue(true)
+//        if (player == StatusPlayer.JoinOnline || player == StatusPlayer.Creator)
+//            toast("Cannot Exist in the Middle Game")
+//        else{
+//            countDownTimer.cancel()
+
+        alert ("You'll be Leave on This Game"){
+            title = "Exit"
+            yesButton {
+                // di isi
+                finish()
+            }
+            noButton {
+            }
+        }.show()
+
+    }
+    // -------------------------   Android LifeCycle Method  ----------------------------
 }
 
 data class Play(

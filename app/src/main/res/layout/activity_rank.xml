@@ -14,6 +14,21 @@
         android:background="@color/colorPrimary"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvrankMainTitle"
+            android:textSize="24sp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Rank"
+            android:layout_margin="10dp"
+            android:gravity="center_horizontal"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorPrimaryDark"/>
+
             <androidx.cardview.widget.CardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,11 +112,17 @@
                         android:gravity="top | center"
                         android:textSize="21sp"
                         android:layout_weight="1"/>
+
                     <ImageView
                         android:layout_width="15dp"
-                        android:layout_height="15sp"
+                        android:layout_height="15dp"
+                        android:background="@drawable/round_yellow"
                         android:src="@drawable/info"
-                        android:layout_marginLeft="5dp"/>
+                        android:layout_marginVertical="3dp"
+                        android:padding="3dp"
+                        android:layout_marginHorizontal="15dp"
+                        android:id="@+id/btnInfo"/>
+
 
                 </LinearLayout>
 
@@ -120,16 +141,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
-                    <TextView
+                    <Button
                         android:layout_width="20dp"
-                        android:layout_height="50dp"
+                        android:layout_height="20dp"
                         android:layout_gravity="right"
-                        android:textSize="25dp"
+                        android:textSize="14sp"
                         android:textStyle="bold"
                         android:text="!"
-                        android:id="@+id/tvTaskInfo"
                         android:visibility="gone"
-                        android:textColor="#ff0000"/>
+                        android:id="@+id/tvTaskInfo"
+                        android:background="@drawable/button_info"
+                        android:textColor="@color/colorWhite"/>
 
                     <ImageView
                         android:layout_width="50dp"

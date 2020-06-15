@@ -26,4 +26,9 @@
     <string name="admin2">lqg53p8FmihSVntXTnZG4bmYYDh2</string>
     <string name="tambahin_aja_email">tambahinaja.helpdesk@gmail.com</string>
     <string name="about_us">https://tambahinajahelpdes.wixsite.com/website</string>
+    <string name="string_update_info">1. New Feature Answer Streaks! \n2. Leaderboard Bug Fixed \n3. UI Improvements</string>
+    <string name="_1_bulan_1_juta_rupiah">1 Bulan 1 Juta Rupiah</string>
+    <string name="practice_normal_tutorial">Let Say Question is:\n\n345\n\n3 + 4 + 5\n\n12\n\nIf There\'s have 2 Digits, then:\n\n1 + 2 \n\nAnswer : 3</string>
+    <string name="practice_alpha_num_tutorial">Let Say Question is: \n\nF3C7\n\nSolve:\n\nConvert Alphabet to Number First \n\n6337\n\n6 + 3 + 3 + 7 \n\n 1 + 9\n\nAnswer: 1</string>
+    <string name="practice_odd_even_tutorial">Let Say Question is: \n\nF3C7\n\nSolve:\n\nConvert Alphabet to Number First \n\n6337\n\n6 + 3 + 3 + 7 \n\n 1 + 9\n\nAnswer: 1</string>
 </resources>

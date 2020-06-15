@@ -6,6 +6,8 @@ import com.ta.tambahinaja.rank.Balance
 import com.facebook.Profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class Presenter(private val view: MainView, private val database: DatabaseReference) {
 
@@ -17,6 +19,22 @@ class Presenter(private val view: MainView, private val database: DatabaseRefere
         override fun onDataChange(p0: DataSnapshot) {
         }
 
+    }
+
+    fun fetchTournament(){
+        GlobalScope.launch {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0,"fetchTournament")
+                }
+
+            }
+            database.child("tournament").addListenerForSingleValueEvent(postListener)
+        }
     }
 
 

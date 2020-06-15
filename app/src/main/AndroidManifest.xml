@@ -19,7 +19,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         tools:ignore="LockedOrientationActivity">
-        <activity android:name=".admin.PlayerDetailActivity"></activity>
+        <activity android:name=".play.practice.PostPracticePlayActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".play.practice.PrePracticePlayActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".play.practice.PracticePlayActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".play.practice.PracticeActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".NewUpdateActivity" />
+        <activity android:name=".admin.PlayerDetailActivity" />
         <activity android:name=".admin.AdminActivity" />
         <activity
             android:name=".TutorialActivity"

@@ -53,12 +53,19 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
     private val availableGameList : MutableList<Boolean> = mutableListOf()
     private lateinit var customGameAdapter: CustomGameRecyclerViewAdapter
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
+    private var mLayout = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_list_friends, container, false)
+        mLayout = savedInstanceState?.getInt("layoutId") ?: R.layout.fragment_list_friends
+        return inflater.inflate(mLayout, container, false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("layoutId",mLayout)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -81,6 +88,8 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
 
         srFriendsList.onRefresh {
             ProfileItems.clear()
+            adapter.notifyDataSetChanged()
+
             friendPresenter.retrieve()
         }
 
@@ -432,7 +441,6 @@ class ListFriendsFragment : Fragment(), NetworkConnectivityListener, MainView {
         ProfileItems.clear()
         friendPresenter.retrieve()
         callback = activity as FriendsActivity
-        friendPresenter = FriendPresenter(this,database)
         super.onStart()
     }
 

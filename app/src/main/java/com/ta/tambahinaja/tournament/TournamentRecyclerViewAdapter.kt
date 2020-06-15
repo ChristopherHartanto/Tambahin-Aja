@@ -20,7 +20,7 @@ class TournamentRecyclerViewAdapter(private val context: Context, private val to
             ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_leaderboard, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(tournamentParticipants[position],position, tournamentParticipants.size, context)
+        holder.bindItem(tournamentParticipants[position],holder.layoutPosition, tournamentParticipants.size, context)
     }
 
     override fun getItemCount(): Int = tournamentParticipants.size
@@ -37,11 +37,21 @@ class TournamentRecyclerViewAdapter(private val context: Context, private val to
             val typeface = ResourcesCompat.getFont(context, R.font.fredokaone_regular)
             name.typeface = typeface
             score.typeface = typeface
+            count.typeface = typeface
 
             when (counter) {
-                1-> count.backgroundResource = R.drawable.first_medal
-                2 -> count.backgroundResource = R.drawable.second_medal
-                3 -> count.backgroundResource = R.drawable.third_medal
+                1-> {
+                    count.backgroundResource = R.drawable.first_medal
+                    count.text = ""
+                }
+                2 -> {
+                    count.backgroundResource = R.drawable.second_medal
+                    count.text = ""
+                }
+                3 -> {
+                    count.backgroundResource = R.drawable.third_medal
+                    count.text = ""
+                }
                 else -> {
                     count.backgroundResource = R.color.colorTransparent
                     count.text = "" + counter + ". "
@@ -50,7 +60,8 @@ class TournamentRecyclerViewAdapter(private val context: Context, private val to
 
             name.text = tournamentParticipants.name
             score.text = "" + tournamentParticipants.point
-            tournamentParticipants.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(tournamentParticipants.facebookId!!)).fit().into(image) }
+            if (tournamentParticipants.facebookId != "")
+                tournamentParticipants.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(tournamentParticipants.facebookId!!)).fit().into(image) }
         }
     }
 }

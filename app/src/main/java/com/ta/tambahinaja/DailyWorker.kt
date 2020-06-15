@@ -12,6 +12,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ta.tambahinaja.main.MainActivity
+import org.jetbrains.anko.ctx
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -41,6 +42,12 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
     private fun sendNotification() {
         val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "WorkManager_00"
+
+        val intent = Intent(applicationContext, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT)
+
         //If on Oreo then notification required a notification channel.
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "WorkManager", NotificationManager.IMPORTANCE_DEFAULT)
@@ -52,6 +59,7 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
         val notification = NotificationCompat.Builder(mContext, channelId)
                 .setContentTitle("Good Morning")
                 .setContentText("Start Playing Tambahin Aja")
+                .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.logo_transparent)
                 .setLargeIcon(bitmap)
                 .setVibrate(longArrayOf(200,200))

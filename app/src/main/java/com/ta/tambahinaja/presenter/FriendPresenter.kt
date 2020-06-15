@@ -33,7 +33,7 @@ class FriendPresenter(private val view: MainView, private val database: Database
                 }
 
             }
-            database.child("friends").child(auth.currentUser!!.uid).addValueEventListener(postListener)
+            database.child("friends").child(auth.currentUser!!.uid).orderByKey().addValueEventListener(postListener)
         }
     }
 
@@ -42,6 +42,7 @@ class FriendPresenter(private val view: MainView, private val database: Database
             it.getValue(User::class.java)!!.name
         }
         for (ds in dataSnapshot.children) {
+            Thread.sleep(20)
             if (ds.key!! != auth.currentUser!!.uid){
                 retrieveProfileFriends(ds.key)
             }

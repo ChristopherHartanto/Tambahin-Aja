@@ -23,7 +23,7 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_leaderboard, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(scoreItems[position],profileItems[position], position, scoreItems.size, context)
+        holder.bindItem(scoreItems[position],profileItems[position], holder.layoutPosition, scoreItems.size, context)
     }
 
     override fun getItemCount(): Int = scoreItems.size
@@ -42,9 +42,18 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
             count.typeface = typeface
             score.typeface = typeface
             when (counter) {
-                1-> count.backgroundResource = R.drawable.first_medal
-                2 -> count.backgroundResource = R.drawable.second_medal
-                3 -> count.backgroundResource = R.drawable.third_medal
+                1-> {
+                    count.backgroundResource = R.drawable.first_medal
+                    count.text = ""
+                }
+                2 -> {
+                    count.backgroundResource = R.drawable.second_medal
+                    count.text = ""
+                }
+                3 -> {
+                    count.backgroundResource = R.drawable.third_medal
+                    count.text = ""
+                }
                 else -> {
                     count.backgroundResource = R.color.colorTransparent
                     count.text = "" + counter + ". "
@@ -53,7 +62,9 @@ class LeaderBoardRecyclerViewAdapter(private val context: Context, private val s
 
             name.text = profileItems.name
             score.text = "" + highScore.score
-            profileItems.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(profileItems.facebookId!!)).fit().into(image) }
+
+            if (profileItems.facebookId != "")
+                profileItems.facebookId?.let { Picasso.get().load(getFacebookProfilePicture(profileItems.facebookId!!)).fit().into(image) }
         }
 
     }

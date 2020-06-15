@@ -34,6 +34,7 @@ import com.ta.tambahinaja.play.GameType
 import com.ta.tambahinaja.play.StatusPlayer
 import com.ta.tambahinaja.presenter.RankPresenter
 import com.facebook.Profile
+import com.github.thunder413.datetimeutils.DateTimeUtils
 import com.ta.tambahinaja.utils.showSnackBar
 import com.ta.tambahinaja.view.RankView
 import com.google.android.gms.ads.AdRequest
@@ -50,12 +51,15 @@ import com.google.firebase.database.FirebaseDatabase
 import com.quantumhiggs.network.Event
 import com.quantumhiggs.network.NetworkConnectivityListener
 import kotlinx.android.synthetic.main.activity_rank.*
+import kotlinx.android.synthetic.main.activity_rank.btnInfo
 import kotlinx.android.synthetic.main.activity_rank.ivProfile
 import kotlinx.android.synthetic.main.activity_rank.tvEnergy
 import kotlinx.android.synthetic.main.activity_rank.tvPoint
+import kotlinx.android.synthetic.main.fragment_tournament.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -114,6 +118,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         tvPoint.typeface = typeface
         tvEnergy.typeface = typeface
         tvTotalScore.typeface = typeface
+        tvrankMainTitle.typeface = typeface
 
         val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
@@ -201,21 +206,21 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
                 }
             }
             items.clear()
-            items.add(ChooseGame("Normal", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal,0))
-            items.add(ChooseGame("Odd Even", 14,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
-            items.add(ChooseGame("Rush", 16,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
-            items.add(ChooseGame("AlphaNum", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum,500))
-            items.add(ChooseGame("Mix", 20,dataSnapshot.getValue(LeaderBoard::class.java)!!.mix,800))
-            items.add(ChooseGame("Double Attack", 18,dataSnapshot.getValue(LeaderBoard::class.java)!!.doubleAttack,1000))
+            items.add(ChooseGame("Normal", 14,dataSnapshot.getValue(LeaderBoard::class.java)!!.normal,0))
+            items.add(ChooseGame("Odd Even", 13,dataSnapshot.getValue(LeaderBoard::class.java)!!.oddEven,100))
+            items.add(ChooseGame("Rush", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.rush,300))
+            items.add(ChooseGame("AlphaNum", 16,dataSnapshot.getValue(LeaderBoard::class.java)!!.alphaNum,500))
+            items.add(ChooseGame("Mix", 17,dataSnapshot.getValue(LeaderBoard::class.java)!!.mix,800))
+            items.add(ChooseGame("Double Attack", 15,dataSnapshot.getValue(LeaderBoard::class.java)!!.doubleAttack,1000))
         }else{
             tvTotalScore.text = "" + 0
 
-            items.add(ChooseGame("Normal", 15,0,0))
+            items.add(ChooseGame("Normal", 14,0,0))
             items.add(ChooseGame("Odd Even", 13,0,100))
-            items.add(ChooseGame("Rush", 16,0,300))
-            items.add(ChooseGame("AlphaNum", 18,0,500))
-            items.add(ChooseGame("Mix", 20,0,800))
-            items.add(ChooseGame("Double Attack", 18,0,1000))
+            items.add(ChooseGame("Rush", 15,0,300))
+            items.add(ChooseGame("AlphaNum", 16,0,500))
+            items.add(ChooseGame("Mix", 17,0,800))
+            items.add(ChooseGame("Double Attack", 15,0,1000))
         }
         adapter.notifyDataSetChanged()
 
@@ -516,10 +521,50 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
         }
 
         btnStartPlay.onClick {
-            val energyRemaining = energy - items[position].energy!!
-            rankPresenter.updateEnergy(energyRemaining.toLong(),true)
-            popupWindow.dismiss()
-            activity_rank.alpha = 1F
+            val watchTutorial = sharedPreference.getBoolean("tutorial${position}",false)
+            if (watchTutorial){
+                val energyRemaining = energy - items[position].energy!!
+                rankPresenter.updateEnergy(energyRemaining.toLong(),true)
+                popupWindow.dismiss()
+                activity_rank.alpha = 1F
+            }else{
+                ivRankGameType.layoutParams.height = 1200
+                ivRankGameType.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                tvTutorialDesc.visibility = View.VISIBLE
+                when(position){
+                    0 -> {
+                        tvTutorialDesc.visibility = View.GONE
+                        ivRankGameType.setImageResource(R.drawable.normal_tutorial)
+                    }
+                    1 -> {
+                        ivRankGameType.visibility = View.GONE
+                        tvTutorialDesc.text = getString(R.string.oddEven_tutorial)
+                    }
+                    2 -> {
+                        ivRankGameType.visibility = View.GONE
+                        tvTutorialDesc.text = getString(R.string.rush_tutorial)
+                    }
+                    3 -> {
+                        ivRankGameType.visibility = View.GONE
+                        tvTutorialDesc.text = getString(R.string.alphaNum_tutorial)
+                    }
+                    4 ->{
+                        ivRankGameType.visibility = View.GONE
+                        tvTutorialDesc.text = getString(R.string.mix_tutorial)
+                    }
+                    5 ->{
+                        ivRankGameType.visibility = View.GONE
+                        tvTutorialDesc.text = getString(R.string.oddEven_tutorial)
+                    }
+                }
+                tvGameTypeInfo.visibility = View.GONE
+                btnWatchTutorial.visibility = View.GONE
+
+                editor = sharedPreference.edit()
+                editor.putBoolean("tutorial${position}",true)
+                editor.apply()
+            }
+
         }
 
         btnWatchTutorial.onClick {
@@ -556,6 +601,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             btnWatchTutorial.visibility = View.GONE
         }
 
+
         TransitionManager.beginDelayedTransition(activity_rank)
         popupWindow.showAtLocation(
                 activity_rank, // Location to display popup window
@@ -569,7 +615,8 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     override fun onResume() {
         super.onResume()
 
-
+        val animationBounce = AnimationUtils.loadAnimation(ctx, R.anim.bounce)
+        btnInfo.startAnimation(animationBounce)
         loadingTimer()
 
         if (auth.currentUser != null){
@@ -582,7 +629,6 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
     override fun onStart() {
         if (auth.currentUser != null && Profile.getCurrentProfile() != null)
         Picasso.get().load(getFacebookProfilePicture(Profile.getCurrentProfile().id)).fit().into(ivProfile)
-
 
         super.onStart()
     }
@@ -855,7 +901,7 @@ class RankActivity : AppCompatActivity(), NetworkConnectivityListener,RankView {
             Rank.Beginner ->{
                 taskList.add("Reach 200 Point in Odd Even")
                 taskList.add("Reach 250 Point in Normal Mode")
-                taskList.add("Play with Friends 1 times")
+                taskList.add("Play with Friends 1 Time")
                 taskList.add("Play Daily Quest 3 Times")
 
                 val progress1 = sharedPreference.getInt("beginner1",0)
