@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/home"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher_background"
+        android:title="home"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/tournament"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher_background"
+        app:showAsAction="ifRoom"
+        android:title="tournament"/>
+
+    <item
+        android:id="@+id/profile"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher_background"
+        app:showAsAction="ifRoom"
+        android:title="profile"/>
+</menu>
